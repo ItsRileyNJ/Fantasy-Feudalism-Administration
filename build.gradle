@@ -1,0 +1,25 @@
+plugins { id 'java-library'; id 'net.neoforged.moddev' version '2.0.148' }
+version = '0.1.0'
+group = 'dev.fantasyfeudalism'
+base { archivesName = 'fantasy-feudalism-administration' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+neoForge {
+    version = '21.1.262'
+    parchment { minecraftVersion = '1.21.1'; mappingsVersion = '2024.11.17' }
+    runs {
+        server { server(); programArgument '--nogui' }
+        gameTestServer { type = 'gameTestServer'; systemProperty 'neoforge.enabledGameTestNamespaces', 'ffa'; systemProperty 'ffa.tests', 'true' }
+    }
+    mods { ffa { sourceSet(sourceSets.main) } }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.register('policyTest', JavaExec) { dependsOn testClasses; classpath = sourceSets.test.runtimeClasspath; mainClass = 'dev.fantasyfeudalism.administration.PolicyTest'; enableAssertions = true }
+tasks.named('check') { dependsOn 'policyTest' }
+sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.main.runtimeClasspath
+// Regression assertions run in policyTest and the real NeoForge GameTest server.
+tasks.named('test') { failOnNoDiscoveredTests = false }
+// Optional verification against exact locally supplied mod JARs. Never bundled or redistributed.
+if (providers.gradleProperty('compatModsDir').isPresent()) {
+    dependencies { runtimeOnly fileTree(dir: providers.gradleProperty('compatModsDir').get(), include: ['*.jar']) }
+}
