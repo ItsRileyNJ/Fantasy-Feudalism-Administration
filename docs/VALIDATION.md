@@ -4,8 +4,9 @@ This is a first development build, not a certification against every mod combina
 
 ## Completed checks
 
+- CI runs the build, policy checks and headless regression suite on Ubuntu and Windows. Atomic-save coverage includes creation, UTF-8 replacement, truncation, replacement failures and temporary-file cleanup.
 - Java 21 compilation against NeoForge **21.1.262**, Minecraft **1.21.1**.
-- **34** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
+- **40** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
 - Headless NeoForge runtime regression suite with actual ServerPlayers, mock network connections, real vanilla player saves, loaded mixins and registered production event handlers.
 - The runtime suite was also run with the exact uploaded **Mercenaries 1.20.4**, **Easy NPC 7.18.0**, and **Easy NPC Config UI 7.18.0** JARs installed together.
 - Runtime assertions include Adventure Mode entry and original-mode restoration, administrator exemption, inventory/XP preservation, hunger/saturation freezing, blocked fire placement, solid-destination rejection through vanilla teleport entry points, mob-spawn restrictions, purchases/sales and interrupted-transaction recovery settling once.

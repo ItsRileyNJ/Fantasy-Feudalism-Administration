@@ -3,7 +3,7 @@ loaderVersion="[4,)"
 license="All Rights Reserved"
 [[mods]]
 modId="ffa"
-version="0.1.0"
+version="0.1.1"
 displayName="Fantasy Feudalism: Administration"
 description='''Server-side spawn administration, regions, teleportation and Denar economy.'''
 [[dependencies.ffa]]

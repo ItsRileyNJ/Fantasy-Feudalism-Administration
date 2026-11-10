@@ -40,6 +40,7 @@ public final class PolicyTest {
 
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
+    atomicWrites(root);
     Path config = root.resolve("server.toml");
     Settings settings = Settings.load(config);
     check(!settings.dimension, "void dimension opt-in");
@@ -167,5 +168,41 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void atomicWrites(Path root) throws Exception {
+    Path directory = root.resolve("atomic-writes");
+    Path target = directory.resolve("state.json");
+    Storage.atomic(target, "first state");
+    check(Files.readString(target).equals("first state"), "First atomic save succeeds");
+    String replacement = "Denar: 19\nMessage: \u00a7aWelcome \u2014 \uD83C\uDFF0\n";
+    Storage.atomic(target, replacement);
+    check(Files.readString(target).equals(replacement), "Atomic replacement preserves UTF-8");
+    Storage.atomic(target, "short");
+    check(Files.readString(target).equals("short"), "Replacement leaves no old trailing data");
+    try (var paths = Files.list(directory)) {
+      check(
+          paths.noneMatch(p -> p.getFileName().toString().startsWith(".ffa-")),
+          "Successful saves remove temporary files");
+    }
+
+    Path blocked = directory.resolve("blocked.json");
+    Files.createDirectory(blocked);
+    Path sentinel = blocked.resolve("keep.txt");
+    Files.writeString(sentinel, "existing data");
+    boolean failed = false;
+    try {
+      Storage.atomic(blocked, "must not replace the directory");
+    } catch (java.io.IOException expected) {
+      failed = true;
+    }
+    check(
+        failed && Files.readString(sentinel).equals("existing data"),
+        "Real replacement errors propagate and preserve existing data");
+    try (var paths = Files.list(directory)) {
+      check(
+          paths.noneMatch(p -> p.getFileName().toString().startsWith(".ffa-")),
+          "Failed saves remove temporary files");
+    }
   }
 }

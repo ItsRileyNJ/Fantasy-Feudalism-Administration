@@ -1,9 +1,9 @@
-# Development build 0.1.0
+# Development build 0.1.1
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
 Download the JAR using GitHub's Download raw file button, and place it in the server mods directory. See the root README for setup and docs/VALIDATION.md for the staging acceptance checklist. This is a development build.
 
-34 policy/persistence/command-parser checks and the headless regression suite passed with the supplied Mercenaries 1.20.4, Easy NPC 7.18.0 and Easy NPC Config UI 7.18.0 installed together. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
+40 policy/persistence/command-parser checks and the headless regression suite passed with the supplied Mercenaries 1.20.4, Easy NPC 7.18.0 and Easy NPC Config UI 7.18.0 installed together. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
 
 SHA-256 is listed in SHA256SUMS. Third-party mods are not bundled.
