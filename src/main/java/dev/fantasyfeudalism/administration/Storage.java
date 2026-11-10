@@ -87,8 +87,14 @@ public final class Storage {
       }
       Files.move(
           temp, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-      try (var channel = FileChannel.open(destination.toAbsolutePath().getParent(), READ)) {
-        channel.force(true);
+      // Windows' NIO provider rejects directory FileChannels with AccessDeniedException.
+      // The temporary file is still forced above and replacement must remain atomic.
+      // Do not catch IOException here: real write, move and supported directory-sync failures
+      // must still propagate so that commit() locks the store after an I/O failure.
+      if (File.separatorChar != '\\') {
+        try (var channel = FileChannel.open(destination.toAbsolutePath().getParent(), READ)) {
+          channel.force(true);
+        }
       }
     } finally {
       Files.deleteIfExists(temp);

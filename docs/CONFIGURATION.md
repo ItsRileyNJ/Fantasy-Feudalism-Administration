@@ -63,3 +63,10 @@ For the first build in a completely empty void dimension, an operator can use va
 ```
 
 Build/import a platform, stand on it, and run `/ffa spawn setpoint`. Then remove the temporary forced load if desired with `/execute in ffa:spawn run forceload remove 0 0`. Future mod teleports can load that already saved full chunk through the bounded load queue.
+
+
+### Windows saves
+
+Windows' Java NIO provider does not support opening a parent directory as a file channel. Version 0.1.1 omits that unsupported directory-flush step on Windows. The complete temporary file is still flushed before atomic replacement; write and replacement errors still propagate and lock further state changes. Directory flushing remains required on other platforms. The mod does not fall back to a non-atomic move.
+
+Windows rename durability during a system power loss depends on the operating system and filesystem because Java cannot request the equivalent parent-directory flush. Keep the consistent backups described above; the existing power-loss recovery acceptance checks still apply.
