@@ -1,0 +1,99 @@
+# Fantasy Feudalism Administration. All times are seconds; all money is whole Denar.
+# Edit while running, then /ffa reload. Dimension settings require a full restart.
+# Invalid settings reject the complete reload and retain the last valid settings.
+configVersion = 1
+[administration]
+# Operator permission level 2..4. Operators bypass gameplay protection, never transaction checks.
+operatorLevel = 2
+# Private detailed feedback; audit records always include timestamp, location and actor.
+verboseFeedback = true
+[permissions]
+# FTB Ranks/LuckPerms nodes ffa.command.<name> override this player-command fallback.
+# Administrator management always requires operator level or the documented management node.
+defaultPlayerCommands = true
+[dimension]
+# Restart required. No terrain or automatic platform is generated. Build before setting spawn.
+enabled = false
+[modules]
+standaloneRegions = false
+economy = true
+homes = true
+tpa = true
+portals = true
+back = false
+rtp = false
+pay = false
+leaderboard = false
+privacy = false
+[spawn]
+firstJoin = false
+# vanilla | bed_first | spawn_first
+respawnPolicy = "vanilla"
+[teleport]
+cooldownSeconds = 3
+warmupSeconds = 0
+cancelOnMovement = true
+requestExpirySeconds = 60
+requestCooldownSeconds = 10
+portalCooldownSeconds = 5
+# Load only previously saved full chunks; at most one completed load is applied per tick.
+maximumQueuedLoads = 2
+loadTimeoutSeconds = 15
+[homes]
+maximum = 3
+allowedDimensions = ["minecraft:overworld"]
+[rtp]
+# Searches only existing loaded terrain; bounded attempts, no chunk generation.
+radius = 1000
+attempts = 16
+allowedDimensions = ["minecraft:overworld"]
+[economy]
+currency = "Denar"
+startingBalance = 0
+maximumBalance = 9000000000000000
+maximumTransfer = 1000000
+[compatibility]
+mercenaries = true
+easyNpc = true
+luckPerms = true
+ftbRanks = true
+# Region overlap with settlements requires an explicit override on that region.
+[logging]
+audit = true
+security = false
+retentionFiles = 8
+maximumFileBytes = 1048576
+[messages]
+denied = "You cannot do that here."
+portalDenied = "You cannot use this portal."
+[defaults]
+# true means allowed; false means blocked/frozen. Applied throughout the spawn dimension.
+# Child regions inherit; an explicit region flag overrides these defaults.
+build = false
+break = false
+interact = false
+containers = false
+entity_interact = false
+npc_trading = true
+settlement_management = true
+hunger = false
+damage = false
+pvp = false
+tnt = false
+pearls = false
+totems = false
+fire = false
+mob_spawning = false
+hostile_spawning = false
+mob_griefing = false
+explosions = false
+pistons = false
+fluids = false
+automation = false
+dispensers = false
+hanging_damage = false
+animal_damage = false
+flight = false
+teleport_in = true
+teleport_out = true
+home_creation = false
