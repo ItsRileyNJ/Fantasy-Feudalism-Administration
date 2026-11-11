@@ -105,6 +105,9 @@ public final class Administration {
     regions.reload(server, candidate, next);
     settings = candidate;
     compat = next;
-    for (var p : server.getPlayerList().getPlayers()) protection.update(p);
+    for (var p : server.getPlayerList().getPlayers()) {
+      protection.update(p);
+      server.getCommands().sendCommands(p);
+    }
   }
 }

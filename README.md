@@ -2,11 +2,11 @@
 
 A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do not need this administration mod installed. Other installed mods may have their own client requirements.
 
-**Development release 0.1.1.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.1.2.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.1.1.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.1.2.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
