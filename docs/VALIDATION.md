@@ -11,6 +11,7 @@ This is a first development build, not a certification against every mod combina
 - The runtime suite was also run with the exact uploaded **Mercenaries 1.20.4**, **Easy NPC 7.18.0**, and **Easy NPC Config UI 7.18.0** JARs installed together.
 - Runtime assertions include Adventure Mode entry and original-mode restoration, administrator exemption, inventory/XP preservation, hunger/saturation freezing, blocked fire placement, solid-destination rejection through vanilla teleport entry points, mob-spawn restrictions, purchases/sales and interrupted-transaction recovery settling once.
 - Expanded runtime checks cover single-use, expired and stale-button teleport consent, transfers, all 16 persistent portal dye colors, denied portal access, actual command dispatch/permissions, and NPC creation exceptions.
+- Native command-tree regression checks cover the actual client command packet, root/action/argument suggestions, partial and namespaced inputs, accessible warp filtering, private home names, disabled modules, immediate permission refresh on reload, quoted messages and vanilla `/execute` redirects.
 - Optional void-datapack selection and its dimension definition are checked using Minecraft's real `LevelStem` codec and server registries. Minecraft's GameTestServer deliberately discards custom level stems when creating its test worlds, so this does not replace a dedicated-server travel test.
 
 ## Remaining deployment acceptance checks

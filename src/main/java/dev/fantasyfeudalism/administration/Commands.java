@@ -4,7 +4,6 @@ import static dev.fantasyfeudalism.administration.Model.*;
 import static net.minecraft.commands.Commands.*;
 
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import java.time.Instant;
 import java.util.*;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,26 +22,21 @@ public final class Commands {
 
   public static void register(RegisterCommandsEvent e) {
     SELECTIONS.clear();
-    e.getDispatcher()
-        .register(
-            literal("ffa")
-                .executes(
-                    c -> {
-                      c.getSource()
-                          .sendSuccess(
-                              () ->
-                                  Component.literal(
-                                      "Fantasy Feudalism Administration: /ffa spawn, warp, region,"
-                                          + " portal, shop, balance, help"),
-                              false);
-                      return 1;
-                    })
-                .then(
-                    argument("operation", StringArgumentType.greedyString())
-                        .executes(
-                            c ->
-                                execute(
-                                    c.getSource(), StringArgumentType.getString(c, "operation")))));
+    var root =
+        literal("ffa")
+            .executes(
+                c -> {
+                  c.getSource()
+                      .sendSuccess(
+                          () ->
+                              Component.literal(
+                                  "Fantasy Feudalism Administration: /ffa spawn, warp, region,"
+                                      + " portal, shop, balance, help"),
+                          false);
+                  return 1;
+                });
+    CommandTree.addTo(root);
+    e.getDispatcher().register(root);
   }
 
   static List<String> tokenize(String text)
@@ -62,7 +56,7 @@ public final class Commands {
     return result;
   }
 
-  private static int execute(CommandSourceStack source, String text) {
+  static int execute(CommandSourceStack source, String text) {
     var app = Administration.INSTANCE;
     try {
       if (app.server == null)
@@ -125,7 +119,9 @@ public final class Commands {
               app.storage.update(s -> s.spawn = Teleports.point(p));
             } else if (action.equals("create")) {
               var list = new ArrayList<>(app.regions.copy());
-              Region r = region(p, "spawn", Kind.SPAWN, args.contains("override"));
+              Region r =
+                  region(
+                      p, "spawn", Kind.SPAWN, args.size() > 2 && arg(args, 2).equals("override"));
               r.entry = "Welcome to Spawn!";
               r.exit = "You are now leaving the protected spawn area.";
               list.add(r);
@@ -401,7 +397,7 @@ public final class Commands {
               p,
               id,
               action.equals("create") ? Kind.CHILD : Kind.STANDALONE,
-              a.contains("override"));
+              a.size() > 3 && arg(a, 3).equals("override"));
       if (r.kind == Kind.CHILD)
         r.parent =
             list.stream()

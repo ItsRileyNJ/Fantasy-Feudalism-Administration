@@ -1,5 +1,7 @@
 # Commands
 
+Type `/ffa ` (including the space), then press **Tab** to browse commands. Continue using Tab for actions, region/warp/portal IDs, your home names, flags, dye colors, item/block IDs and online player names. Management commands are shown only when you have the required permissions, and disabled modules are omitted. `/ffa reload` refreshes the client command list after supported config edits.
+
 All command responses are private. Administration confirmations include time, operation, object, dimension/location and persistence result when verbose feedback is enabled. Failures preserve the previous definition. None of these commands replaces another mod's command root.
 
 Arguments containing spaces, including messages and team coordinates, must be quoted.

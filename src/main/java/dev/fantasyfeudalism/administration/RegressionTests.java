@@ -182,12 +182,17 @@ public final class RegressionTests {
           shopCommand == 1
               && app.storage.state().shops.get("command_test").item.equals("minecraft:stone"),
           "Actual namespaced shop command validates and persists");
-      int unauthorized =
-          app.server
-              .getCommands()
-              .getDispatcher()
-              .execute(
-                  "ffa region delete test_spawn", p.createCommandSourceStack().withPermission(0));
+      int unauthorized = 0;
+      try {
+        unauthorized =
+            app.server
+                .getCommands()
+                .getDispatcher()
+                .execute(
+                    "ffa region delete test_spawn", p.createCommandSourceStack().withPermission(0));
+      } catch (com.mojang.brigadier.exceptions.CommandSyntaxException expected) {
+        // Native registration hides unauthorized administrative branches from the client.
+      }
       h.assertTrue(
           unauthorized == 0 && app.regions.all().size() == 1,
           "Unauthorized command cannot mutate regions");
@@ -201,6 +206,7 @@ public final class RegressionTests {
       h.assertTrue(
           flagCommand == 1 && Regions.read(app.regions.file).getFirst().flags.get(Flag.PVP),
           "Administrative flag command updates the authoritative TOML");
+      commandSuggestions(h, p, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");
@@ -214,6 +220,209 @@ public final class RegressionTests {
       app.regions.edit(before, app.server, app.settings, app.compat);
       app.server.getPlayerList().remove(p);
       app.storage.commit(old);
+    }
+  }
+
+  private static java.util.List<String> complete(
+      Administration app, net.minecraft.commands.CommandSourceStack source, String input) {
+    var dispatcher = app.server.getCommands().getDispatcher();
+    return dispatcher
+        .getCompletionSuggestions(dispatcher.parse(input, source))
+        .join()
+        .getList()
+        .stream()
+        .map(com.mojang.brigadier.suggestion.Suggestion::getText)
+        .toList();
+  }
+
+  private static java.util.List<Object> outgoing(ServerPlayer p) {
+    var channel = (EmbeddedChannel) p.connection.getConnection().channel();
+    channel.runPendingTasks();
+    channel.flushOutbound();
+    var result = new ArrayList<Object>();
+    Object packet;
+    while ((packet = channel.readOutbound()) != null) result.add(packet);
+    return result;
+  }
+
+  private static com.mojang.brigadier.tree.RootCommandNode<
+          net.minecraft.commands.SharedSuggestionProvider>
+      clientCommands(ServerPlayer p, boolean request) {
+    if (request) {
+      outgoing(p);
+      p.server.getCommands().sendCommands(p);
+    }
+    net.minecraft.network.protocol.game.ClientboundCommandsPacket found = null;
+    for (Object packet : outgoing(p))
+      if (packet instanceof net.minecraft.network.protocol.game.ClientboundCommandsPacket commands)
+        found = commands;
+    if (found == null) throw new AssertionError("Server did not send a client command tree");
+    return found.getRoot(
+        net.minecraft.commands.CommandBuildContext.simple(
+            p.server.registryAccess(), p.serverLevel().enabledFeatures()));
+  }
+
+  private static void commandSuggestions(GameTestHelper h, ServerPlayer p, Administration app)
+      throws Exception {
+    var admin = p.createCommandSourceStack().withPermission(4);
+    var ordinary = p.createCommandSourceStack().withPermission(0);
+    h.assertTrue(
+        complete(app, admin, "ffa ").containsAll(List.of("region", "spawn", "portal", "help")),
+        "Native subcommands complete after ffa and a space");
+    h.assertTrue(
+        complete(app, admin, "ffa reg").contains("region"), "Partial root command completes");
+    h.assertTrue(
+        complete(app, admin, "ffa region ")
+            .containsAll(List.of("create", "flag", "visualize", "list")),
+        "Region actions complete");
+    h.assertTrue(
+        complete(app, admin, "ffa region flag test_").contains("test_spawn"),
+        "Current region IDs complete");
+    h.assertTrue(
+        complete(app, admin, "ffa region flag test_spawn p").contains("pvp"),
+        "Region flag names complete");
+    h.assertTrue(
+        complete(app, admin, "ffa region flag test_spawn pvp ")
+            .containsAll(List.of("true", "false", "inherit")),
+        "Flag values complete");
+    h.assertTrue(
+        complete(app, admin, "ffa shop set example minecraft:sto").contains("minecraft:stone"),
+        "Namespaced item IDs complete");
+    int redirect =
+        app.server
+            .getCommands()
+            .getDispatcher()
+            .execute("execute as @s run ffa region flag test_spawn hunger false", admin);
+    h.assertTrue(redirect == 1, "Command forwarding works inside vanilla execute redirects");
+    int quoted =
+        app.server
+            .getCommands()
+            .getDispatcher()
+            .execute("ffa region message test_spawn entry \"Welcome to Spawn!\"", admin);
+    h.assertTrue(
+        quoted == 1 && app.regions.get("test_spawn").entry.equals("Welcome to Spawn!"),
+        "Quoted messages retain their content with native arguments");
+
+    Warp visible = new Warp();
+    visible.point = Teleports.point(p);
+    Warp hidden = new Warp();
+    hidden.point = Teleports.point(p);
+    hidden.access.mode = "admin";
+    UUID other = UUID.randomUUID();
+    app.storage.update(
+        state -> {
+          state.warps.put("visible_completion", visible);
+          state.warps.put("hidden_completion", hidden);
+          state
+              .players
+              .get(p.getUUID().toString())
+              .homes
+              .put("my_completion_home", Teleports.point(p));
+          PlayerData data = new PlayerData();
+          data.homes.put("other_completion_home", Teleports.point(p));
+          state.players.put(other.toString(), data);
+          Model.Portal portal = new Model.Portal();
+          portal.id = "completion_portal";
+          portal.dimension = p.level().dimension().location().toString();
+          portal.warp = "visible_completion";
+          state.portals.put(portal.id, portal);
+        });
+    try {
+      h.assertTrue(
+          complete(app, ordinary, "ffa warp ").contains("visible_completion")
+              && !complete(app, ordinary, "ffa warp ").contains("hidden_completion"),
+          "Players only receive accessible warp names");
+      h.assertTrue(
+          complete(app, admin, "ffa portal link completion_portal ").contains("hidden_completion"),
+          "Authorized portal managers can complete managed destinations");
+      h.assertTrue(
+          complete(app, admin, "ffa portal color completion_portal light_")
+              .containsAll(List.of("light_blue", "light_gray")),
+          "Portal dye colors complete");
+      if (app.settings.homes && !app.compat.ftbEssentials())
+        h.assertTrue(
+            complete(app, ordinary, "ffa home ").contains("my_completion_home")
+                && !complete(app, ordinary, "ffa home ").contains("other_completion_home"),
+            "Home suggestions never include another player's homes");
+      h.assertFalse(
+          complete(app, ordinary, "ffa region visualize ").contains("test_spawn"),
+          "Unauthorized sources do not receive private region names");
+      app.server
+          .getPlayerList()
+          .getOps()
+          .add(new net.minecraft.server.players.ServerOpListEntry(p.getGameProfile(), 4, false));
+      var operatorTree = clientCommands(p, true).getChild("ffa");
+      h.assertTrue(
+          operatorTree.getChild("region") != null
+              && operatorTree.getChild("spawn").getChild("create") != null,
+          "The actual client packet contains native administrator subcommands");
+      h.assertTrue(
+          operatorTree.getChild("operation") == null,
+          "Client command tree has no opaque greedy operation argument");
+      if (!app.settings.back)
+        h.assertTrue(
+            operatorTree.getChild("back") == null,
+            "Disabled modules are omitted from the client command tree");
+      app.server.getPlayerList().deop(p.getGameProfile());
+      var playerTree = clientCommands(p, true).getChild("ffa");
+      h.assertTrue(
+          playerTree.getChild("spawn") != null
+              && playerTree.getChild("region") == null
+              && playerTree.getChild("portal") == null
+              && playerTree.getChild("reload") == null,
+          "Client tree filters administrator commands for ordinary players");
+
+      String config = java.nio.file.Files.readString(app.settingsFile);
+      try {
+        h.assertTrue(
+            config.contains("defaultPlayerCommands = true"),
+            "Permission reload fixture starts from default public commands");
+        outgoing(p);
+        Storage.atomic(
+            app.settingsFile,
+            config.replace("defaultPlayerCommands = true", "defaultPlayerCommands = false"));
+        app.reload();
+        h.assertTrue(
+            clientCommands(p, false).getChild("ffa").getChild("spawn") == null,
+            "Config reload immediately sends the updated permission-filtered client tree");
+      } finally {
+        Storage.atomic(app.settingsFile, config);
+        app.reload();
+      }
+
+      var position = p.position();
+      try {
+        p.setPos(h.absoluteVec(new Vec3(2.5, 1, 2.5)));
+        for (String command : List.of("ffa pos1", "ffa pos2", "ffa region create override"))
+          h.assertTrue(
+              app.server
+                      .getCommands()
+                      .getDispatcher()
+                      .execute(command, p.createCommandSourceStack().withPermission(4))
+                  == 1,
+              "Native creation command succeeds: " + command);
+        h.assertFalse(
+            app.regions.get("override").settlementOverride,
+            "Naming a region override does not enable the explicit overlap override");
+        h.assertTrue(
+            complete(app, admin, "ffa region visualize ov").contains("override"),
+            "Newly created regions appear in suggestions immediately");
+        app.server.getCommands().getDispatcher().execute("ffa region delete override", admin);
+      } finally {
+        p.setPos(position);
+        app.protection.update(p);
+      }
+    } finally {
+      app.server.getPlayerList().deop(p.getGameProfile());
+      app.storage.update(
+          state -> {
+            state.warps.remove("visible_completion");
+            state.warps.remove("hidden_completion");
+            state.portals.remove("completion_portal");
+            state.players.remove(other.toString());
+            state.players.get(p.getUUID().toString()).homes.remove("my_completion_home");
+          });
+      Portals.reindex(app);
     }
   }
 
