@@ -10,9 +10,10 @@
 
 The private confirmation identifies the saved snapshot under `<world>/ffa/backups/<timestamp>/`. It includes:
 
-- `state.json`: FFA account, shop, spawn, warp, portal, home and related state.
+- `state.json`: FFA account, shop, spawn, warp, portal, home, personal chat styles, vanish flags/prior modes, whisper approvals/monitor preferences and related state.
 - `server.toml`: general FFA settings.
 - `regions.toml`: authoritative protected-region definitions.
+- `ranks.json`: built-in rank definitions and UUID memberships.
 - `README.txt`: recovery restrictions.
 
 A snapshot is refused while prepared economy transactions exist. Backups contain **no world blocks, schematics, vanilla player inventories, or other mods' town data**. Snapshot creation does not automatically prune old backups.
@@ -31,6 +32,8 @@ A set of files copied at unrelated times while transactions continue is not an e
 4. Start the server to validate them. If validation fails, inspect the named key/region and restore the retained files as necessary.
 
 This procedure changes FFA rules/definitions, not world blocks. Do not overwrite unrelated world directories as part of an FFA config rollback.
+
+To restore permissions alone, restore `ranks.json` with the server stopped. Use chat `clear`/`reset` commands to undo personal styling without rolling back financial state.
 
 ## Do not roll back balances alone
 

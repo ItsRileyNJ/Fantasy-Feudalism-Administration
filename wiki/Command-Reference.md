@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.1.2**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Names used for players are online player names, not arbitrary selectors.
+This reference covers **0.2.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -98,6 +98,65 @@ Disabled by default through the corresponding modules. Privacy commands require 
 
 Shop quantities: 1..2304, subject to actual funds/items/space. Prices: -1 disables a direction; 0 is free/no payout; otherwise nonnegative whole Denar within limits. When buying is enabled, sell cannot exceed buy. `economy set` replaces a total. `pay` and `baltop` default to disabled. [Economy walkthrough](Economy-and-Shops.md).
 
+## Built-in ranks and chat
+
+```text
+/ffa ranks
+/ffa ranks create <rank> [power]
+/ffa ranks delete <rank>
+/ffa ranks list
+/ffa ranks info <rank>
+/ffa ranks add <player_or_uuid> <rank>
+/ffa ranks remove <player_or_uuid> <rank>
+/ffa ranks player <player_or_uuid>
+/ffa ranks power <rank> <power>
+/ffa ranks default <rank> <true|false>
+/ffa ranks parent <add|remove> <rank> <parent>
+/ffa ranks node add <rank> <permission> <value>
+/ffa ranks node remove <rank> <permission>
+/ffa ranks node get <rank> <permission>
+/ffa ranks node list <rank>
+/ffa ranks check <player_or_uuid> <permission>
+/ffa ranks list_all_ranks
+/ffa ranks list_ranks_of <player_or_uuid>
+/ffa ranks show_rank <rank>
+/ffa ranks list_players_with <rank>
+/ffa ranks refresh_readme
+/ffa ranks reload
+/ffa chat
+/ffa chat nickname "<nickname>"
+/ffa chat title "<title>"
+/ffa chat color <color>
+/ffa chat titlecolor <color>
+/ffa chat bold <true|false>
+/ffa chat italic <true|false>
+/ffa chat titlebold <true|false>
+/ffa chat titleitalic <true|false>
+/ffa chat inherit <property>
+/ffa chat view
+/ffa chat view <player_or_uuid>
+/ffa chat set <player_or_uuid> <property> <value>
+/ffa chat clear <player_or_uuid> <property>
+/ffa chat reset <player_or_uuid>
+```
+
+Rank management and administrator chat operations support console use. Self-service chat changes require a player and the corresponding editing permission. See [ranks](Ranks.md) for priorities, inheritance, wildcard quoting, values and aliases, and [chat styling](Chat-and-Nicknames.md) for properties, colors, permissions and full examples. Unauthorized management branches are omitted from the client tree and player help.
+
+## Staff tools, whispers and stats
+
+```text
+/ffa vanish
+/ffa invisee <online_player>
+/ffa whisper <online_player> <message...>
+/ffa whisperaccept [request_token]
+/ffa whisperdeny [request_token]
+/ffa whisperforget <player_or_uuid>
+/ffa whispers <on|off>
+/ffa stats <online_player>
+```
+
+Vanish, inventory editing and whisper monitoring require an in-game full administrator/operator. Stats is public by default and supports console use; whispers and consent actions require a player. See [staff tools](Staff-Tools.md) and [whispers/stats](Whispers-and-Stats.md) for the live inventory layout, vanish boundaries, permanent recipient approval, monitoring and time units.
+
 ## Reload, snapshots, and console use
 
 ```text
@@ -107,6 +166,6 @@ Shop quantities: 1..2304, subject to actual funds/items/space. Prices: -1 disabl
 
 These require their [management nodes](Permissions-and-Access.md). Reload cannot mutate dimension registration or the documented restart-only modules, and waits for pending jobs/trades to finish. Backups have [inventory/rollback restrictions](Backups-and-Recovery.md).
 
-Most operations require an in-game player, including edits that use player location or private management context. Console-supported operations include bare help, `/ffa help`, `/ffa region list`, `/ffa delwarp NAME`, `/ffa reload`, and `/ffa backup`. Other mods' and vanilla commands have their own console rules.
+Most operations require an in-game player, including edits that use player location or private management context. Console-supported operations include bare help, `/ffa help`, `/ffa region list`, `/ffa delwarp NAME`, `/ffa reload`, `/ffa backup`, rank management, administrator chat operations and `/ffa stats PLAYER`. Other mods' and vanilla commands have their own console rules.
 
 There is no `/ffa economy give`, `/ffa portal resize`, `/ffa region select` wand, built-in schematic-import command, or admin command to inspect/delete another player's homes in this release. Use the documented supported actions instead.

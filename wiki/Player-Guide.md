@@ -75,3 +75,7 @@ Both modules default to disabled. `back` returns to the recorded origin of your 
 ## When FTB Essentials is installed
 
 FFA disables its native home, request and request-privacy operations. Use FTB Essentials' own commands for those features. FFA's settings for native homes/requests do not automatically rewrite the other mod's limits or privacy settings. `/ffa spawn`, custom warps, portals and regions remain separate.
+
+## Private messages and public statistics
+
+Use `/ffa whisper PLAYER MESSAGE` to request consent before first contact. Accepting permanently approves that sender for you. Authorized administrators can monitor these moderated whispers. `/ffa stats PLAYER` privately shows playtime days, deaths, player kills, Denar, settlements and ranks for visible online players. See [whispers and stats](Whispers-and-Stats.md) for consent, monitoring and full syntax.

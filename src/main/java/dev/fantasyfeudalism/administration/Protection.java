@@ -56,6 +56,7 @@ public final class Protection {
   }
 
   public void update(ServerPlayer p) {
+    if (Vanish.hidden(p.getUUID())) return;
     PlayerData data = app.storage.player(p.getUUID());
     if (data == null) return;
     boolean

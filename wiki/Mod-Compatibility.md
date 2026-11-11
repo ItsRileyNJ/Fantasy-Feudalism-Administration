@@ -53,6 +53,12 @@ If another mod also handles first join or death respawns, choose a consistent ow
 
 ## Permission providers and other integrations
 
+FFA now also includes [built-in ranks](Ranks.md) and [chat tools](Chat-and-Nicknames.md), managed under `/ffa`. Explicit external Boolean decisions take precedence over local ranks; local rank/chat data is separate and is not automatically imported from another mod. FFA command help and client suggestions hide unauthorized management tools.
+
 FTB Ranks **2101.1.5** uses the public API checked in its source. LuckPerms is another optional provider. See [permission nodes](Permissions-and-Access.md); the exact FTB Ranks JAR, LuckPerms and FTB Essentials were not in the uploaded runtime test set.
 
 Protection covers supported NeoForge events and included vanilla hooks. A machine mod that writes blocks/inventories outside those hooks needs its own verified adapter. There is no bundled anti-X-ray obfuscator: region rules cannot hide block data already sent to a client.
+
+## Staff visibility and inventory tools
+
+[FFA vanish](Staff-Tools.md) filters supported vanilla/FFA player-facing presence paths, including status/query responses. Other mods' web maps, custom online lists and direct APIs require verified adapters; server operators/logs retain real presence. Staff inventory editing closes before FFA item trades and does not replace another mod's inventory rules. [Public Stats](Whispers-and-Stats.md) reads Mercenaries owner/member settlement names and active local/FTB ranks without changing their data.

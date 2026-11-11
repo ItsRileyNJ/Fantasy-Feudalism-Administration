@@ -1,6 +1,6 @@
 # Fantasy Feudalism: Administration Wiki
 
-The operator and player manual for **development version 0.1.2**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
+The operator and player manual for **development version 0.2.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
 
 FFA manages protected spawn regions, configurable interactions, safe travel, dyeable portals, and virtual **Denar** shops. Install FFA on the server; players do not need the FFA JAR. Other mods can have their own client requirements.
 
@@ -17,6 +17,10 @@ FFA manages protected spawn regions, configurable interactions, safe travel, dye
 | Set up warps and colored physical portals | [Warps and portals](Warps-and-Portals.md) |
 | Use homes, teleport requests, privacy, back, or random teleport | [Player guide](Player-Guide.md) |
 | Create Denar shops, fund players, or enable transfers | [Economy and shops](Economy-and-Shops.md) |
+| Create and assign ranks, inherit permissions, or control other mods' commands | [Built-in ranks](Ranks.md) |
+| Vanish or edit an online player's inventory | [Staff tools](Staff-Tools.md) |
+| Send consent-based whispers, monitor them, or view player stats | [Whispers and stats](Whispers-and-Stats.md) |
+| Assign chat colors, nicknames, titles, bold, and italic | [Chat and nicknames](Chat-and-Nicknames.md) |
 | Give a rank management rights or restrict a gate to a group/team | [Permissions and access](Permissions-and-Access.md) |
 | Use Mercenaries, Easy NPC, FTB Essentials, FTB Ranks, or LuckPerms | [Mod compatibility](Mod-Compatibility.md) |
 | Build a spawn in an empty dimension | [Void spawn dimension](Void-Spawn-Dimension.md) |

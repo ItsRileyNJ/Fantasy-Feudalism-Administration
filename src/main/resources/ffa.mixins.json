@@ -12,7 +12,17 @@
     "DispenserMixin",
     "MobMixin",
     "TeleportMixin",
-    "FlightMixin"
+    "FlightMixin",
+    "InfoPacketAccess",
+    "VisibilityPacketsMixin",
+    "VanishPlayerMixin",
+    "VisibleSelectorsMixin",
+    "VisibleNamesMixin",
+    "VisibleListMixin",
+    "VisibleStatusMixin",
+    "VisibleQueryMixin",
+    "InspectionClicksMixin",
+    "VisibleLegacyPingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

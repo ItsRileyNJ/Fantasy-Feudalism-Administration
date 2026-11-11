@@ -31,6 +31,9 @@ final class CommandTree {
 
   static void addTo(LiteralArgumentBuilder<CommandSourceStack> root) {
     root.then(node("help"));
+    root.then(RankCommands.tree());
+    root.then(ChatCommands.tree());
+    StaffCommands.addTo(root);
     root.then(
         node("spawn")
             .requires(s -> usable(s, "spawn"))
@@ -221,7 +224,10 @@ final class CommandTree {
             (c, b) ->
                 SharedSuggestionProvider.suggest(
                     c.getSource().getServer().getPlayerList().getPlayers().stream()
-                        .filter(p -> !excludeSelf || p != c.getSource().getPlayer())
+                        .filter(
+                            p ->
+                                (!excludeSelf || p != c.getSource().getPlayer())
+                                    && Vanish.canSee(c.getSource(), p))
                         .map(p -> p.getGameProfile().getName()),
                     b));
   }

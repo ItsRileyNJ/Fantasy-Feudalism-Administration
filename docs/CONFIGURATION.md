@@ -72,3 +72,7 @@ Build/import a platform, stand on it, and run `/ffa spawn setpoint`. Then remove
 Windows' Java NIO provider does not support opening a parent directory as a file channel. Version 0.1.1 omits that unsupported directory-flush step on Windows. The complete temporary file is still flushed before atomic replacement; write and replacement errors still propagate and lock further state changes. Directory flushing remains required on other platforms. The mod does not fall back to a non-atomic move.
 
 Windows rename durability during a system power loss depends on the operating system and filesystem because Java cannot request the equivalent parent-directory flush. Keep the consistent backups described above; the existing power-loss recovery acceptance checks still apply.
+
+## Built-in ranks and personal chat styles (0.2.0)
+
+`<world>/ffa/ranks.json` stores local ranks and UUID assignments. Use `/ffa ranks reload` after file edits; general `/ffa reload` does not reload ranks. Invalid edits keep the previous active ranks. Backups now include this file, which can be restored independently with the server stopped. Personal chat overrides are stored in existing `state.json`; use chat commands to clear/reset them instead of rolling back financial state. See [ranks](../wiki/Ranks.md) and [chat](../wiki/Chat-and-Nicknames.md).

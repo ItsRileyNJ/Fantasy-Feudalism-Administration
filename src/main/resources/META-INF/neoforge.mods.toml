@@ -3,9 +3,9 @@ loaderVersion="[4,)"
 license="All Rights Reserved"
 [[mods]]
 modId="ffa"
-version="0.1.2"
+version="0.2.0"
 displayName="Fantasy Feudalism: Administration"
-description='''Server-side spawn administration, regions, teleportation and Denar economy.'''
+description='''Server-side regions, travel, ranks, chat, staff tools and Denar economy.'''
 [[dependencies.ffa]]
 modId="neoforge"
 type="required"

@@ -41,6 +41,9 @@ public final class PolicyTest {
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
     atomicWrites(root);
+    ranks(root);
+    chatStyles();
+    whispers();
     Path config = root.resolve("server.toml");
     Settings settings = Settings.load(config);
     check(!settings.dimension, "void dimension opt-in");
@@ -168,6 +171,187 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void whispers() throws Exception {
+    check(Whispers.validate("Hello there").equals("Hello there"), "Whispers preserve plain text");
+    rejects(() -> Whispers.validate(" "), "Blank whisper rejected");
+    rejects(() -> Whispers.validate("x".repeat(513)), "Oversized whisper rejected");
+    rejects(() -> Whispers.validate("hello\nworld"), "Whisper control characters rejected");
+    rejects(() -> Whispers.validate("\u00a7cRed"), "Whisper formatting injection rejected");
+    check(
+        new PlayerData().whisperMonitor && new PlayerData().whisperAllowed.isEmpty(),
+        "Monitoring defaults on while recipient consent starts empty");
+  }
+
+  private static void chatStyles() throws Exception {
+    check(
+        ChatStyles.validate("nickname", "Sir Riley").equals("Sir Riley"),
+        "Nickname permits plain text spaces");
+    check(ChatStyles.validate("title", "").isEmpty(), "Empty title can suppress inherited title");
+    check(
+        ChatStyles.validate("name_color", "gold").equals("gold"),
+        "Native named chat colors accepted");
+    check(ChatStyles.validate("title_italic", "true").equals("true"), "Italic style uses boolean");
+    rejects(() -> ChatStyles.validate("nickname", " "), "Empty nickname rejected");
+    rejects(() -> ChatStyles.validate("nickname", "A\nB"), "Newline nickname rejected");
+    rejects(
+        () -> ChatStyles.validate("title", "\u00a7cAdmin"), "Legacy injected formatting rejected");
+    rejects(
+        () -> ChatStyles.validate("nickname", "A\u202eB"), "Invisible direction controls rejected");
+    rejects(
+        () -> ChatStyles.validate("name_color", "obfuscated"),
+        "Non-color formatting is not accepted as a color");
+    rejects(() -> ChatStyles.validate("name_bold", "yes"), "Non-boolean formatting rejected");
+    rejects(() -> ChatStyles.validate("title", "x".repeat(49)), "Title length bounded");
+    rejects(
+        () -> ChatStyles.validateRank("ffa.chat.style.title", Ranks.parseValue("true")),
+        "Rank display title must be a string");
+    check(
+        ChatStyles.rankValue("ffa.chat.style.nickname", "123").isString(),
+        "Numeric-looking rank nickname remains plain text");
+    check(
+        ChatStyles.permission("nickname").equals("ffa.chat.nickname"),
+        "Self-service nickname node is separate from stored style");
+  }
+
+  private static void ranks(Path root) throws Exception {
+    Path file = root.resolve("ranks/ranks.json");
+    Ranks ranks = new Ranks(file);
+    check(
+        Ranks.parse(Files.readString(Path.of("wiki/examples/ranks.json")))
+            .ranks
+            .containsKey("nobles"),
+        "Published ranks example passes production validation");
+    UUID player = UUID.randomUUID();
+    check(ranks.active(player).equals(List.of("member")), "Default rank is automatic");
+    check(
+        ranks.decision(player, "ffa.admin").isEmpty(), "New ranks grant no administration rights");
+    ranks.update(
+        d -> {
+          d.ranks.get("member").permissions.put("ffa.command.spawn", Ranks.parseValue("true"));
+          var vip = new Ranks.Rank();
+          vip.power = 10;
+          vip.parents.add("member");
+          vip.permissions.put("ffa.*", Ranks.parseValue("true"));
+          vip.permissions.put("ffa.admin", Ranks.parseValue("false"));
+          vip.permissions.put("ffa.homes.maximum", Ranks.parseValue("5"));
+          vip.permissions.put("command.time", Ranks.parseValue("true"));
+          vip.permissions.put("command.time.set", Ranks.parseValue("false"));
+          vip.permissions.put("display.label", Ranks.parseValue("Royal Guard"));
+          d.ranks.put("vip", vip);
+          d.players.put(player.toString(), new TreeSet<>(Set.of("vip")));
+        });
+    check(
+        ranks.active(player).equals(List.of("vip", "member")),
+        "Assigned and inherited ranks use descending power");
+    check(!ranks.decision(player, "ffa.admin").orElse(true), "Exact deny beats same-rank wildcard");
+    check(
+        ranks.value(player, "ffa.chat.style.name_bold").isEmpty(),
+        "Broad permission grant never creates display metadata");
+    check(
+        ranks.decision(player, "ffa.command.home").orElse(false),
+        "Trailing wildcard grants matching nodes");
+    check(
+        ranks.integer(player, "ffa.homes.maximum").orElse(0) == 5,
+        "Numeric permission stays an integer");
+    check(
+        ranks.decision(player, "ffa.homes.maximum").isEmpty(),
+        "Number is never coerced to boolean");
+    check(
+        ranks.value(player, "display.label").orElseThrow().getAsString().equals("Royal Guard"),
+        "String metadata round trips");
+    check(
+        ranks.decision(player, "command.time.query.daytime").orElse(false),
+        "Command permission covers descendants");
+    check(
+        !ranks.decision(player, "command.time.set.day").orElse(true),
+        "Specific command deny beats parent allow");
+    check(
+        new Ranks(file).integer(player, "ffa.homes.maximum").orElse(0) == 5,
+        "Ranks persist across a new manager");
+    String original = Files.readString(file);
+    rejects(
+        () -> ranks.update(d -> d.ranks.get("member").parents.add("vip")),
+        "Inheritance cycle rejected");
+    rejects(
+        () -> ranks.update(d -> d.ranks.get("vip").parents.add("missing")),
+        "Missing parent rejected");
+    rejects(
+        () ->
+            ranks.update(
+                d ->
+                    d.ranks
+                        .get("vip")
+                        .permissions
+                        .put("ffa.homes.maximum", Ranks.parseValue("-1"))),
+        "Invalid numeric home limit rejected");
+    rejects(
+        () ->
+            ranks.update(
+                d -> {
+                  for (int i = 0; i <= 33; i++) {
+                    var rank = new Ranks.Rank();
+                    if (i > 0) rank.parents.add("depth_" + (i - 1));
+                    d.ranks.put("depth_" + i, rank);
+                  }
+                }),
+        "Inheritance beyond 32 edges is rejected");
+    check(Files.readString(file).equals(original), "Invalid rank changes preserve disk");
+    ranks.update(
+        d -> {
+          var restricted = new Ranks.Rank();
+          restricted.power = 20;
+          restricted.permissions.put("ffa.command.spawn", Ranks.parseValue("false"));
+          d.ranks.put("restricted", restricted);
+          d.players.get(player.toString()).add("restricted");
+        });
+    check(
+        !ranks.decision(player, "ffa.command.spawn").orElse(true),
+        "Higher-power deny overrides lower allow");
+    ranks.update(
+        d -> {
+          var first = new Ranks.Rank();
+          first.power = 20;
+          first.permissions.put("ffa.command.spawn", Ranks.parseValue("true"));
+          d.ranks.put("aaa", first);
+          d.players.get(player.toString()).add("aaa");
+        });
+    check(
+        ranks.decision(player, "ffa.command.spawn").orElse(false),
+        "Equal powers resolve by rank ID deterministically");
+    ranks.update(d -> d.ranks.get("member").defaultRank = false);
+    check(ranks.active(player).contains("member"), "Inheritance activates a non-default parent");
+    check(
+        ranks.active(UUID.randomUUID()).isEmpty(),
+        "Non-default rank does not activate for strangers");
+    String valid = Files.readString(file);
+    Files.writeString(file, "{}");
+    rejects(ranks::reload, "Malformed ranks reload rejected");
+    check(
+        ranks.integer(player, "ffa.homes.maximum").orElse(0) == 5,
+        "Bad reload retains active permissions");
+    rejects(() -> ranks.update(d -> d.ranks.clear()), "Commands cannot overwrite external edits");
+    Files.writeString(file, valid);
+    ranks.reload();
+    rejects(
+        () -> Ranks.parse(valid.replace("\"power\": 10", "\"power\": 1.5")),
+        "Fractional priorities rejected");
+    rejects(
+        () -> Ranks.parse(valid.replace("\"power\": 10", "\"power\": true")),
+        "Boolean priorities rejected");
+    rejects(() -> Ranks.checkNode("ffa.*.admin", true), "Mid-node wildcards rejected");
+    check(ranks.ids().contains("vip"), "Successful reload preserves ranks");
+    Files.delete(file);
+    Files.createDirectory(file);
+    Files.writeString(file.resolve("keep"), "sentinel");
+    boolean ioFailure = false;
+    try {
+      ranks.update(d -> d.ranks.clear());
+    } catch (java.io.IOException expected) {
+      ioFailure = true;
+    }
+    check(ioFailure && ranks.ids().contains("vip"), "Rank read failure retains active permissions");
   }
 
   private static void atomicWrites(Path root) throws Exception {

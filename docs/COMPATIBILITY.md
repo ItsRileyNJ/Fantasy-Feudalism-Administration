@@ -38,22 +38,24 @@ Native Easy NPC merchant screens continue to use their own item trades. The admi
 
 ## FTB Ranks 2101.1.5 and LuckPerms
 
-FTB Ranks support uses its public `FTBRanksAPI.getPermissionValue`, `PermissionValue.asBoolean/asInteger`, and `RankManager.getRanks` APIs. These were checked against official source for **2101.1.5**. An explicit FTB decision takes precedence over LuckPerms; absent decisions use the configured fallback. Missing/failed integrations cannot grant privileged access.
+FTB Ranks support uses its public `FTBRanksAPI.getPermissionValue`, `PermissionValue.asBoolean/asInteger`, and `RankManager.getRanks` APIs. These were checked against official source for **2101.1.5**. An explicit FTB decision takes precedence over LuckPerms; absent decisions consult the built-in ranks before the configured fallback. Missing/failed integrations cannot grant privileged access.
 
 Relevant nodes:
 
 - `ffa.admin`: complete administrator gameplay exemption and management access.
-- `ffa.region.edit`, `ffa.spawn.manage`, `ffa.warp.manage`, `ffa.portal.manage`, `ffa.shop.manage`, `ffa.economy.manage`, `ffa.reload`, `ffa.backup`: individual management access.
+- `ffa.region.edit`, `ffa.spawn.manage`, `ffa.warp.manage`, `ffa.portal.manage`, `ffa.shop.manage`, `ffa.economy.manage`, `ffa.ranks.manage`, `ffa.chat.manage`, `ffa.reload`, `ffa.backup`: individual management access.
 - `ffa.command.spawn`, `ffa.command.warp`, etc.: optional per-command player access; `permissions.defaultPlayerCommands` is the fallback.
-- `ffa.homes.maximum`: FTB integer home limit, clamped to 0..1000.
+- `ffa.homes.maximum`: FTB/local integer home limit, clamped to 0..1000.
 - `ffa.homes.unlimited`: bypass the configured home count.
 
-Use `group` access with a rank ID for rank restrictions. FTB Ranks remains responsible for assigning ranks. Operators at the configured level always retain built-in access if neither permission provider is installed.
+Use `group` access with a rank ID for rank restrictions. FTB Ranks remains responsible for assigning its own ranks. FFA's separate [built-in ranks](../wiki/Ranks.md) support local membership and group checks; no automatic import is performed. [Chat styles](../wiki/Chat-and-Nicknames.md) can be supplied by local rank metadata or personal settings, and self-edit permissions can come from the existing Boolean providers. Operators at the configured level always retain built-in access if neither permission provider is installed.
 
 The exact FTB Ranks binary was not uploaded; runtime integration testing with that JAR remains to be performed. LuckPerms is also a soft dependency and was not present in the supplied test set.
 
 ## FTB Essentials and other command owners
 
-Only the `/ffa` root is registered. This preserves vanilla `/tp`, FTB `/spawn`, `/warp`, `/home`, `/tpa`, and other mods' roots without load-order competition. FTB Essentials detection disables this mod's home, request and request-privacy operations. Its custom `/ffa spawn`, `/ffa warp`, regions and portals remain available.
+Only the `/ffa` root is registered. Explicit `command.…` rank nodes can allow/deny other registered commands while preserving their original predicates when no decision is set. This preserves vanilla `/tp`, FTB `/spawn`, `/warp`, `/home`, `/tpa`, and other mods' roots without load-order competition. FTB Essentials detection disables this mod's home, request and request-privacy operations. Its custom `/ffa spawn`, `/ffa warp`, regions and portals remain available.
 
 ServerPlayer teleport entry points and NeoForge teleport events validate arrivals against applicable region rules and destination safety. Mods that directly rewrite positions or bypass loader protection events need their own verified adapters; no universal interception guarantee is made.
+
+FFA public Stats reads the supplied Mercenaries settlement names and membership without modifying towns. Vanish protects supported vanilla/FFA presence paths, not arbitrary mods' web maps or direct online-player APIs; test those separately. Whisper monitoring and inventory tools use native server/client interfaces and require no FFA client mod.

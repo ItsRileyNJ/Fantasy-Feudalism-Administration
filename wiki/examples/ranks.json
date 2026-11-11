@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "ranks": {
+    "member": {
+      "power": 0,
+      "defaultRank": true,
+      "parents": [],
+      "permissions": {}
+    },
+    "traders": {
+      "power": 10,
+      "defaultRank": false,
+      "parents": [
+        "member"
+      ],
+      "permissions": {
+        "ffa.portal.market": true,
+        "ffa.homes.maximum": 5
+      }
+    },
+    "nobles": {
+      "power": 50,
+      "defaultRank": false,
+      "parents": [
+        "member"
+      ],
+      "permissions": {
+        "ffa.chat.nickname": true,
+        "ffa.chat.style.title": "Duke",
+        "ffa.chat.style.name_color": "gold",
+        "ffa.chat.style.title_color": "aqua",
+        "ffa.chat.style.name_bold": true,
+        "ffa.chat.style.title_italic": true
+      }
+    }
+  },
+  "players": {
+    "00000000-0000-0000-0000-000000000001": [
+      "traders"
+    ]
+  }
+}

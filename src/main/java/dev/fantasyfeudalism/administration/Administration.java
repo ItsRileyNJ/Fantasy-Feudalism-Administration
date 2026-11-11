@@ -24,6 +24,11 @@ public final class Administration {
   public Storage storage;
   public Regions regions;
   public Compat compat;
+  public Ranks ranks;
+  public CommandPermissions commandPermissions;
+  public ChatStyles chatStyles;
+  public Vanish vanish;
+  public Whispers whispers;
   public Teleports teleports;
   public Protection protection;
   public Economy economy;
@@ -45,6 +50,7 @@ public final class Administration {
     NeoForge.EVENT_BUS.addListener(this::start);
     NeoForge.EVENT_BUS.addListener(this::stop);
     NeoForge.EVENT_BUS.addListener(Commands::register);
+    NeoForge.EVENT_BUS.addListener(this::datapackSync);
   }
 
   private void packs(AddPackFindersEvent e) {
@@ -62,12 +68,20 @@ public final class Administration {
     server = e.getServer();
     try {
       storage = new Storage(server.getWorldPath(LevelResource.ROOT).resolve("ffa"));
-      compat = new Compat(settings);
+      ranks = new Ranks(storage.directory.resolve("ranks.json"));
+      compat = new Compat(settings, ranks);
       regions = new Regions(storage.directory.resolve("regions.toml"));
       regions.reload(server, settings, compat);
       teleports = new Teleports(this);
       economy = new Economy(this);
       protection = new Protection(this);
+      whispers = new Whispers(this);
+      vanish = new Vanish(this);
+      NeoForge.EVENT_BUS.register(whispers);
+      NeoForge.EVENT_BUS.register(vanish);
+      chatStyles = new ChatStyles(this);
+      NeoForge.EVENT_BUS.register(chatStyles);
+      commandPermissions = new CommandPermissions(this);
       Portals.reindex(this);
       NeoForge.EVENT_BUS.register(teleports);
       NeoForge.EVENT_BUS.register(protection);
@@ -80,9 +94,27 @@ public final class Administration {
     }
   }
 
+  private void datapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent e) {
+    if (server == null || ranks == null || e.getPlayer() != null) return;
+    if (commandPermissions == null || !commandPermissions.current()) {
+      if (commandPermissions != null) commandPermissions.close();
+      try {
+        commandPermissions = new CommandPermissions(this);
+      } catch (ReflectiveOperationException ex) {
+        throw new IllegalStateException(
+            "Cannot apply FFA command rank permissions after datapack reload", ex);
+      }
+      refreshPermissions();
+    }
+  }
+
   private void stop(ServerStoppedEvent e) {
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
     if (protection != null) NeoForge.EVENT_BUS.unregister(protection);
+    if (commandPermissions != null) commandPermissions.close();
+    if (chatStyles != null) NeoForge.EVENT_BUS.unregister(chatStyles);
+    if (vanish != null) NeoForge.EVENT_BUS.unregister(vanish);
+    if (whispers != null) NeoForge.EVENT_BUS.unregister(whispers);
     server = null;
   }
 
@@ -101,12 +133,18 @@ public final class Administration {
         || candidate.leaderboard != settings.leaderboard
         || candidate.privacy != settings.privacy)
       throw new IllegalArgumentException("Command module enable/disable requires restart");
-    Compat next = new Compat(candidate);
+    Compat next = new Compat(candidate, ranks);
     regions.reload(server, candidate, next);
     settings = candidate;
     compat = next;
+    refreshPermissions();
+  }
+
+  public void refreshPermissions() {
+    if (vanish != null) vanish.enforce();
     for (var p : server.getPlayerList().getPlayers()) {
       protection.update(p);
+      p.refreshDisplayName();
       server.getCommands().sendCommands(p);
     }
   }

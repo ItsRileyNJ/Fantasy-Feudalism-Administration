@@ -121,6 +121,10 @@ public final class Model {
 
   public static final class PlayerData {
     public long balance;
+    public Map<String, String> chat = new TreeMap<>();
+    public boolean vanished, whisperMonitor = true;
+    public String vanishMode;
+    public Set<String> whisperAllowed = new HashSet<>();
     public boolean joined, requestsEnabled = true;
     public String previousMode;
     public boolean previousMayFly, previousFlying, flightTracked;

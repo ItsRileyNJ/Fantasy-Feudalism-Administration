@@ -24,9 +24,12 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 /** Opt-in tests using real players, packets, saves, mixins, event handlers and registries. */
 @PrefixGameTestTemplate(false)
 public final class RegressionTests {
-  private static ServerPlayer player(GameTestHelper h, String name) {
-    var cookie =
-        CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), name), false);
+  static ServerPlayer player(GameTestHelper h, String name) {
+    return player(h, new GameProfile(UUID.randomUUID(), name));
+  }
+
+  static ServerPlayer player(GameTestHelper h, GameProfile profile) {
+    var cookie = CommonListenerCookie.createInitial(profile, false);
     var p =
         new ServerPlayer(
             h.getLevel().getServer(),
@@ -207,6 +210,9 @@ public final class RegressionTests {
           flagCommand == 1 && Regions.read(app.regions.file).getFirst().flags.get(Flag.PVP),
           "Administrative flag command updates the authoritative TOML");
       commandSuggestions(h, p, app);
+      ranks(h, p, app);
+      chatStyles(h, p, app);
+      ToolsRegression.verify(h, p, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");
@@ -223,7 +229,324 @@ public final class RegressionTests {
     }
   }
 
-  private static java.util.List<String> complete(
+  private static void chatStyles(GameTestHelper h, ServerPlayer p, Administration app)
+      throws Exception {
+    String ranksFile = java.nio.file.Files.readString(app.ranks.file);
+    var saved = app.storage.copy();
+    var dispatcher = app.server.getCommands().getDispatcher();
+    var console = app.server.createCommandSourceStack();
+    var ordinary = p.createCommandSourceStack().withPermission(0);
+    try {
+      h.assertTrue(
+          clientCommands(p, true).getChild("ffa").getChild("chat") == null,
+          "Chat tools are hidden when a player has no editing rights");
+      outgoing(p);
+      h.assertTrue(dispatcher.execute("ffa help", ordinary) == 1, "Player help works");
+      String help =
+          outgoing(p).stream()
+              .filter(
+                  packet ->
+                      packet
+                          instanceof
+                          net.minecraft.network.protocol.game.ClientboundSystemChatPacket)
+              .map(
+                  packet ->
+                      ((net.minecraft.network.protocol.game.ClientboundSystemChatPacket) packet)
+                          .content()
+                          .getString())
+              .collect(java.util.stream.Collectors.joining(" "));
+      h.assertTrue(
+          !help.contains("/ffa ranks")
+              && !help.contains("/ffa region")
+              && !help.contains("/ffa chat"),
+          "Player help does not advertise unauthorized administration or chat tools");
+      for (String command :
+          List.of(
+              "ffa ranks create nobles 50",
+              "ffa ranks node add nobles ffa.chat.nickname true",
+              "ffa ranks node add nobles ffa.chat.style.title Duke",
+              "ffa ranks node add nobles ffa.chat.style.name_color gold",
+              "ffa ranks node add nobles ffa.chat.style.title_color aqua",
+              "ffa ranks node add nobles ffa.chat.style.name_bold true",
+              "ffa ranks node add nobles ffa.chat.style.title_italic true",
+              "ffa ranks add " + p.getGameProfile().getName() + " nobles"))
+        h.assertTrue(
+            dispatcher.execute(command, console) == 1, "Chat rank operation succeeds: " + command);
+      var chatTree = clientCommands(p, false).getChild("ffa").getChild("chat");
+      h.assertTrue(
+          chatTree != null
+              && chatTree.getChild("nickname") != null
+              && chatTree.getChild("set") == null
+              && chatTree.getChild("reset") == null
+              && chatTree.getChild("color") == null
+              && chatTree.getChild("title") == null,
+          "High rank can unlock nickname while hiding all ungranted styling/administrator actions");
+      h.assertTrue(
+          dispatcher.execute("ffa chat nickname \"Sir Test\"", ordinary) == 1,
+          "Authorized player can change own nickname without operator authority");
+      h.assertTrue(
+          p.getDisplayName().getString().contains("[Duke] Sir Test"),
+          "Rank title and personal nickname render through real display-name event");
+      boolean[] styled = new boolean[2];
+      p.getDisplayName()
+          .visit(
+              (style, text) -> {
+                if (text.equals("Sir Test"))
+                  styled[0] =
+                      style.isBold()
+                          && style.getColor() != null
+                          && style.getColor().getValue()
+                              == net.minecraft.ChatFormatting.GOLD.getColor();
+                if (text.equals("[Duke]"))
+                  styled[1] =
+                      style.isItalic()
+                          && style.getColor() != null
+                          && style.getColor().getValue()
+                              == net.minecraft.ChatFormatting.AQUA.getColor();
+                return Optional.empty();
+              },
+              net.minecraft.network.chat.Style.EMPTY);
+      h.assertTrue(
+          styled[0] && styled[1],
+          "Rendered name/title carry independent colors and bold/italic styles");
+      h.assertTrue(
+          p.getGameProfile().getName().equals("ffaPlayer"),
+          "Nickname leaves canonical account name unchanged");
+      boolean denied = false;
+      try {
+        dispatcher.execute(
+            "ffa chat set " + p.getGameProfile().getName() + " title Admin", ordinary);
+      } catch (com.mojang.brigadier.exceptions.CommandSyntaxException expected) {
+        denied = true;
+      }
+      h.assertTrue(denied, "Nickname privilege does not grant other-player management");
+      String name = p.getGameProfile().getName();
+      for (String command :
+          List.of(
+              "ffa chat set " + name + " title King",
+              "ffa chat set " + name + " name_color red",
+              "ffa chat set " + name + " name_italic true",
+              "ffa chat set " + name + " title_bold true"))
+        h.assertTrue(
+            dispatcher.execute(command, console) == 1,
+            "Administrator can set personal style: " + command);
+      h.assertTrue(
+          p.getDisplayName().getString().contains("[King] Sir Test"),
+          "Personal title overrides rank title");
+      h.assertTrue(
+          new Storage(app.storage.directory)
+              .player(p.getUUID())
+              .chat
+              .get("nickname")
+              .equals("Sir Test"),
+          "Personal chat style persists on disk");
+      h.assertTrue(
+          dispatcher.execute("ffa chat clear " + name + " title", console) == 1
+              && p.getDisplayName().getString().contains("[Duke] Sir Test"),
+          "Clearing personal property restores rank style");
+      h.assertTrue(
+          dispatcher.execute("ffa chat inherit nickname", ordinary) == 1
+              && p.getDisplayName().getString().contains("[Duke] " + name),
+          "Player can restore allowed property inheritance");
+      h.assertTrue(
+          dispatcher.execute("ffa chat set " + name + " name_color invalid", console) == 0,
+          "Invalid style fails before mutation");
+      h.assertTrue(
+          dispatcher.execute("ffa chat reset " + name, console) == 1
+              && app.storage.player(p.getUUID()).chat.isEmpty(),
+          "Administrator reset clears personal overrides");
+      h.assertTrue(
+          dispatcher.execute("ffa ranks remove " + name + " nobles", console) == 1,
+          "Chat rank can be revoked");
+      h.assertTrue(
+          clientCommands(p, false).getChild("ffa").getChild("chat") == null
+              && p.getDisplayName().getString().equals(name),
+          "Rank revocation refreshes display name and hides chat tools");
+    } finally {
+      Storage.atomic(app.ranks.file, ranksFile);
+      app.ranks.reload();
+      app.storage.commit(saved);
+      app.refreshPermissions();
+    }
+  }
+
+  private static void ranks(GameTestHelper h, ServerPlayer p, Administration app) throws Exception {
+    String saved = java.nio.file.Files.readString(app.ranks.file);
+    var dispatcher = app.server.getCommands().getDispatcher();
+    var console = app.server.createCommandSourceStack();
+    var ordinary = p.createCommandSourceStack().withPermission(0);
+    long day = h.getLevel().getDayTime();
+    try {
+      app.commandPermissions.close();
+      var rankNode = dispatcher.getRoot().getChild("ffa").getChild("ranks");
+      var field = com.mojang.brigadier.tree.CommandNode.class.getDeclaredField("requirement");
+      field.setAccessible(true);
+      var nativeRequirement = rankNode.getRequirement();
+      try {
+        field.set(
+            rankNode,
+            (java.util.function.Predicate<net.minecraft.commands.CommandSourceStack>)
+                source -> true);
+        app.commandPermissions = new CommandPermissions(app);
+        h.assertFalse(
+            rankNode.canUse(ordinary),
+            "External broad command grant cannot override native FFA management visibility");
+        h.assertTrue(
+            clientCommands(p, true).getChild("ffa").getChild("ranks") == null,
+            "Native permission guard survives external command predicate replacement in actual"
+                + " client packet");
+      } finally {
+        app.commandPermissions.close();
+        field.set(rankNode, nativeRequirement);
+        app.commandPermissions = new CommandPermissions(app);
+      }
+      h.assertTrue(
+          clientCommands(p, true).getChild("ffa").getChild("ranks") == null,
+          "Ordinary players do not receive ranks management commands");
+      int denied = 0;
+      try {
+        denied = dispatcher.execute("ffa ranks create stolen 100", ordinary);
+      } catch (com.mojang.brigadier.exceptions.CommandSyntaxException expected) {
+      }
+      h.assertTrue(
+          denied == 0 && !app.ranks.ids().contains("stolen"),
+          "Players cannot grant themselves ranks");
+      h.assertFalse(
+          dispatcher.getRoot().getChild("time").canUse(ordinary),
+          "Original vanilla time permission remains in force");
+      for (String command :
+          List.of(
+              "ffa ranks create builders 10",
+              "ffa ranks node add builders ffa.region.edit true",
+              "ffa ranks node add builders ffa.homes.maximum 7",
+              "ffa ranks node add builders command.time true",
+              "ffa ranks node add builders command.time.set false",
+              "ffa ranks node add builders command.msg false",
+              "ffa ranks add " + p.getGameProfile().getName() + " builders"))
+        h.assertTrue(
+            dispatcher.execute(command, console) == 1,
+            "Console rank operation succeeds: " + command);
+      var packet = clientCommands(p, false);
+      h.assertTrue(
+          packet.getChild("ffa").getChild("region") != null
+              && packet.getChild("ffa").getChild("ranks") == null,
+          "Rank assignment refreshes actual client permissions without granting rank management");
+      h.assertTrue(
+          packet.getChild("time") != null && packet.getChild("time").getChild("set") == null,
+          "Client command packet includes allowed vanilla root and hides denied child");
+      h.assertTrue(
+          app.compat.permission(p, "ffa.region.edit") && app.compat.homeLimit(p, 3) == 7,
+          "FFA consumes local boolean and numeric permissions");
+      h.assertTrue(
+          app.compat.group(p, "builders"), "Local rank membership works for group access gates");
+      app.commandPermissions.close();
+      app.commandPermissions = null;
+      NeoForge.EVENT_BUS.post(
+          new net.neoforged.neoforge.event.OnDatapackSyncEvent(app.server.getPlayerList(), null));
+      h.assertTrue(
+          app.commandPermissions != null
+              && app.commandPermissions.current()
+              && dispatcher.getRoot().getChild("time").canUse(ordinary),
+          "Datapack synchronization reinstalls missing command permission bridge");
+      for (String command :
+          List.of(
+              "ffa ranks list_all_ranks",
+              "ffa ranks list_ranks_of " + p.getGameProfile().getName(),
+              "ffa ranks show_rank builders",
+              "ffa ranks list_players_with builders",
+              "ffa ranks refresh_readme"))
+        h.assertTrue(
+            dispatcher.execute(command, console) == 1, "FTB-style command succeeds: " + command);
+      h.assertTrue(
+          java.nio.file.Files.readString(app.storage.directory.resolve("ranks-readme.txt"))
+              .contains("command.time"),
+          "Generated reference includes actual command nodes");
+      h.assertTrue(
+          dispatcher.execute("time add 1", ordinary) >= 0,
+          "Rank can grant a vanilla command to a nonoperator");
+      boolean rejected = false;
+      try {
+        dispatcher.execute("time set day", ordinary);
+      } catch (com.mojang.brigadier.exceptions.CommandSyntaxException expected) {
+        rejected = true;
+      }
+      h.assertTrue(rejected, "Explicit command deny is enforced during dispatch");
+      h.assertFalse(
+          dispatcher.getRoot().getChild("w").canUse(ordinary),
+          "Redirect alias inherits canonical command deny");
+      h.assertTrue(
+          complete(app, console, "ffa ranks node add builders command.t").contains("command.time"),
+          "Actual registered command permission paths complete");
+      h.assertTrue(
+          complete(app, console, "ffa ranks add " + p.getGameProfile().getName() + " ")
+              .contains("builders"),
+          "Saved rank IDs complete");
+      h.assertTrue(
+          dispatcher.execute("ffa ranks node add builders \"ffa.command.*\" true", console) == 1,
+          "Quoted wildcard permission parses through native grammar");
+      h.assertTrue(
+          dispatcher.execute("ffa ranks parent add builders member", console) == 1,
+          "Inheritance command persists");
+      h.assertTrue(
+          dispatcher.execute("ffa ranks parent add member builders", console) == 0,
+          "Command rejects cycle without changing permissions");
+      h.assertTrue(
+          dispatcher.execute("ffa ranks reload", console) == 1
+              && app.compat.permission(p, "ffa.region.edit"),
+          "Permissions survive explicit ranks reload");
+      h.assertTrue(
+          dispatcher.execute(
+                  "ffa ranks remove " + p.getGameProfile().getName() + " builders", console)
+              == 1,
+          "Membership removal succeeds");
+      h.assertFalse(app.compat.permission(p, "ffa.region.edit"), "Revocation applies immediately");
+      h.assertTrue(
+          clientCommands(p, false).getChild("ffa").getChild("region") == null,
+          "Revocation sends filtered command packet immediately");
+      String snapshot = app.storage.snapshot(app.settingsFile, app.regions.file);
+      h.assertTrue(
+          java.nio.file.Files.exists(
+              app.storage.directory.resolve("backups").resolve(snapshot).resolve("ranks.json")),
+          "FFA snapshot includes rank definitions and UUID memberships");
+      String valid = java.nio.file.Files.readString(app.ranks.file);
+      Storage.atomic(app.ranks.file, "{}");
+      h.assertTrue(
+          dispatcher.execute("ffa ranks reload", console) == 0
+              && app.ranks.ids().contains("builders"),
+          "Invalid ranks reload keeps previous valid definitions");
+      Storage.atomic(app.ranks.file, valid);
+      app.ranks.reload();
+      app.server
+          .getPlayerList()
+          .getOps()
+          .add(new net.minecraft.server.players.ServerOpListEntry(p.getGameProfile(), 4, false));
+      app.ranks.update(
+          d -> d.ranks.get("member").permissions.put("command.time", Ranks.parseValue("false")));
+      h.assertTrue(
+          dispatcher.getRoot().getChild("time").canUse(p.createCommandSourceStack()),
+          "Local rank deny does not remove operator authority");
+      app.server.getPlayerList().deop(p.getGameProfile());
+      app.ranks.update(
+          d -> d.ranks.get("member").permissions.put("command.seed", Ranks.parseValue("true")));
+      var previousCommands = app.server.getCommands();
+      app.server.reloadResources(app.server.getPackRepository().getSelectedIds()).join();
+      h.assertTrue(
+          app.server.getCommands() != previousCommands && app.commandPermissions.current(),
+          "Real datapack reload replaces the dispatcher and reinstalls rank predicates");
+      h.assertTrue(
+          app.server.getCommands().getDispatcher().getRoot().getChild("seed").canUse(ordinary)
+              && clientCommands(p, true).getChild("seed") != null,
+          "Command permission grant and filtered packet survive actual datapack reload");
+    } finally {
+      app.server.getPlayerList().deop(p.getGameProfile());
+      Storage.atomic(app.ranks.file, saved);
+      app.ranks.reload();
+      app.refreshPermissions();
+      h.getLevel().setDayTime(day);
+    }
+  }
+
+  static java.util.List<String> complete(
       Administration app, net.minecraft.commands.CommandSourceStack source, String input) {
     var dispatcher = app.server.getCommands().getDispatcher();
     return dispatcher
@@ -235,7 +558,7 @@ public final class RegressionTests {
         .toList();
   }
 
-  private static java.util.List<Object> outgoing(ServerPlayer p) {
+  static java.util.List<Object> outgoing(ServerPlayer p) {
     var channel = (EmbeddedChannel) p.connection.getConnection().channel();
     channel.runPendingTasks();
     channel.flushOutbound();
@@ -245,8 +568,7 @@ public final class RegressionTests {
     return result;
   }
 
-  private static com.mojang.brigadier.tree.RootCommandNode<
-          net.minecraft.commands.SharedSuggestionProvider>
+  static com.mojang.brigadier.tree.RootCommandNode<net.minecraft.commands.SharedSuggestionProvider>
       clientCommands(ServerPlayer p, boolean request) {
     if (request) {
       outgoing(p);
@@ -652,6 +974,9 @@ public final class RegressionTests {
       claim.invoke(test, town, bell, player.getUUID(), "Integration Town");
       h.assertTrue(
           app.compat.townMember(player, bell, ""), "Mercenaries owner membership recognized");
+      h.assertTrue(
+          app.compat.settlementNames(player).contains("Integration Town"),
+          "Stats adapter reads actual Mercenaries settlement name");
       Region candidate = app.regions.copy().getFirst();
       candidate.settlementOverride = false;
       boolean rejected = false;
