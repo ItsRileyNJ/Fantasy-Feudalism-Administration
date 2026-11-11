@@ -1,5 +1,7 @@
 # Compatibility
 
+[Complete mod wiki](../wiki/Home.md)
+
 ## Mercenaries
 
 The supplied `fantasyfeudalism-mercenaries-1.20.4.jar` declares Minecraft **1.21.1**, NeoForge **[21.1.262,21.2)** and mod ID `villagerscontract`. The filename is its mod version, not its target Minecraft version.

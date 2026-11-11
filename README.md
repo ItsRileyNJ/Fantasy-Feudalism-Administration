@@ -2,6 +2,8 @@
 
 A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do not need this administration mod installed. Other installed mods may have their own client requirements.
 
+**[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, compatibility, recovery and IntelliJ guides.
+
 **Development release 0.1.2.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation

@@ -1,0 +1,72 @@
+# Example only: create your initial region in-game, then compare/edit its authoritative entry.
+# Adjust to your existing world and buildings. This does not establish the spawn teleport point.
+configVersion = 1
+
+[[regions]]
+id = "spawn"
+name = "Spawn Plaza"
+type = "SPAWN"
+dimension = "minecraft:overworld"
+parent = ""
+minX = -50
+maxX = 50
+minZ = -50
+maxZ = 50
+priority = 0
+settlementOverride = false
+entry = "Welcome to Spawn!"
+exit = "Leaving the spawn plaza."
+interactions = ["minecraft:oak_door", "minecraft:lever"]
+[regions.access]
+mode = "public"
+value = ""
+[regions.flags]
+pvp = false
+damage = false
+hunger = false
+
+[[regions]]
+id = "marketplace"
+name = "Marketplace"
+type = "CHILD"
+dimension = "minecraft:overworld"
+parent = "spawn"
+minX = 10
+maxX = 20
+minZ = 10
+maxZ = 20
+priority = 0
+settlementOverride = false
+entry = "Welcome to the Marketplace."
+exit = "You have left the Marketplace."
+interactions = ["minecraft:oak_door", "minecraft:chest"]
+[regions.access]
+mode = "public"
+value = ""
+[regions.flags]
+containers = true
+npc_trading = true
+
+[[regions]]
+id = "arena"
+name = "Arena"
+type = "CHILD"
+dimension = "minecraft:overworld"
+parent = "spawn"
+minX = -40
+maxX = -25
+minZ = 15
+maxZ = 30
+priority = 0
+settlementOverride = false
+entry = "You have entered the Arena."
+exit = "You left the Arena."
+interactions = []
+[regions.access]
+mode = "public"
+value = ""
+[regions.flags]
+pvp = true
+damage = true
+hunger = true
+flight = false

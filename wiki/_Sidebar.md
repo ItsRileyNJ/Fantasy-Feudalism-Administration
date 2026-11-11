@@ -1,0 +1,18 @@
+# Wiki navigation
+
+- [Home](Home.md)
+- [Getting Started](Getting-Started.md)
+- [Regions](Regions.md)
+- [Flags and Interactions](Flags-and-Interactions.md)
+- [Configuration](Configuration.md)
+- [Warps and Portals](Warps-and-Portals.md)
+- [Player Guide](Player-Guide.md)
+- [Economy and Shops](Economy-and-Shops.md)
+- [Permissions and Access](Permissions-and-Access.md)
+- [Mod Compatibility](Mod-Compatibility.md)
+- [Void Spawn Dimension](Void-Spawn-Dimension.md)
+- [First Join and Respawns](First-Join-and-Respawns.md)
+- [Backups and Recovery](Backups-and-Recovery.md)
+- [Troubleshooting](Troubleshooting.md)
+- [IntelliJ and Building](IntelliJ-and-Building.md)
+- [Command Reference](Command-Reference.md)

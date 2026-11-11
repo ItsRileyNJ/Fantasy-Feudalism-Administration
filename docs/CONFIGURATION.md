@@ -1,5 +1,7 @@
 # Configuration and recovery
 
+[Complete mod wiki](../wiki/Home.md)
+
 `config/ffa/server.toml` is the general server configuration. It contains comments, default values and units. Values are validated as a complete candidate. Numeric bounds are enforced with errors naming the setting and allowed range.
 
 | Category | Key settings / allowed range |

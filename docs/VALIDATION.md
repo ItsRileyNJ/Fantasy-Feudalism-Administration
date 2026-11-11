@@ -1,5 +1,7 @@
 # Validation and release limits
 
+[Complete mod wiki](../wiki/Home.md)
+
 This is a first development build, not a certification against every mod combination or exploit in the specification.
 
 ## Completed checks
