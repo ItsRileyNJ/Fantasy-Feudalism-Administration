@@ -64,3 +64,9 @@ teleport_in teleport_out home_creation
 ```
 
 Allowing `build` does not remove vanilla Adventure Mode's item placement requirements. Administrators are exempt from Adventure Mode.
+
+## Ranks and chat (0.2.0)
+
+See the [complete command reference](../wiki/Command-Reference.md), [built-in ranks tutorial](../wiki/Ranks.md), and [chat tools](../wiki/Chat-and-Nicknames.md). `/ffa ranks` provides creation, assignment, typed nodes, inheritance, defaults, priorities, checks and familiar FTB-style aliases. `/ffa chat` supplies personal/rank colors, nicknames, titles, bold and italic, with separate self-edit permissions. Rank/chat administration supports console use. Management commands are filtered out of ordinary client trees and `/ffa help`.
+
+See [staff tools](../wiki/Staff-Tools.md) for `/ffa vanish` and editable `/ffa invisee PLAYER`. [Whispers and stats](../wiki/Whispers-and-Stats.md) cover `/ffa whisper PLAYER MESSAGE`, recipient Accept/Deny, permanent consent, `/ffa whispers on|off` for each administrator, and public `/ffa stats PLAYER`.

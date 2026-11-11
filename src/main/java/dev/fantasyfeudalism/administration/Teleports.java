@@ -171,6 +171,8 @@ public final class Teleports {
   }
 
   public void request(ServerPlayer from, ServerPlayer to, boolean here) {
+    if (Vanish.hidden(from.getUUID()) || !Vanish.canSee(from, to))
+      throw new IllegalArgumentException("Player is offline or messaging is unavailable");
     if (from == to) throw new IllegalArgumentException("Choose another player.");
     PlayerData target = app.storage.player(to.getUUID());
     if (target == null
@@ -226,7 +228,8 @@ public final class Teleports {
           "That request button is stale. Use the current request message.");
     requests.remove(p.getUUID());
     ServerPlayer from = app.server.getPlayerList().getPlayer(r.from);
-    if (from == null) throw new IllegalArgumentException("Requesting player is offline.");
+    if (from == null || !Vanish.canSee(p, from))
+      throw new IllegalArgumentException("Requesting player is offline.");
     if (!accept) {
       tell(from, "Request declined.");
       return;

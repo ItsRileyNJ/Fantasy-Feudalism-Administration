@@ -15,15 +15,17 @@ import net.neoforged.fml.ModList;
 /** Optional integrations never change another mod's records or ownership decisions. */
 public final class Compat {
   private final Settings settings;
+  private final Ranks ranks;
   private Class<?> villageClass;
   private Method get, all, at;
-  private Field bells, owner, members, center;
+  private Field bells, owner, members, center, settlementName;
   private boolean townInstalled, townReady;
   private int settlementRadius;
   private final boolean essentials = ModList.get().isLoaded("ftbessentials");
 
-  public Compat(Settings settings) {
+  public Compat(Settings settings, Ranks ranks) {
     this.settings = settings;
+    this.ranks = ranks;
     townInstalled = ModList.get().isLoaded("villagerscontract");
     if (townInstalled && settings.mercenaries)
       try {
@@ -45,6 +47,7 @@ public final class Compat {
         owner = field(v, "owner");
         members = field(v, "members");
         center = field(v, "center");
+        settlementName = field(v, "name");
         settlementRadius = villageClass.getField("RADIUS").getInt(null);
         if (settlementRadius < 1 || settlementRadius > 4096)
           throw new ReflectiveOperationException("Unsupported settlement radius");
@@ -148,6 +151,13 @@ public final class Compat {
   }
 
   public Optional<Boolean> decision(ServerPlayer p, String node) {
+    Optional<Boolean> external = externalDecision(p, node);
+    return external.isPresent()
+        ? external
+        : ranks.decision(p.getUUID(), node.toLowerCase(Locale.ROOT));
+  }
+
+  private Optional<Boolean> externalDecision(ServerPlayer p, String node) {
     if (settings.ftbRanks && ModList.get().isLoaded("ftbranks"))
       try {
         Object value =
@@ -224,7 +234,7 @@ public final class Compat {
         if (n.isPresent()) return Math.max(0, Math.min(1000, n.getAsInt()));
       } catch (ReflectiveOperationException | LinkageError ignored) {
       }
-    return fallback;
+    return ranks.integer(p.getUUID(), "ffa.homes.maximum").orElse(fallback);
   }
 
   public boolean group(ServerPlayer p, String id) {
@@ -244,7 +254,54 @@ public final class Compat {
       } catch (ReflectiveOperationException | LinkageError ignored) {
         return false;
       }
-    return permission(p, "group." + id);
+    return ranks.active(p.getUUID()).contains(id) || permission(p, "group." + id);
+  }
+
+  public String settlementNames(ServerPlayer player) {
+    if (!townInstalled) return "not installed";
+    if (!townReady) return "adapter unavailable";
+    Set<String> names = new TreeSet<>();
+    try {
+      for (var level : player.server.getAllLevels()) {
+        Object data = get.invoke(null, level);
+        for (Object village : (Collection<?>) all.invoke(data))
+          if (player.getUUID().equals(owner.get(village))
+              || ((Set<?>) members.get(village)).contains(player.getUUID())) {
+            String name = String.valueOf(settlementName.get(village));
+            names.add(
+                (name.isBlank() ? "Unnamed settlement" : name)
+                    + " ("
+                    + level.dimension().location()
+                    + ")");
+          }
+      }
+    } catch (ReflectiveOperationException | LinkageError ex) {
+      return "adapter unavailable";
+    }
+    return names.isEmpty() ? "none" : String.join(", ", names);
+  }
+
+  public String rankNames(ServerPlayer player) {
+    Set<String> names = new TreeSet<>();
+    for (String id : ranks.active(player.getUUID())) names.add("FFA:" + id);
+    if (settings.ftbRanks && ModList.get().isLoaded("ftbranks")) {
+      try {
+        Object manager =
+            Class.forName("dev.ftb.mods.ftbranks.api.FTBRanksAPI")
+                .getMethod("manager")
+                .invoke(null);
+        Collection<?> active =
+            (Collection<?>)
+                Class.forName("dev.ftb.mods.ftbranks.api.RankManager")
+                    .getMethod("getRanks", ServerPlayer.class)
+                    .invoke(manager, player);
+        Method id = Class.forName("dev.ftb.mods.ftbranks.api.Rank").getMethod("getId");
+        for (Object rank : active) names.add("FTB:" + id.invoke(rank));
+      } catch (ReflectiveOperationException | LinkageError ex) {
+        names.add("FTB:adapter unavailable");
+      }
+    }
+    return names.isEmpty() ? "none" : String.join(", ", names);
   }
 
   public static void validateAccess(Access a) {

@@ -73,6 +73,7 @@ public final class Economy {
 
   public void trade(ServerPlayer p, String shopId, int quantity, boolean buy) throws Exception {
     enabled();
+    InspectionMenu.closeFor(app, p);
     available(p.getUUID());
     if (quantity < 1 || quantity > 2304)
       throw new IllegalArgumentException("Quantity must be 1..2304.");

@@ -8,7 +8,7 @@ operatorLevel = 2
 # Private detailed feedback; audit records always include timestamp, location and actor.
 verboseFeedback = true
 [permissions]
-# FTB Ranks/LuckPerms nodes ffa.command.<name> override this player-command fallback.
+# FTB Ranks, LuckPerms, then built-in rank nodes ffa.command.<name> override this fallback.
 # Administrator management always requires operator level or the documented management node.
 defaultPlayerCommands = true
 [dimension]

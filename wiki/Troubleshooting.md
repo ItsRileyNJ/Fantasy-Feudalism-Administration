@@ -66,3 +66,7 @@ Fix the specific reported issue: duplicate IDs, reversed bounds, unsupported dim
 - Request stale/expired: use the current message or send a new request after cooldown; consent cannot be replayed.
 - No safe RTP result: reduce the radius or use normally loaded wilderness; the search does not generate new terrain.
 - Recovery/account lock: follow [backups and recovery](Backups-and-Recovery.md), preserve files and inspect the server log. Do not delete a journal to manufacture a successful result.
+
+## Ranks or chat changes are not applying
+
+Use `/ffa ranks check PLAYER NODE` and `/ffa ranks player PLAYER` as a manager. Check explicit FTB Ranks/LuckPerms decisions before local ranks, rank power, default/inherited memberships and personal chat overrides. Use `/ffa ranks reload` for external edits to `ranks.json`; general `/ffa reload` handles settings/regions. The [ranks](Ranks.md) and [chat](Chat-and-Nicknames.md) guides include examples. Hidden commands are expected when a player lacks their permission.

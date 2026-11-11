@@ -8,7 +8,8 @@
 | --- | --- |
 | `config/ffa/server.toml` | General server rules, modules, limits, integration and logging settings |
 | `<world>/ffa/regions.toml` | The one authoritative, human-editable region definition file |
-| `<world>/ffa/state.json` | Saved FFA points, objects, accounts and transaction state, managed through commands |
+| `<world>/ffa/ranks.json` | Built-in ranks, typed permission nodes, default/inherited membership and UUID assignments; use `/ffa ranks reload` after edits |
+| `<world>/ffa/state.json` | Saved FFA points, objects, accounts, personal chat styles, vanish state, whisper approvals/monitor preferences and transaction state, managed through commands |
 | `<world>/ffa/backups/` | Administrator-created snapshots |
 
 `<world>` means the active world directory, usually the server's `level-name`, not a literal folder with angle brackets. For IntelliJ's default development run these paths are usually under `<project>/run/`; inspect its working directory if customized. These general settings are not stored in `<world>/serverconfig/ffa/`.
@@ -22,7 +23,7 @@
 
 Reload is refused while teleport jobs or prepared trades are pending. Do not change dimension registration live. In-game region edits refuse to overwrite unreloaded external edits.
 
-The [full default server.toml](examples/server.toml) is extracted from 0.1.2's actual template. Use it for comparison; replacing your existing settings with the whole template resets your custom general rules. Config/state schema versions remain 1. Unknown versions are refused; do not manually increment version fields.
+The [full default server.toml](examples/server.toml) is extracted from 0.2.0's actual template. Use it for comparison; replacing your existing settings with the whole template resets your custom general rules. Config/state schema versions remain 1. Unknown versions are refused; do not manually increment version fields.
 
 ## Every general setting
 
@@ -48,8 +49,8 @@ The [full default server.toml](examples/server.toml) is extracted from 0.1.2's a
 | `teleport.cooldownSeconds` | `3` | 0..86400 seconds | Reload | Ordinary command teleport cooldown. |
 | `teleport.warmupSeconds` | `0` | 0..300 seconds | Reload | Delay before ordinary player travel; zero is immediate. |
 | `teleport.cancelOnMovement` | `true` | Boolean | Reload | Cancel warmups/prepared chunk loads when the player moves. |
-| `teleport.requestExpirySeconds` | `60` | 1..3600 seconds | Reload | Time before an incoming request expires. |
-| `teleport.requestCooldownSeconds` | `10` | 0..3600 seconds | Reload | Minimum interval between normal-player requests. |
+| `teleport.requestExpirySeconds` | `60` | 1..3600 seconds | Reload | Time before an incoming TPA/first-contact whisper request expires. |
+| `teleport.requestCooldownSeconds` | `10` | 0..3600 seconds | Reload | Minimum interval between normal-player TPA or first-contact whisper requests. |
 | `teleport.portalCooldownSeconds` | `5` | 1..3600 seconds | Reload | Portal loop/repeat protection, including administrators. |
 | `teleport.maximumQueuedLoads` | `2` | 1..16 jobs | Reload | Maximum queued saved-destination loads; at most one completed load is applied per tick. |
 | `teleport.loadTimeoutSeconds` | `15` | 1..60 seconds | Reload | Timeout for a queued destination load. |

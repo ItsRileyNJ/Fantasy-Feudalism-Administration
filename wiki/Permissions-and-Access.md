@@ -4,7 +4,7 @@
 
 ## Administrator fallback
 
-Without a permission provider, operators at `administration.operatorLevel` have management rights. The default is **2**, and the setting accepts 2..4. Authorized console commands retain their normal server authority; operations based on your location still require an in-game player.
+Operators at `administration.operatorLevel` have management rights. The default is **2**, and the setting accepts 2..4. Authorized console commands retain their normal server authority; operations based on your location still require an in-game player.
 
 `ffa.admin` grants the mod's full administrator role through a supported provider. Administrators bypass gameplay restrictions, forced Adventure Mode and normal command travel timing/home limits. It is not an invulnerability grant: an exempt Survival administrator can still face ordinary Minecraft hazards. Inventory/transaction checks, destination safety and portal loop prevention remain.
 
@@ -13,6 +13,9 @@ Without a permission provider, operators at `administration.operatorLevel` have 
 | Node | Grants |
 | --- | --- |
 | `ffa.admin` | Full FFA administration and gameplay exemption |
+| `ffa.ranks.manage` | Full built-in ranks administration, including privilege grants |
+| `ffa.chat.manage` | Assign/edit/reset any player's chat appearance |
+| `ffa.chat.nickname`, `ffa.chat.title`, `ffa.chat.color`, `ffa.chat.format` | Separate self-service chat editing rights; see [chat tools](Chat-and-Nicknames.md) |
 | `ffa.region.edit` | Region selection, creation, deletion, flags, messages, interactions, access and visualization |
 | `ffa.spawn.manage` | Spawn region creation and teleport-point management |
 | `ffa.warp.manage` | Warp creation/deletion and access edits |
@@ -21,15 +24,16 @@ Without a permission provider, operators at `administration.operatorLevel` have 
 | `ffa.economy.manage` | Set an online player's balance |
 | `ffa.reload` | Reload supported configuration and region edits |
 | `ffa.backup` | Create an FFA state/configuration snapshot |
+| `ffa.command.whisper`, `ffa.command.stats` | Public whisper sending/revocation and player stats; full staff tools require operator/`ffa.admin` |
 | `ffa.command.<command>` | Allow/deny a player command family, e.g. `ffa.command.spawn` or `ffa.command.shop` |
-| `ffa.homes.maximum` | FTB Ranks numeric home limit, clamped to 0..1000 |
+| `ffa.homes.maximum` | FTB Ranks or built-in numeric home limit, 0..1000 |
 | `ffa.homes.unlimited` | Bypass the normal home count limit |
 
 `permissions.defaultPlayerCommands = true` is the player-command fallback. An explicit provider decision overrides that fallback; operators/full FFA administrators retain their exemption. If you set the fallback to false, grant the desired command-family nodes.
 
-For delegated staff who are not full administrators, spawn management, warp-access edits and shop management also pass their public command-family checks. Grant `ffa.command.spawn`, `ffa.command.warp`, or `ffa.command.shop` as applicable alongside the management node. There are no separate per-flag editing permissions in 0.1.2.
+For delegated staff who are not full administrators, spawn management, warp-access edits and shop management also pass their public command-family checks. Grant `ffa.command.spawn`, `ffa.command.warp`, or `ffa.command.shop` as applicable alongside the management node. There are no separate per-flag editing permissions in 0.2.0.
 
-FTB Ranks explicit decisions take precedence over LuckPerms. FFA does not create or assign ranks automatically.
+FTB Ranks explicit Boolean decisions take precedence over LuckPerms, followed by FFA's built-in ranks. The [built-in ranks guide](Ranks.md) covers creation, assignment, default ranks, inheritance, priority, wildcards and explicit command permissions. A fresh install creates only an empty default member rank. Use `/ffa ranks` for local ranks, `/ftbranks` for external FTB ranks.
 
 ## FTB Ranks example
 
@@ -62,7 +66,7 @@ Apply an access rule to a portal, warp, or region:
 | `public` | No extra object-specific access restriction |
 | `admin` | FFA administrators only |
 | `permission NODE` | Require a Boolean permission from the supported provider |
-| `group ID` | Match an active FTB rank ID or the supported `group.ID` permission fallback |
+| `group ID` | Match an active FFA/FTB rank ID or the supported `group.ID` permission fallback |
 | `team [CENTER]` | Require Mercenaries settlement owner/member status at the checked location |
 
 These rules do not grant building rights, change town membership, or create a wall that prevents walking into a region. Region access restricts relevant teleport arrival; protection flags still decide actions inside it.

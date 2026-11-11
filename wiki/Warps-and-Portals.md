@@ -80,6 +80,6 @@ Default command teleport cooldown: **3 seconds**. Default portal cooldown: **5 s
 /ffa portal delete market_gate
 ```
 
-Deleting a portal removes its definition and loaded visual markers, not its destination warp or world frame. FFA has no portal-resize command in 0.1.2: delete/recreate the trigger to change its geometry.
+Deleting a portal removes its definition and loaded visual markers, not its destination warp or world frame. FFA has no portal-resize command in 0.2.0: delete/recreate the trigger to change its geometry.
 
 `modules.portals = false` disables travel and portal management. Saved definitions remain; existing visual markers can remain visible. Re-enable the module to resume using them, or delete unwanted portals while it is enabled.

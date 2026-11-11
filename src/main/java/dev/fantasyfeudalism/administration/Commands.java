@@ -17,26 +17,43 @@ public final class Commands {
   record Selection(String dimension, BlockPos first, BlockPos second) {}
 
   private static final Map<UUID, Selection> SELECTIONS = new HashMap<>();
+  private static final Map<
+          com.mojang.brigadier.tree.CommandNode<CommandSourceStack>,
+          java.util.function.Predicate<CommandSourceStack>>
+      NATIVE_REQUIREMENTS = new IdentityHashMap<>();
 
   private Commands() {}
 
   public static void register(RegisterCommandsEvent e) {
     SELECTIONS.clear();
-    var root =
-        literal("ffa")
-            .executes(
-                c -> {
-                  c.getSource()
-                      .sendSuccess(
-                          () ->
-                              Component.literal(
-                                  "Fantasy Feudalism Administration: /ffa spawn, warp, region,"
-                                      + " portal, shop, balance, help"),
-                          false);
-                  return 1;
-                });
+    var root = literal("ffa").executes(c -> help(c.getSource()));
     CommandTree.addTo(root);
-    e.getDispatcher().register(root);
+    NATIVE_REQUIREMENTS.clear();
+    capture(e.getDispatcher().register(root));
+  }
+
+  private static void capture(com.mojang.brigadier.tree.CommandNode<CommandSourceStack> node) {
+    if (NATIVE_REQUIREMENTS.putIfAbsent(node, node.getRequirement()) != null) return;
+    node.getChildren().forEach(Commands::capture);
+  }
+
+  static java.util.function.Predicate<CommandSourceStack> nativeRequirement(
+      com.mojang.brigadier.tree.CommandNode<CommandSourceStack> node) {
+    return NATIVE_REQUIREMENTS.get(node);
+  }
+
+  static int help(CommandSourceStack source) {
+    var root = source.getServer().getCommands().getDispatcher().getRoot().getChild("ffa");
+    String available =
+        root.getChildren().stream()
+            .filter(n -> n.canUse(source))
+            .map(n -> "/ffa " + n.getName())
+            .sorted()
+            .collect(java.util.stream.Collectors.joining(", "));
+    source.sendSuccess(
+        () -> Component.literal("Available commands: " + available + ". Use Tab for options."),
+        false);
+    return 1;
   }
 
   static List<String> tokenize(String text)
@@ -64,20 +81,7 @@ public final class Commands {
       List<String> args = tokenize(text);
       String cmd = arg(args, 0);
       ServerPlayer p = source.getPlayer();
-      if (cmd.equals("help")) {
-        source.sendSuccess(
-            () ->
-                Component.literal(
-                    "Use /ffa pos1, pos2; spawn create|setpoint; region"
-                        + " create|standalone|delete|flag|message|expand|contract|visualize|list;"
-                        + " warp NAME; setwarp NAME; delwarp NAME; warps; portal"
-                        + " create|delete|link|color|access; shop buy|sell|list|set|delete;"
-                        + " balance; pay PLAYER AMOUNT; home|sethome|delhome NAME; homes;"
-                        + " tpa|tpahere PLAYER; tpaccept|tpdeny|tpcancel; reload; backup. See docs"
-                        + " for syntax."),
-            false);
-        return 1;
-      }
+      if (cmd.equals("help")) return help(source);
       if (p != null
           && !app.compat.admin(p)
           && Set.of(
@@ -228,7 +232,9 @@ public final class Commands {
             app.teleports.answer(
                 p, cmd.equals("tpaccept"), args.size() > 1 ? UUID.fromString(arg(args, 1)) : null);
           else if (cmd.equals("tpcancel")) app.teleports.cancel(p);
-          else app.teleports.request(p, player(app, arg(args, 1)), cmd.equals("tpahere"));
+          else
+            app.teleports.request(
+                p, player(app, source.getPlayer(), arg(args, 1)), cmd.equals("tpahere"));
         }
         case "tptoggle", "tpignore" -> {
           requirePlayer(p);
@@ -241,7 +247,7 @@ public final class Commands {
                   d.requestsEnabled = !d.requestsEnabled;
                 });
           else {
-            String target = player(app, arg(args, 1)).getUUID().toString();
+            String target = player(app, source.getPlayer(), arg(args, 1)).getUUID().toString();
             app.storage.update(
                 s -> {
                   Set<String> ignore = s.players.get(p.getUUID().toString()).ignored;
@@ -268,7 +274,8 @@ public final class Commands {
         case "pay" -> {
           requirePlayer(p);
           if (!app.settings.pay) throw new IllegalArgumentException("Transfers disabled");
-          app.economy.pay(p, player(app, arg(args, 1)), Long.parseLong(arg(args, 2)));
+          app.economy.pay(
+              p, player(app, source.getPlayer(), arg(args, 1)), Long.parseLong(arg(args, 2)));
           Teleports.tell(p, "Transfer saved.");
         }
         case "baltop" -> {
@@ -291,7 +298,7 @@ public final class Commands {
           requirePlayer(p);
           if (!arg(args, 1).equals("set"))
             throw new IllegalArgumentException("Use economy set PLAYER AMOUNT");
-          ServerPlayer target = player(app, arg(args, 2));
+          ServerPlayer target = player(app, source.getPlayer(), arg(args, 2));
           app.economy.set(p, target.getUUID(), Long.parseLong(arg(args, 3)));
           feedback(app, source, text, Teleports.point(target).describe(), "SUCCESS persisted");
         }
@@ -686,9 +693,10 @@ public final class Commands {
     if (p == null) throw new IllegalArgumentException("This operation requires a player");
   }
 
-  private static ServerPlayer player(Administration app, String name) {
+  private static ServerPlayer player(Administration app, ServerPlayer viewer, String name) {
     ServerPlayer p = app.server.getPlayerList().getPlayerByName(name);
-    if (p == null) throw new IllegalArgumentException("Player is offline");
+    if (p == null || viewer != null && !Vanish.canSee(viewer, p))
+      throw new IllegalArgumentException("Player is offline");
     return p;
   }
 

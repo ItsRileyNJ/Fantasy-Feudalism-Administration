@@ -158,6 +158,8 @@ public final class Storage {
     atomic(target.resolve("state.json"), JSON.toJson(state));
     Files.copy(settings, target.resolve("server.toml"));
     Files.copy(regions, target.resolve("regions.toml"));
+    Path ranks = directory.resolve("ranks.json");
+    if (Files.exists(ranks)) Files.copy(ranks, target.resolve("ranks.json"));
     atomic(
         target.resolve("README.txt"),
         "Offline recovery only. Stop the server. Restore configuration/regions separately. Economy"
