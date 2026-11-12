@@ -216,7 +216,10 @@ final class RankCommands {
                                     .suggests(
                                         (c, b) ->
                                             SharedSuggestionProvider.suggest(
-                                                List.of("true", "false"), b))
+                                                text(c, "permission").equals("ffa.homes.maximum")
+                                                    ? List.of("0", "1", "3", "5", "10")
+                                                    : List.of("true", "false"),
+                                                b))
                                     .executes(
                                         c ->
                                             edit(

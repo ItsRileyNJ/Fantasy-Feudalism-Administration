@@ -6,8 +6,8 @@
 
 | Type | Relationship | Mode behavior for nonadministrators |
 | --- | --- | --- |
-| `SPAWN` | One main spawn region for the server | Forces Adventure while inside |
-| `CHILD` | Completely inside that spawn, in the same dimension | Overrides parent flags; restores prior mode when building or breaking is allowed |
+| `SPAWN` | One main spawn region for the server | Forces Adventure while inside unless specific farming/tool edits are enabled |
+| `CHILD` | Completely inside that spawn, in the same dimension | Overrides parent flags; restores prior mode when building, breaking or specific farming/tool actions are allowed |
 | `STANDALONE` | Optional independent protected area | Applies flags without forcing the spawn Adventure mode |
 
 Children inherit **flags** from the main spawn unless overridden. They cannot use another child as their parent. Child regions cannot overlap each other, and standalone areas cannot overlap existing regions. A shared boundary block counts as overlap: use adjacent, non-overlapping block ranges.
@@ -131,7 +131,10 @@ For example, bounds X 0..20 and Z 0..20 become X 2..18 and Z 2..18 after `/ffa r
 /ffa region title Marketplace entry color gold
 /ffa region title Marketplace entry bold true
 /ffa region title Marketplace entry italic false
+/ffa region title Marketplace entry underline true
 /ffa region title Marketplace exit color "#FF8800"
 ```
 
-Use `entry` or `exit` with each style command. Colors accept Minecraft color names or `#RRGGBB`. Text, color, bold and italic can also be edited in `regions.toml`; existing custom messages are preserved on upgrade.
+Use `entry` or `exit` with each style command. Colors accept Minecraft color names or `#RRGGBB`. Text, color, bold, italic and underline can also be edited in `regions.toml`; existing custom messages are preserved on upgrade.
+
+Use `entryUnderlined` / `exitUnderlined` in `regions.toml`, or `/ffa region title REGION entry underline true` and the matching `exit` command. Missing underline fields default to false in existing files. See [action flags](Flags-and-Interactions.md) for farms and workshops that work without general building permission.

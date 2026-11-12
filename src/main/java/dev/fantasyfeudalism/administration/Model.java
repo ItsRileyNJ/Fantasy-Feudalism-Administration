@@ -34,7 +34,27 @@ public final class Model {
     FLIGHT,
     TELEPORT_IN,
     TELEPORT_OUT,
-    HOME_CREATION
+    HOME_CREATION,
+    FARMING(false),
+    TILLING(false),
+    STRIP_WOOD(false),
+    DIRT_PATH(false),
+    ITEM_DROP(false),
+    ITEM_PICKUP(false),
+    CATCH_FIRE(false),
+    VEHICLE_ENTER(false),
+    FLINT_AND_STEEL(false),
+    SHEARS(false);
+
+    public final Boolean upgradeDefault;
+
+    Flag() {
+      upgradeDefault = null;
+    }
+
+    Flag(boolean value) {
+      upgradeDefault = value;
+    }
   }
 
   public enum Kind {
@@ -50,7 +70,7 @@ public final class Model {
     public boolean settlementOverride;
     public String entry = "Entering {name}", exit = "Leaving {name}";
     public String entryColor = "green", exitColor = "yellow";
-    public boolean entryBold, entryItalic, exitBold, exitItalic;
+    public boolean entryBold, entryItalic, exitBold, exitItalic, entryUnderlined, exitUnderlined;
     public Map<Flag, Boolean> flags = new EnumMap<>(Flag.class);
     public Set<String> interactions = new LinkedHashSet<>();
     public Set<String> items = new LinkedHashSet<>();

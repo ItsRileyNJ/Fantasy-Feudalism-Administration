@@ -17,7 +17,15 @@ public abstract class JailInventoryMixin {
     return a != null && a.moderation != null && a.moderation.confined(player);
   }
 
-  @Inject(method = "handleContainerClick", at = @At("HEAD"), cancellable = true)
+  @Inject(
+      method = "handleContainerClick",
+      at =
+          @At(
+              value = "INVOKE",
+              target =
+                  "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V",
+              shift = At.Shift.AFTER),
+      cancellable = true)
   private void ffa$inventory(ServerboundContainerClickPacket packet, CallbackInfo ci) {
     if (ffa$jailed()) {
       player.containerMenu.sendAllDataToRemote();
@@ -25,14 +33,41 @@ public abstract class JailInventoryMixin {
     }
   }
 
-  @Inject(method = "handlePlayerAction", at = @At("HEAD"), cancellable = true)
+  @Inject(
+      method = "handlePlayerAction",
+      at =
+          @At(
+              value = "INVOKE",
+              target =
+                  "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V",
+              shift = At.Shift.AFTER),
+      cancellable = true)
   private void ffa$drop(ServerboundPlayerActionPacket packet, CallbackInfo ci) {
-    if (ffa$jailed()
+    if ((ffa$jailed() || !RegionActions.canDrop(player))
         && (packet.getAction() == ServerboundPlayerActionPacket.Action.DROP_ITEM
             || packet.getAction() == ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS
-            || packet.getAction() == ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND)) {
+            || ffa$jailed()
+                && packet.getAction()
+                    == ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND)) {
       player.inventoryMenu.sendAllDataToRemote();
       ci.cancel();
+    }
+  }
+
+  @Inject(
+      method = "handleSetCreativeModeSlot",
+      at =
+          @At(
+              value = "INVOKE",
+              target =
+                  "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V",
+              shift = At.Shift.AFTER),
+      cancellable = true)
+  private void ffa$creativeDrop(
+      ServerboundSetCreativeModeSlotPacket packet, CallbackInfo callback) {
+    if (packet.slotNum() < 0 && !RegionActions.canDrop(player)) {
+      player.inventoryMenu.sendAllDataToRemote();
+      callback.cancel();
     }
   }
 }

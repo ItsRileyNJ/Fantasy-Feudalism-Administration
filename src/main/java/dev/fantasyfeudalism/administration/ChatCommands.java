@@ -54,7 +54,11 @@ final class ChatCommands {
             "titlebold",
             "title_bold",
             "titleitalic",
-            "title_italic");
+            "title_italic",
+            "underline",
+            "name_underlined",
+            "titleunderline",
+            "title_underlined");
     actions.forEach(
         (action, key) ->
             root.then(
@@ -230,7 +234,9 @@ final class ChatCommands {
               return SharedSuggestionProvider.suggest(
                   key.endsWith("_color")
                       ? ChatStyles.COLORS
-                      : key.endsWith("_bold") || key.endsWith("_italic")
+                      : key.endsWith("_bold")
+                              || key.endsWith("_italic")
+                              || key.endsWith("_underlined")
                           ? List.of("true", "false")
                           : List.of(),
                   b);

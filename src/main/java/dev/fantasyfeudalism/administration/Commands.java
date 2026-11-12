@@ -450,11 +450,15 @@ public final class Commands {
             if (entry) r.entryColor = value;
             else r.exitColor = value;
           } else {
-            if (!Set.of("bold", "italic").contains(property)
+            if (!Set.of("bold", "italic", "underline").contains(property)
                 || !Set.of("true", "false").contains(value))
-              throw new IllegalArgumentException("Use color, bold or italic with a valid value.");
+              throw new IllegalArgumentException(
+                  "Use color, bold, italic or underline with a valid value.");
             boolean enabled = Boolean.parseBoolean(value);
-            if (entry && property.equals("bold")) r.entryBold = enabled;
+            if (property.equals("underline")) {
+              if (entry) r.entryUnderlined = enabled;
+              else r.exitUnderlined = enabled;
+            } else if (entry && property.equals("bold")) r.entryBold = enabled;
             else if (entry) r.entryItalic = enabled;
             else if (property.equals("bold")) r.exitBold = enabled;
             else r.exitItalic = enabled;

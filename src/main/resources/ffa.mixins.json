@@ -30,7 +30,10 @@
     "PortalTravelAuthorityMixin",
     "JailInventoryMixin",
     "PortalForcerMixin",
-    "PortalDestinationAuthorityMixin"
+    "PortalDestinationAuthorityMixin",
+    "PlayerActionMixin",
+    "RegionInventoryMixin",
+    "PlayerFireMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -20,7 +20,8 @@ public final class RegionTitles {
             Style.EMPTY
                 .withColor(color(entry ? region.entryColor : region.exitColor))
                 .withBold(entry ? region.entryBold : region.exitBold)
-                .withItalic(entry ? region.entryItalic : region.exitItalic));
+                .withItalic(entry ? region.entryItalic : region.exitItalic)
+                .withUnderlined(entry ? region.entryUnderlined : region.exitUnderlined));
   }
 
   public static void show(ServerPlayer player, Model.Region previous, Model.Region current) {
@@ -32,7 +33,12 @@ public final class RegionTitles {
       notice
           .append(
               Component.literal(" · ")
-                  .withStyle(Style.EMPTY.withColor(0xAAAAAA).withBold(false).withItalic(false)))
+                  .withStyle(
+                      Style.EMPTY
+                          .withColor(0xAAAAAA)
+                          .withBold(false)
+                          .withItalic(false)
+                          .withUnderlined(false)))
           .append(exit);
     player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 50, 20));
     // Vanilla renders the title at 4x and the subtitle at 2x; no arbitrary scale is available.

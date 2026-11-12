@@ -117,6 +117,16 @@ flight = false
 teleport_in = true
 teleport_out = true
 home_creation = false
+farming = false
+tilling = false
+strip_wood = false
+dirt_path = false
+item_drop = false
+item_pickup = false
+catch_fire = false
+vehicle_enter = false
+flint_and_steel = false
+shears = false
 """;
   public int queuedLoads, loadTimeout;
   public int defaultJailSeconds,
@@ -238,8 +248,11 @@ home_creation = false
       s.maxLog = integer(c, "logging.maximumFileBytes", 4096, 16777216);
       s.denied = scalar(c, "messages.denied", String.class);
       s.portalDenied = scalar(c, "messages.portalDenied", String.class);
-      for (var f : Flag.values())
-        s.defaults.put(f, bool(c, "defaults." + f.name().toLowerCase(Locale.ROOT)));
+      for (var f : Flag.values()) {
+        String key = "defaults." + f.name().toLowerCase(Locale.ROOT);
+        s.defaults.put(
+            f, !c.contains(key) && f.upgradeDefault != null ? f.upgradeDefault : bool(c, key));
+      }
       return s;
     }
   }

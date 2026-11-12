@@ -186,6 +186,8 @@ To find a short explanation in game:
 /ffa ranks nodes commands
 ```
 
+For `ffa.homes.maximum`, the value argument suggests whole-number examples (`0`, `1`, `3`, `5`, `10`), never `true`/`false`. You can type any whole number from 0 to 1000; suggestions do not limit that range. Boolean permission nodes still suggest `true` and `false`.
+
 These lists show six nodes per page and describe the accepted value. Tab begins with common FFA nodes and nodes you have already saved; hover suggestions for their meanings. To explore the many vanilla/mod command nodes, begin typing `command.` in the permission argument. `/ffa ranks refresh_readme` writes the complete installed command tree to a file instead of flooding chat.
 
 Use `/ffa ranks node remove noble NODE` to undo a setting and return to inheritance/fallback. Use `false` only when you intend an explicit denial. Higher power wins between active ranks; inheritance makes another rank active rather than copying its settings. Existing explicit FTB Ranks decisions still take precedence, so inspect those too if a local change appears ineffective.

@@ -41,6 +41,7 @@ public final class PolicyTest {
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
     atomicWrites(root);
+    actionDefaults(root);
     usability(root);
     ranks(root);
     chatStyles();
@@ -172,6 +173,44 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void actionDefaults(Path root) throws Exception {
+    String legacy = Settings.TEMPLATE;
+    for (var flag : Flag.values())
+      if (flag.upgradeDefault != null)
+        legacy =
+            legacy.replaceAll(
+                "(?m)^" + flag.name().toLowerCase(java.util.Locale.ROOT) + " = .*\\R", "");
+    Path file = root.resolve("legacy-action-settings.toml");
+    Files.writeString(file, legacy);
+    var settings = Settings.load(file);
+    for (var flag : Flag.values())
+      if (flag.upgradeDefault != null)
+        check(!settings.defaults.get(flag), "Old config safely defaults new flag " + flag);
+    check(
+        ChatStyles.validate("name_underlined", "true").equals("true"),
+        "Name underline accepts Boolean text");
+    rejects(
+        () -> ChatStyles.validate("title_underlined", "yes"),
+        "Title underline rejects non-Boolean text");
+    ChatStyles.validateRank("ffa.chat.style.title_underlined", Ranks.parseValue("true"));
+    check(true, "Rank underline accepts a typed Boolean");
+    rejects(
+        () ->
+            ChatStyles.validateRank(
+                "ffa.chat.style.title_underlined", new com.google.gson.JsonPrimitive("true")),
+        "Rank underline rejects string values masquerading as Boolean");
+    Region region = region("Underline", Kind.SPAWN, 0, 10);
+    region.entryUnderlined = true;
+    Path regions = root.resolve("underlined-regions.toml");
+    Storage.atomic(regions, Regions.write(List.of(region)));
+    check(Regions.read(regions).getFirst().entryUnderlined, "Region underline round trips");
+    Files.writeString(
+        regions, Files.readString(regions).replaceAll("(?m)^(entry|exit)Underlined = .*\\R", ""));
+    check(
+        !Regions.read(regions).getFirst().entryUnderlined,
+        "Legacy region files default underline off");
   }
 
   private static void usability(Path root) throws Exception {

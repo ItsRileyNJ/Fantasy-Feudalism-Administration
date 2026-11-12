@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [Built-in ranks](Ranks.md) · [Permissions](Permissions-and-Access.md)
 
-Available in **0.3.0**, server-side with no FFA client mod. Names and titles support independent colors, bold, and italic. A displayed nickname does not change a player's UUID, login name, permission identity, or the player name used by commands.
+Available in **0.3.0**, server-side with no FFA client mod. Names and titles support independent colors, bold, italic, and underline. A displayed nickname does not change a player's UUID, login name, permission identity, or the player name used by commands.
 
 ## Assign a player's appearance
 
@@ -15,8 +15,10 @@ Operators, full FFA administrators, or holders of `ffa.chat.manage` can run thes
 /ffa chat set Alice title_color aqua
 /ffa chat set Alice name_bold true
 /ffa chat set Alice name_italic false
+/ffa chat set Alice name_underlined true
 /ffa chat set Alice title_bold false
 /ffa chat set Alice title_italic true
+/ffa chat set Alice title_underlined true
 /ffa chat view Alice
 ```
 
@@ -35,12 +37,14 @@ Set style metadata on an FFA rank:
 /ffa ranks node add nobles ffa.chat.style.title_color aqua
 /ffa ranks node add nobles ffa.chat.style.name_bold true
 /ffa ranks node add nobles ffa.chat.style.title_italic true
+/ffa ranks node add nobles ffa.chat.style.name_underlined true
+/ffa ranks node add nobles ffa.chat.style.title_underlined true
 /ffa ranks add Alice nobles
 ```
 
 Each property takes the first exact style value from the player's active local ranks, ordered by power and then rank ID as described in [ranks](Ranks.md). Inherited ranks participate too. Style metadata uses exact nodes; broad permission wildcards never accidentally make names bold or create titles.
 
-The eight style nodes are:
+The ten style nodes are:
 
 | Node | Type |
 | --- | --- |
@@ -52,8 +56,10 @@ The eight style nodes are:
 | `ffa.chat.style.name_italic` | Boolean |
 | `ffa.chat.style.title_bold` | Boolean |
 | `ffa.chat.style.title_italic` | Boolean |
+| `ffa.chat.style.name_underlined` | Boolean |
+| `ffa.chat.style.title_underlined` | Boolean |
 
-Per-player overrides win over rank style values independently for each property. Unconfigured names use the real account name; unconfigured titles are absent. Once FFA formats a display name, unset colors are white and unset bold/italic settings are false.
+Per-player overrides win over rank style values independently for each property. Unconfigured names use the real account name; unconfigured titles are absent. Once FFA formats a display name, unset colors are white and unset bold/italic/underline settings are false.
 
 ## Unlock nickname changes for a high rank
 
@@ -80,7 +86,7 @@ Optional self-service permissions:
 | `ffa.chat.nickname` | `/ffa chat nickname TEXT` |
 | `ffa.chat.title` | `/ffa chat title TEXT` |
 | `ffa.chat.color` | `/ffa chat color COLOR`, `/ffa chat titlecolor COLOR` |
-| `ffa.chat.format` | `/ffa chat bold BOOL`, `italic BOOL`, `titlebold BOOL`, `titleitalic BOOL` |
+| `ffa.chat.format` | `/ffa chat bold BOOL`, `italic BOOL`, `titlebold BOOL`, `titleitalic BOOL`, `underline BOOL`, `titleunderline BOOL` |
 | `ffa.chat.manage` | Edit any player, reset overrides, and use all chat styling actions |
 
 `inherit PROPERTY` requires the corresponding editing permission. For example, `inherit name_color` needs `ffa.chat.color`. Permission grants can also come from the supported FTB Ranks/LuckPerms Boolean providers. Visual style metadata comes from FFA's built-in ranks; it does not reinterpret another mod's name-format syntax.
@@ -112,7 +118,7 @@ black dark_blue dark_green dark_aqua dark_red dark_purple gold gray
 dark_gray blue green aqua red light_purple yellow white
 ```
 
-Use `true` or `false` for bold/italic. Quote names/titles containing spaces. Names/titles are literal text: no `&`/section-sign formatting parser, JSON click actions, embedded newlines, invisible control characters, or leading/trailing spaces. Put the title text alone in the value; FFA supplies square brackets and the separating space.
+Use `true` or `false` for bold/italic/underline. Quote names/titles containing spaces. Names/titles are literal text: no `&`/section-sign formatting parser, JSON click actions, embedded newlines, invisible control characters, or leading/trailing spaces. Put the title text alone in the value; FFA supplies square brackets and the separating space.
 
 Personal styles are included in `state.json` snapshots. Do not roll back the entire financial state merely to undo a nickname; use `clear`/`reset` instead.
 
@@ -125,3 +131,14 @@ FFA retains its native management checks even if another ranks mod replaces comm
 ## Other chat mods
 
 FFA changes the server's display-name component and leaves signed chat-message bodies unchanged. If no FFA personal/rank style is configured, it preserves the existing display-name component, including another mod's decoration. If FFA style is configured, FFA supplies that player's decorated name; choose one owner for name formatting and test the complete chat stack. A custom chat mod that ignores Minecraft's display-name component needs an adapter. FTB Ranks' separate prefix/name-format system and LuckPerms metadata are not automatically imported.
+
+## Underline controls
+
+```text
+/ffa chat underline true
+/ffa chat titleunderline true
+/ffa chat inherit name_underlined
+/ffa chat inherit title_underlined
+```
+
+Self-service underline uses the existing `ffa.chat.format` permission. Administrators assign it through `chat set PLAYER name_underlined true` or `title_underlined true`; ranks use the matching `ffa.chat.style.…` Boolean nodes above. Personal values override rank defaults, including an explicit false; `inherit` returns to the rank style. Region notices have [their own underline settings](Regions.md).

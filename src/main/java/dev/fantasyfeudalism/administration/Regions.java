@@ -227,6 +227,10 @@ public final class Regions {
           .append(quote(r.entry))
           .append("\nexit = ")
           .append(quote(r.exit))
+          .append("\nentryUnderlined = ")
+          .append(r.entryUnderlined)
+          .append("\nexitUnderlined = ")
+          .append(r.exitUnderlined)
           .append("\nentryColor = ")
           .append(quote(r.entryColor))
           .append("\nexitColor = ")
@@ -284,6 +288,8 @@ public final class Regions {
         r.settlementOverride = Settings.bool(v, "settlementOverride");
         r.entry = Settings.scalar(v, "entry", String.class);
         r.exit = Settings.scalar(v, "exit", String.class);
+        if (v.contains("entryUnderlined")) r.entryUnderlined = Settings.bool(v, "entryUnderlined");
+        if (v.contains("exitUnderlined")) r.exitUnderlined = Settings.bool(v, "exitUnderlined");
         if (v.contains("entryColor")) r.entryColor = Settings.scalar(v, "entryColor", String.class);
         if (v.contains("exitColor")) r.exitColor = Settings.scalar(v, "exitColor", String.class);
         if (v.contains("entryBold")) r.entryBold = Settings.bool(v, "entryBold");
