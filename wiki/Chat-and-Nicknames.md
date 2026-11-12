@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [Built-in ranks](Ranks.md) · [Permissions](Permissions-and-Access.md)
 
-Available in **0.2.0**, server-side with no FFA client mod. Names and titles support independent colors, bold, and italic. A displayed nickname does not change a player's UUID, login name, permission identity, or the player name used by commands.
+Available in **0.3.0**, server-side with no FFA client mod. Names and titles support independent colors, bold, and italic. A displayed nickname does not change a player's UUID, login name, permission identity, or the player name used by commands.
 
 ## Assign a player's appearance
 

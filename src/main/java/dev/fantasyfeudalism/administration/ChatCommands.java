@@ -104,7 +104,7 @@ final class ChatCommands {
                           if (player == null)
                             throw new IllegalArgumentException(
                                 "Specify a target player from console");
-                          tell(c, app().chatStyles.effective(player).toString());
+                          tell(c, ChatStyles.describe(app().chatStyles.effective(player)));
                         }))
             .then(
                 RankCommands.target()

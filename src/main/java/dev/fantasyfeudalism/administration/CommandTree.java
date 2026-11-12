@@ -34,6 +34,7 @@ final class CommandTree {
     root.then(RankCommands.tree());
     root.then(ChatCommands.tree());
     StaffCommands.addTo(root);
+    ModerationCommands.addTo(root);
     root.then(
         node("spawn")
             .requires(s -> usable(s, "spawn"))
@@ -45,13 +46,15 @@ final class CommandTree {
 
     var region = node("region").requires(s -> manages(s, "ffa.region.edit"));
     region.then(node("list"));
-    region.then(node("create").then(word("name").then(node("override"))));
     region.then(
-        node("standalone")
-            .requires(s -> Administration.INSTANCE.settings.standalone)
-            .then(word("name").then(node("override"))));
-    for (String action : List.of("delete", "visualize"))
-      region.then(node(action).then(saved("region", Saved.REGION)));
+        node("create")
+            .then(word("name").then(node("override")))
+            .then(node("child").then(word("name").then(node("override"))))
+            .then(node("standalone").then(word("name").then(node("override")))));
+    region.then(node("child").then(word("name").then(node("override"))));
+    region.then(node("standalone").then(word("name").then(node("override"))));
+    region.then(node("delete").then(saved("region", Saved.REGION)));
+    region.then(node("visualize").then(node("cancel")).then(saved("region", Saved.REGION)));
     for (String action : List.of("expand", "contract"))
       region.then(
           node(action)
@@ -88,6 +91,31 @@ final class CommandTree {
                                     SharedSuggestionProvider.suggestResource(
                                         BuiltInRegistries.BLOCK.keySet(), b))
                             .then(choices("action", "allow", "remove")))));
+    region.then(
+        node("item")
+            .then(
+                saved("region", Saved.REGION)
+                    .then(
+                        arg("item", ResourceLocationArgument.id())
+                            .suggests(
+                                (c, b) ->
+                                    SharedSuggestionProvider.suggestResource(
+                                        BuiltInRegistries.ITEM.keySet(), b))
+                            .then(choices("action", "allow", "remove")))));
+    var title = saved("region", Saved.REGION);
+    for (String side : List.of("entry", "exit"))
+      title.then(
+          node(side)
+              .then(
+                  node("color")
+                      .then(
+                          arg("color", StringArgumentType.string())
+                              .suggests(
+                                  (c, b) ->
+                                      SharedSuggestionProvider.suggest(ChatStyles.COLORS, b))))
+              .then(node("bold").then(choices("value", "true", "false")))
+              .then(node("italic").then(choices("value", "true", "false"))));
+    region.then(node("title").then(title));
     region.then(node("access").then(withAccess(saved("region", Saved.REGION))));
     root.then(region);
 
@@ -105,7 +133,13 @@ final class CommandTree {
     root.then(node("warps").requires(s -> usable(s, "warps")));
 
     var portal = node("portal").requires(s -> enabled("portal") && manages(s, "ffa.portal.manage"));
-    portal.then(node("create").then(word("name").then(saved("warp", Saved.MANAGED_WARP))));
+    portal.then(
+        node("create")
+            .requires(
+                s ->
+                    !Administration.INSTANCE.settings.adminPortalCreationOnly
+                        || StaffCommands.admin(s))
+            .then(word("name").then(saved("warp", Saved.MANAGED_WARP))));
     portal.then(node("delete").then(saved("portal", Saved.PORTAL)));
     portal.then(
         node("link").then(saved("portal", Saved.PORTAL).then(saved("warp", Saved.MANAGED_WARP))));
@@ -133,14 +167,18 @@ final class CommandTree {
     }
     for (String command : List.of("tpaccept", "tpdeny"))
       root.then(node(command).requires(s -> usable(s, command)).then(word("request")));
-    for (String command : List.of("tpcancel", "tptoggle", "back", "rtp", "balance", "baltop"))
+    for (String command : List.of("tpcancel", "tptoggle", "back", "rtp", "baltop"))
       root.then(node(command).requires(s -> usable(s, command)));
 
     root.then(
-        node("economy")
-            .requires(s -> manages(s, "ffa.economy.manage"))
+        node("balance")
+            .requires(
+                s ->
+                    enabled("balance")
+                        && (permitted(s, "balance") || manages(s, "ffa.economy.manage")))
             .then(
                 node("set")
+                    .requires(s -> manages(s, "ffa.economy.manage"))
                     .then(onlinePlayer(false).then(arg("amount", LongArgumentType.longArg(0))))));
     var shop = node("shop").requires(s -> permitted(s, "shop"));
     shop.then(node("list"));
@@ -169,6 +207,15 @@ final class CommandTree {
         node("delete")
             .requires(s -> manages(s, "ffa.shop.manage"))
             .then(saved("shop", Saved.SHOP)));
+    shop.then(
+        node("sign")
+            .requires(StaffCommands::admin)
+            .then(
+                node("bind")
+                    .then(
+                        saved("shop", Saved.SHOP)
+                            .then(arg("quantity", IntegerArgumentType.integer(1, 2304)))))
+            .then(node("remove")));
     root.then(shop);
     root.then(node("reload").requires(s -> manages(s, "ffa.reload")));
     root.then(node("backup").requires(s -> manages(s, "ffa.backup")));
@@ -323,7 +370,7 @@ final class CommandTree {
       case "tpa", "tpahere", "tpaccept", "tpdeny", "tpcancel" -> c.tpa && !ftb;
       case "tptoggle", "tpignore" -> c.privacy && !ftb;
       case "portal" -> c.portals;
-      case "back" -> c.back;
+      case "back" -> true;
       case "rtp" -> c.rtp;
       case "balance" -> c.economy;
       case "pay" -> c.pay && c.economy;

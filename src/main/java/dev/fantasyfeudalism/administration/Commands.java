@@ -4,11 +4,9 @@ import static dev.fantasyfeudalism.administration.Model.*;
 import static net.minecraft.commands.Commands.*;
 
 import com.mojang.brigadier.StringReader;
-import java.time.Instant;
 import java.util.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.*;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -106,6 +104,7 @@ public final class Commands {
                   "baltop",
                   "shop")
               .contains(cmd)
+          && !(cmd.equals("balance") && args.size() > 1)
           && !app.compat.decision(p, "ffa.command." + cmd).orElse(app.settings.publicCommands))
         throw new IllegalArgumentException("Permission denied.");
       switch (cmd) {
@@ -126,8 +125,8 @@ public final class Commands {
               Region r =
                   region(
                       p, "spawn", Kind.SPAWN, args.size() > 2 && arg(args, 2).equals("override"));
-              r.entry = "Welcome to Spawn!";
-              r.exit = "You are now leaving the protected spawn area.";
+              r.entry = "Entering {name}";
+              r.exit = "Leaving {name}";
               list.add(r);
               app.regions.edit(list, app.server, app.settings, app.compat);
             } else
@@ -258,7 +257,8 @@ public final class Commands {
         }
         case "back" -> {
           requirePlayer(p);
-          if (!app.settings.back) throw new IllegalArgumentException("Back is disabled");
+          if (app.storage.player(p.getUUID()).back == null)
+            throw new IllegalArgumentException("No previous death or teleport location.");
           app.teleports.teleport(p, app.storage.player(p.getUUID()).back, false);
         }
         case "rtp" -> {
@@ -268,8 +268,17 @@ public final class Commands {
         }
         case "balance" -> {
           requirePlayer(p);
-          if (!app.settings.economy) throw new IllegalArgumentException("Economy disabled");
-          Teleports.tell(p, app.storage.player(p.getUUID()).balance + " " + app.settings.currency);
+          if (!app.settings.economy) throw new IllegalArgumentException("Economy is disabled.");
+          if (args.size() > 1) {
+            authorize(app, source, "ffa.economy.manage");
+            if (!arg(args, 1).equals("set"))
+              throw new IllegalArgumentException("Use /ffa balance set PLAYER AMOUNT.");
+            ServerPlayer target = player(app, p, arg(args, 2));
+            app.economy.set(p, target.getUUID(), Long.parseLong(arg(args, 3)));
+            feedback(app, source, text, Teleports.point(target).describe(), "SUCCESS persisted");
+          } else
+            Teleports.tell(
+                p, app.storage.player(p.getUUID()).balance + " " + app.settings.currency);
         }
         case "pay" -> {
           requirePlayer(p);
@@ -292,15 +301,6 @@ public final class Commands {
                       Teleports.tell(
                           p,
                           x.getKey() + ": " + x.getValue().balance + " " + app.settings.currency));
-        }
-        case "economy" -> {
-          authorize(app, source, "ffa.economy.manage");
-          requirePlayer(p);
-          if (!arg(args, 1).equals("set"))
-            throw new IllegalArgumentException("Use economy set PLAYER AMOUNT");
-          ServerPlayer target = player(app, source.getPlayer(), arg(args, 2));
-          app.economy.set(p, target.getUUID(), Long.parseLong(arg(args, 3)));
-          feedback(app, source, text, Teleports.point(target).describe(), "SUCCESS persisted");
         }
         case "shop" -> shop(app, source, p, args, text);
         case "reload" -> {
@@ -333,19 +333,7 @@ public final class Commands {
                   && app.compat != null
                   && app.compat.admin(source.getPlayer());
       String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
-      source.sendFailure(
-          Component.literal(
-              (admin
-                      ? Instant.now()
-                          + " FAILED "
-                          + text
-                          + " at "
-                          + source.getLevel().dimension().location()
-                          + " "
-                          + source.getPosition()
-                          + ": "
-                      : "")
-                  + message));
+      source.sendFailure(Component.literal(message));
       if (app.storage != null)
         app.storage.security(
             app.settings,
@@ -368,35 +356,38 @@ public final class Commands {
       Administration app, CommandSourceStack s, ServerPlayer p, List<String> a, String text)
       throws Exception {
     authorize(app, s, "ffa.region.edit");
-    String action = arg(a, 1);
+    a = new ArrayList<>(a);
+    if (a.size() > 1 && a.get(1).equals("child")) a.set(1, "create");
+    if (a.size() > 2
+        && a.get(1).equals("create")
+        && Set.of("child", "standalone").contains(a.get(2))) {
+      boolean standalone = a.get(2).equals("standalone");
+      a.remove(2);
+      if (standalone) a.set(1, "standalone");
+    }
+    final List<String> args = a;
+    String action = arg(args, 1);
+    if (action.equals("visualize") && (a.size() == 2 || a.get(2).equals("cancel"))) {
+      requirePlayer(p);
+      app.regionVisuals.stop(p);
+      s.sendSuccess(() -> Component.literal("Region boundary hidden."), false);
+      return;
+    }
     if (action.equals("list")) {
       s.sendSuccess(
           () ->
               Component.literal(
-                  app.regions.all().stream()
-                      .map(
-                          r ->
-                              r.id
-                                  + " "
-                                  + r.kind
-                                  + " "
-                                  + r.dimension
-                                  + " ["
-                                  + r.minX
-                                  + ","
-                                  + r.minZ
-                                  + "]..["
-                                  + r.maxX
-                                  + ","
-                                  + r.maxZ
-                                  + "]")
-                      .toList()
-                      .toString()),
+                  "Regions: "
+                      + String.join(", ", app.regions.all().stream().map(r -> r.id).toList())),
           false);
       return;
     }
     requirePlayer(p);
-    String id = arg(a, 2);
+    String requested = arg(args, 2);
+    String id =
+        action.equals("create") || action.equals("standalone")
+            ? requested
+            : app.regions.get(requested).id;
     var list = new ArrayList<>(app.regions.copy());
     if (action.equals("create") || action.equals("standalone")) {
       Region r =
@@ -404,7 +395,7 @@ public final class Commands {
               p,
               id,
               action.equals("create") ? Kind.CHILD : Kind.STANDALONE,
-              a.size() > 3 && arg(a, 3).equals("override"));
+              a.size() > 3 && arg(args, 3).equals("override"));
       if (r.kind == Kind.CHILD)
         r.parent =
             list.stream()
@@ -421,13 +412,13 @@ public final class Commands {
               .orElseThrow(() -> new IllegalArgumentException("Unknown region"));
       switch (action) {
         case "delete" -> {
-          if (list.stream().anyMatch(x -> x.parent.equals(id)))
+          if (list.stream().anyMatch(x -> x.parent.equalsIgnoreCase(id)))
             throw new IllegalArgumentException("Delete child regions first");
           list.remove(r);
         }
         case "flag" -> {
-          Flag f = Flag.valueOf(arg(a, 3).toUpperCase(Locale.ROOT));
-          String v = arg(a, 4);
+          Flag f = Flag.valueOf(arg(args, 3).toUpperCase(Locale.ROOT));
+          String v = arg(args, 4);
           if (v.equals("inherit")) r.flags.remove(f);
           else {
             if (!v.equals("true") && !v.equals("false"))
@@ -436,21 +427,51 @@ public final class Commands {
           }
         }
         case "message" -> {
-          String side = arg(a, 3), msg = arg(a, 4);
+          String side = arg(args, 3), msg = arg(args, 4);
           if (side.equals("entry")) r.entry = msg;
           else if (side.equals("exit")) r.exit = msg;
           else throw new IllegalArgumentException("Use message ID entry|exit \"text\"");
         }
-        case "access" -> r.access = access(a, 3);
+        case "access" -> r.access = access(args, 3);
         case "interaction" -> {
-          String block = arg(a, 3);
-          if (arg(a, 4).equals("allow")) r.interactions.add(block);
-          else if (arg(a, 4).equals("remove")) r.interactions.remove(block);
+          String block = arg(args, 3);
+          if (arg(args, 4).equals("allow")) r.interactions.add(block);
+          else if (arg(args, 4).equals("remove")) r.interactions.remove(block);
           else
             throw new IllegalArgumentException("Use interaction ID minecraft:block allow|remove");
         }
+        case "title" -> {
+          String side = arg(args, 3), property = arg(args, 4), value = arg(args, 5);
+          if (!Set.of("entry", "exit").contains(side))
+            throw new IllegalArgumentException("Choose entry or exit.");
+          boolean entry = side.equals("entry");
+          if (property.equals("color")) {
+            RegionTitles.color(value);
+            if (entry) r.entryColor = value;
+            else r.exitColor = value;
+          } else {
+            if (!Set.of("bold", "italic").contains(property)
+                || !Set.of("true", "false").contains(value))
+              throw new IllegalArgumentException("Use color, bold or italic with a valid value.");
+            boolean enabled = Boolean.parseBoolean(value);
+            if (entry && property.equals("bold")) r.entryBold = enabled;
+            else if (entry) r.entryItalic = enabled;
+            else if (property.equals("bold")) r.exitBold = enabled;
+            else r.exitItalic = enabled;
+          }
+        }
+        case "item" -> {
+          String item = arg(args, 3);
+          var key = net.minecraft.resources.ResourceLocation.tryParse(item);
+          if (key == null
+              || !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(key)
+              || item.equals("minecraft:air")) throw new IllegalArgumentException("Unknown item.");
+          if (arg(args, 4).equals("allow")) r.items.add(item);
+          else if (arg(args, 4).equals("remove")) r.items.remove(item);
+          else throw new IllegalArgumentException("Use item REGION ITEM allow|remove.");
+        }
         case "expand", "contract" -> {
-          int amount = Integer.parseInt(arg(a, 3));
+          int amount = Integer.parseInt(arg(args, 3));
           if (amount < 1 || amount > 100000)
             throw new IllegalArgumentException("Amount must be 1..100000");
           if (action.equals("contract")) amount = -amount;
@@ -462,19 +483,7 @@ public final class Commands {
         case "visualize" -> {
           if (!p.level().dimension().location().toString().equals(r.dimension))
             throw new IllegalArgumentException("Travel to the region dimension first");
-          double y = p.getY() + .3;
-          for (int i = 0; i <= 32; i++) {
-            double t = i / 32.0;
-            for (double[] v :
-                new double[][] {
-                  {r.minX + (r.maxX + 1.0 - r.minX) * t, r.minZ},
-                  {r.minX + (r.maxX + 1.0 - r.minX) * t, r.maxZ + 1.0},
-                  {r.minX, r.minZ + (r.maxZ + 1.0 - r.minZ) * t},
-                  {r.maxX + 1.0, r.minZ + (r.maxZ + 1.0 - r.minZ) * t}
-                })
-              p.serverLevel()
-                  .sendParticles(p, ParticleTypes.END_ROD, true, v[0], y, v[1], 1, 0, 0, 0, 0);
-          }
+          app.regionVisuals.start(p, id);
           feedback(
               app,
               s,
@@ -516,7 +525,7 @@ public final class Commands {
   }
 
   private static Region region(ServerPlayer p, String id, Kind kind, boolean override) {
-    Regions.checkId(id);
+    Regions.checkName(id);
     Selection sel = selection(p);
     Region r = new Region();
     r.id = id;
@@ -531,7 +540,7 @@ public final class Commands {
     return r;
   }
 
-  private static Selection selection(ServerPlayer p) {
+  static Selection selection(ServerPlayer p) {
     Selection s = SELECTIONS.get(p.getUUID());
     if (s == null
         || s.first == null
@@ -555,6 +564,8 @@ public final class Commands {
     }
     Portal old = app.storage.state().portals.get(id);
     if (action.equals("create")) {
+      if (app.settings.adminPortalCreationOnly && !app.compat.admin(p))
+        throw new IllegalArgumentException("Only administrators can create portals.");
       if (old != null) throw new IllegalArgumentException("Portal ID already exists");
       Selection sel = selection(p);
       String warp = arg(a, 3);
@@ -639,6 +650,16 @@ public final class Commands {
       throws Exception {
     requirePlayer(p);
     String action = arg(a, 1);
+    if (action.equals("sign")) {
+      if (!app.compat.admin(p)) throw new IllegalArgumentException("Administrator only.");
+      if (arg(a, 2).equals("remove")) app.signShops.remove(p);
+      else if (arg(a, 2).equals("bind"))
+        app.signShops.bind(p, arg(a, 3), a.size() > 4 ? Integer.parseInt(arg(a, 4)) : 1);
+      else
+        throw new IllegalArgumentException(
+            "Use /ffa shop sign bind SHOP [QUANTITY] or sign remove.");
+      return;
+    }
     if (action.equals("list")) {
       Teleports.tell(p, app.storage.state().shops.keySet().toString());
       return;
@@ -669,10 +690,13 @@ public final class Commands {
             "Prices must be -1 (disabled) or 0..maximum balance; sell cannot exceed buy");
       app.storage.update(st -> st.shops.put(id, shop));
     } else if (action.equals("delete")) {
+      if (app.storage.state().shopSigns.values().stream().anyMatch(sign -> sign.shop.equals(id)))
+        throw new IllegalArgumentException("Unlink this shop's signs first.");
       if (!app.storage.state().shops.containsKey(id))
         throw new IllegalArgumentException("Unknown shop");
       app.storage.update(st -> st.shops.remove(id));
     } else throw new IllegalArgumentException("Unknown shop operation");
+    app.signShops.refresh(id);
     feedback(app, s, text, "shop=" + id + " " + Teleports.point(p).describe(), "SUCCESS persisted");
   }
 
@@ -711,10 +735,59 @@ public final class Commands {
   public static void feedback(
       Administration app, CommandSourceStack s, String action, String where, String result) {
     app.storage.audit(app.settings, s.getTextName(), action, where, result);
-    String message =
-        app.settings.verbose
-            ? Instant.now() + " " + result + " | " + action + " | " + where
-            : result + " | " + action;
-    s.sendSuccess(() -> Component.literal(message), false);
+    s.sendSuccess(() -> Component.literal(successMessage(action)), false);
+  }
+
+  static String successMessage(String action) {
+    try {
+      List<String> a = new ArrayList<>(tokenize(action));
+      if (!a.isEmpty() && a.getFirst().equals("ffa")) a.removeFirst();
+      String command = a.getFirst(), operation = a.size() > 1 ? a.get(1) : "";
+      return switch (command) {
+        case "pos1" -> "First corner set.";
+        case "pos2" -> "Second corner set.";
+        case "spawn" -> operation.equals("create") ? "Spawn region created." : "Spawn point set.";
+        case "setwarp" -> "Warp set.";
+        case "delwarp" -> "Warp deleted.";
+        case "warp" -> "Warp access updated.";
+        case "region" ->
+            switch (operation) {
+              case "create", "standalone" -> "Region created.";
+              case "delete" -> "Region deleted.";
+              case "visualize" -> "Region boundary shown.";
+              case "expand", "contract" -> "Region resized.";
+              case "flag" -> "Region flag updated.";
+              case "message" -> "Region message updated.";
+              case "item" -> "Usable items updated.";
+              case "title" -> "Region notification updated.";
+              case "interaction" -> "Allowed blocks updated.";
+              default -> "Region updated.";
+            };
+        case "portal" ->
+            switch (operation) {
+              case "create" -> "Portal created.";
+              case "delete" -> "Portal deleted.";
+              case "color" -> "Portal color updated.";
+              default -> "Portal updated.";
+            };
+        case "shop" ->
+            operation.equals("delete")
+                ? "Shop deleted."
+                : operation.equals("sign") ? "Shop sign updated." : "Shop saved.";
+        case "balance" -> "Balance set.";
+        case "reload" -> "Configuration reloaded.";
+        case "backup" -> "Backup created.";
+        case "chat" -> "Chat appearance updated.";
+        case "ranks" ->
+            operation.equals("reload")
+                ? "Ranks reloaded."
+                : operation.equals("create")
+                    ? "Rank created."
+                    : operation.equals("delete") ? "Rank deleted." : "Ranks updated.";
+        default -> "Done.";
+      };
+    } catch (Exception ignored) {
+      return "Done.";
+    }
   }
 }

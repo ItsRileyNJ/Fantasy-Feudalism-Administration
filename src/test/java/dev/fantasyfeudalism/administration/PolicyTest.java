@@ -41,6 +41,7 @@ public final class PolicyTest {
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
     atomicWrites(root);
+    usability(root);
     ranks(root);
     chatStyles();
     whispers();
@@ -171,6 +172,68 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void usability(Path root) throws Exception {
+    Path config = root.resolve("upgrade.toml");
+    String legacy =
+        Settings.TEMPLATE
+            .replaceAll("(?m)^adminCreationOnly = .*\\R", "")
+            .replaceAll("(?m)^default(Jail|ChatBan|WarpBan)Seconds = .*\\R", "")
+            .replaceAll("(?m)^maximumDurationSeconds = .*\\R", "");
+    Files.writeString(config, legacy);
+    Settings settings = Settings.load(config);
+    check(
+        settings.adminPortalCreationOnly
+            && settings.defaultJailSeconds == 300
+            && settings.defaultChatBanSeconds == 300
+            && settings.defaultWarpBanSeconds == 300,
+        "Older settings gain safe portal and moderation defaults");
+    Files.writeString(
+        config, Settings.TEMPLATE.replace("defaultJailSeconds = 300", "defaultJailSeconds = 0"));
+    rejects(() -> Settings.load(config), "Zero punishment default rejected");
+    check(Moderation.seconds("2h", 10000) == 7200, "Duration suffix uses real seconds");
+    rejects(
+        () -> Moderation.seconds("99999999999999999999999w", 10000), "Duration overflow rejected");
+    rejects(() -> Moderation.seconds("0s", 10000), "Zero duration rejected");
+    rejects(() -> Moderation.seconds("2d", 10000), "Configured duration maximum enforced");
+    Regions.checkName("MiningYard");
+    check(true, "Uppercase region and home names accepted");
+    rejects(() -> Regions.checkName("Bad Name"), "Names with spaces rejected");
+    Region parent = region("Spawn", Kind.SPAWN, 0, 100);
+    Region child = region("Market", Kind.CHILD, 10, 20);
+    child.parent = "sPAWN";
+    child.items.add("minecraft:bread");
+    child.entry = "Entering {name}";
+    child.entryColor = "#FF8800";
+    child.entryBold = true;
+    Regions.validate(List.of(parent, child), null, settings, null);
+    check(true, "Child parent lookup ignores case");
+    Region duplicate = region("market", Kind.CHILD, 30, 40);
+    duplicate.parent = "Spawn";
+    rejects(
+        () -> Regions.validate(List.of(parent, child, duplicate), null, settings, null),
+        "Case-only duplicate region names rejected");
+    Path file = root.resolve("styled-regions.toml");
+    Storage.atomic(file, Regions.write(List.of(parent, child)));
+    Region reread = Regions.read(file).get(1);
+    check(
+        reread.items.equals(child.items)
+            && reread.entryBold
+            && reread.entryColor.equals("#FF8800")
+            && reread.entry.equals("Entering {name}"),
+        "Item allowlists and styled title templates round trip");
+    String oldRegions =
+        Files.readString(file)
+            .replaceAll(
+                "(?m)^(items|entryColor|exitColor|entryBold|exitBold|entryItalic|exitItalic) ="
+                    + " .*\\R",
+                "");
+    Files.writeString(file, oldRegions);
+    reread = Regions.read(file).get(1);
+    check(
+        reread.items.isEmpty() && !reread.entryBold && reread.entryColor.equals("green"),
+        "Old region files receive optional item/style defaults");
   }
 
   private static void whispers() throws Exception {

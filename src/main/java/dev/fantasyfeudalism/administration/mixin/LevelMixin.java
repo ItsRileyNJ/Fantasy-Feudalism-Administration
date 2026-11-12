@@ -18,7 +18,15 @@ public abstract class LevelMixin {
       cancellable = true)
   private void ffa$fire(
       BlockPos p, BlockState s, int f, int depth, CallbackInfoReturnable<Boolean> ci) {
+    if (!((Level) (Object) this).isClientSide
+        && s.is(net.minecraft.tags.BlockTags.PORTALS)
+        && !((Level) (Object) this).getBlockState(p).is(s.getBlock())
+        && !PortalCreation.permitted()) {
+      ci.setReturnValue(false);
+      return;
+    }
     if (s.getBlock() instanceof BaseFireBlock
+        && !PortalCreation.adminActor()
         && Protection.block((Level) (Object) this, p, Model.Flag.FIRE)) ci.setReturnValue(false);
   }
 }

@@ -16,6 +16,30 @@ final class StaffCommands {
 
   static void addTo(LiteralArgumentBuilder<CommandSourceStack> root) {
     root.then(
+        literal("god")
+            .requires(StaffCommands::admin)
+            .executes(
+                c ->
+                    run(
+                        c,
+                        () -> {
+                          requireAdmin(c);
+                          app().adminPowers.toggle(playerSource(c));
+                        })));
+    root.then(
+        literal("smite")
+            .requires(StaffCommands::admin)
+            .then(
+                target()
+                    .executes(
+                        c ->
+                            run(
+                                c,
+                                () -> {
+                                  requireAdmin(c);
+                                  app().adminPowers.smite(playerSource(c), targetPlayer(c));
+                                }))));
+    root.then(
         literal("vanish")
             .requires(StaffCommands::admin)
             .executes(

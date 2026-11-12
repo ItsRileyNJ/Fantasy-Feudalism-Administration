@@ -14,8 +14,8 @@
 
 | Flag | Default | Controls |
 | --- | --- | --- |
-| `build` | `false` | Player block placement; vanilla Adventure restrictions still apply. |
-| `break` | `false` | Player block destruction; vanilla Adventure restrictions still apply. |
+| `build` | `false` | Player block placement; children that enable this restore the prior game mode. |
+| `break` | `false` | Player block destruction; children that enable this restore the prior game mode. |
 | `interact` | `false` | Ordinary block interaction, subject to explicit allowlists and other checks. |
 | `containers` | `false` | Inventory/menu and supported item-handler block access. |
 | `entity_interact` | `false` | Ordinary non-trading entity interaction. |
@@ -81,7 +81,7 @@ Create/select `storage_counter` first. This allows matching chest blocks inside 
 
 For a PvP arena, allow both `pvp` and `damage`. An attack can still be refused when the attacker is in a region that forbids PvP. Animal/hanging-entity protections are separate flags.
 
-There is no Adventure-mode flag to disable for a spawn child. Setting `build` or `break` to `true` removes FFA's corresponding cancellation, but vanilla Adventure Mode's item restrictions still apply. Operators and `ffa.admin` users bypass gameplay restrictions; switching an operator to Survival does not make them a normal test player.
+Children explicitly allowing `build` or `break` restore the prior game mode. Other child flags still apply individually. Operators and `ffa.admin` users bypass gameplay restrictions; use a nonadministrator to test.
 
 Freezing hunger does not automatically refill an empty food bar. A permitted-flight region does not guarantee a safe landing after you leave it.
 
@@ -90,3 +90,15 @@ Freezing hunger does not automatically refill an empty food bar. A permitted-fli
 `npc_trading` and `settlement_management` default to true despite ordinary interactions being blocked. They preserve the supported NPC/trading and bell-management paths; the other mod still checks its own ownership and permissions.
 
 Environmental flags govern supported world effects. An unattributed fluid flow or fire tick does not become allowed merely because an administrator is nearby. Existing residents loaded from disk are not deleted by the natural-spawn restriction. See [compatibility](Mod-Compatibility.md) for settlement workflows that spawn vanilla villagers and for automation limits.
+
+## Allow usable items in a region
+
+```text
+/ffa region item Marketplace minecraft:bread allow
+/ffa region item Marketplace minecraft:ender_pearl allow
+/ffa region item Marketplace minecraft:bread remove
+```
+
+Each region has an `items` list in `regions.toml`, empty by default. Add food, tools or other usable items by registry ID. Children use their own list rather than inheriting the parent's list. Full administrators bypass it.
+
+This permits item use without opening every door, chest or button. Block interactions have their separate `interactions` list and flags. Allowed block placement follows `build`; a child with building enabled can use block items without listing every building material. Specific restrictions such as `pearls` or spawn-egg rules still apply, and town/mod rules can impose additional checks. Jail confinement still blocks items.

@@ -22,7 +22,15 @@
     "VisibleStatusMixin",
     "VisibleQueryMixin",
     "InspectionClicksMixin",
-    "VisibleLegacyPingMixin"
+    "VisibleLegacyPingMixin",
+    "TravelHistoryMixin",
+    "RespawnHistoryMixin",
+    "PortalAuthorityMixin",
+    "PortalCommandAuthorityMixin",
+    "PortalTravelAuthorityMixin",
+    "JailInventoryMixin",
+    "PortalForcerMixin",
+    "PortalDestinationAuthorityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

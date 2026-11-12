@@ -4,11 +4,11 @@ A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do
 
 **[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, built-in ranks, chat styling, compatibility, recovery and IntelliJ guides.
 
-**Development release 0.2.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.3.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.2.0.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.3.0.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
@@ -18,7 +18,7 @@ Every region covers the world's full build height. Spawn children must lie entir
 
 Administrators bypass gameplay restrictions, Adventure Mode, home limits and command teleport warmups/cooldowns. Portal loop protection still applies. Inventory, balance and destination-safety validation always apply. Automatic world effects without an administrator actor remain controlled by region flags.
 
-Spawn defaults freeze hunger/saturation and block building, breaking, block/container interactions, PvP, player damage, ordinary entity interactions, natural mob spawning, fire, explosions, fluid/piston changes, automation, flight and elytra flight for nonadministrators. NPC trading and settlement management remain enabled. Explicit child flags override inherited settings; Adventure Mode stays mandatory for nonadministrators throughout spawn and its children.
+Spawn defaults freeze hunger/saturation and block building, breaking, block/container interactions, PvP, player damage, ordinary entity interactions, natural mob spawning, fire, explosions, fluid/piston changes, automation, flight and elytra flight for nonadministrators. NPC trading and settlement management remain enabled. Explicit child flags override inherited settings. A child allowing building or breaking restores the player’s prior mode so those permissions work; the surrounding spawn retains Adventure Mode.
 
 Built-in [ranks](wiki/Ranks.md) support permissions, inheritance, priority, default membership and explicit permissions for other mods' commands. [Chat tools](wiki/Chat-and-Nicknames.md) support nicknames, titles, colors, bold and italic, with rank-based self-service permissions. [Staff tools](wiki/Staff-Tools.md) add vanish and live inventory editing. [Whispers and public stats](wiki/Whispers-and-Stats.md) include persistent recipient consent, administrator monitoring controls and player statistics. Unauthorized management commands are hidden from the client command tree and `/ffa help`.
 
@@ -36,3 +36,5 @@ See [commands](docs/COMMANDS.md), [configuration and recovery](docs/CONFIGURATIO
 `check` runs the standalone policy/persistence assertions. The GameTest server runs opt-in tests with real players, saves, event handlers and mixins. Tests are registered only when the development run sets `ffa.tests=true`.
 
 No uploaded third-party JARs are included in this repository or release.
+
+Version 0.3.0 also adds persistent region visualization, explicit child/standalone creation, per-region usable items and styled entry/exit titles, sign shops, `/ffa back`, `/ffa balance set`, [timed punishments/jail](wiki/Moderation.md), configurable administrator-only portal creation, smite and god mode. Home and region names preserve uppercase letters; command confirmations are concise.

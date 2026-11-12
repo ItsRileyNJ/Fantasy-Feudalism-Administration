@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.2.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.3.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -24,15 +24,22 @@ The first two commands show help. `spawn` teleports players. The remaining selec
 
 ```text
 /ffa region list
+/ffa region create child <name> [override]
+/ffa region create standalone <name> [override]
 /ffa region create <name> [override]
+/ffa region child <name> [override]
 /ffa region standalone <name> [override]
 /ffa region delete <name>
 /ffa region visualize <name>
+/ffa region visualize cancel
 /ffa region expand <name> <blocks>
 /ffa region contract <name> <blocks>
 /ffa region flag <name> <flag> <true|false|inherit>
 /ffa region message <name> <entry|exit> "<message>"
 /ffa region interaction <name> <block_id> <allow|remove>
+/ffa region item <name> <item_id> <allow|remove>
+/ffa region title <name> <entry|exit> color <color>
+/ffa region title <name> <entry|exit> <bold|italic> <true|false>
 /ffa region access <name> <mode> [value]
 ```
 
@@ -80,7 +87,7 @@ Native home/request modules must be enabled and FTB Essentials absent. Clickable
 /ffa tpignore <player>
 ```
 
-Disabled by default through the corresponding modules. Privacy commands require the native request-privacy mode, not an unverified FTB Essentials bridge.
+`back` is available by default and returns to the latest death or successful teleport origin. The other utilities are disabled by default through their corresponding modules. Privacy commands require the native request-privacy mode, not an unverified FTB Essentials bridge.
 
 ## Economy and shops
 
@@ -91,12 +98,14 @@ Disabled by default through the corresponding modules. Privacy commands require 
 /ffa shop sell <name> <quantity>
 /ffa shop set <name> <item_id> <buy_price> <sell_price>
 /ffa shop delete <name>
-/ffa economy set <online_player> <whole_balance>
+/ffa shop sign bind <name> [quantity]
+/ffa shop sign remove
+/ffa balance set <online_player> <whole_balance>
 /ffa pay <online_player> <whole_amount>
 /ffa baltop
 ```
 
-Shop quantities: 1..2304, subject to actual funds/items/space. Prices: -1 disables a direction; 0 is free/no payout; otherwise nonnegative whole Denar within limits. When buying is enabled, sell cannot exceed buy. `economy set` replaces a total. `pay` and `baltop` default to disabled. [Economy walkthrough](Economy-and-Shops.md).
+Shop quantities: 1..2304, subject to actual funds/items/space. Prices: -1 disables a direction; 0 is free/no payout; otherwise nonnegative whole Denar within limits. When buying is enabled, sell cannot exceed buy. `balance set` replaces a total. `pay` and `baltop` default to disabled. [Economy walkthrough](Economy-and-Shops.md).
 
 ## Built-in ranks and chat
 
@@ -105,6 +114,7 @@ Shop quantities: 1..2304, subject to actual funds/items/space. Prices: -1 disabl
 /ffa ranks create <rank> [power]
 /ffa ranks delete <rank>
 /ffa ranks list
+/ffa ranks nodes [category] [page]
 /ffa ranks info <rank>
 /ffa ranks add <player_or_uuid> <rank>
 /ffa ranks remove <player_or_uuid> <rank>
@@ -146,6 +156,8 @@ Rank management and administrator chat operations support console use. Self-serv
 
 ```text
 /ffa vanish
+/ffa smite <online_player>
+/ffa god
 /ffa invisee <online_player>
 /ffa whisper <online_player> <message...>
 /ffa whisperaccept [request_token]
@@ -169,3 +181,18 @@ These require their [management nodes](Permissions-and-Access.md). Reload cannot
 Most operations require an in-game player, including edits that use player location or private management context. Console-supported operations include bare help, `/ffa help`, `/ffa region list`, `/ffa delwarp NAME`, `/ffa reload`, `/ffa backup`, rank management, administrator chat operations and `/ffa stats PLAYER`. Other mods' and vanilla commands have their own console rules.
 
 There is no `/ffa economy give`, `/ffa portal resize`, `/ffa region select` wand, built-in schematic-import command, or admin command to inspect/delete another player's homes in this release. Use the documented supported actions instead.
+
+## Punishments and jail cells
+
+```text
+/ffa punish jail <online_player> [duration] [reason...]
+/ffa punish chatban <player_or_uuid> [duration] [reason...]
+/ffa punish warpban <player_or_uuid> [duration] [reason...]
+/ffa punish clear <jail|chatban|warpban> <player_or_uuid>
+/ffa punish status <player_or_uuid>
+/ffa jail cell set <name> [override]
+/ffa jail cell list
+/ffa jail cell delete <name>
+```
+
+Full administrator/operator only. Durations accept seconds or a suffix: `30s`, `5m`, `2h`, `1d`, `1w`. Omission uses the configured default. [Punishments and jail](Moderation.md) explains cell selection, offline timers, release and the scope of each ban.

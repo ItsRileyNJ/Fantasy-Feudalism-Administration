@@ -9,7 +9,7 @@
 | administration | operatorLevel 2..4; verboseFeedback true/false |
 | permissions | defaultPlayerCommands true/false, overridden by explicit rank decisions |
 | dimension | enabled true/false, default false; restart only |
-| modules | independently enable standaloneRegions, economy, homes, tpa, portals, back, rtp, pay, leaderboard, privacy |
+| modules | independently enable standaloneRegions, economy, homes, tpa, portals, rtp, pay, leaderboard, privacy |
 | spawn | firstJoin false by default; respawnPolicy `vanilla`, `bed_first`, `spawn_first` |
 | teleport | cooldown 0..86400 seconds; warmup 0..300; request expiry 1..3600; request cooldown 0..3600; portal cooldown 1..3600; cancelOnMovement; maximumQueuedLoads 1..16; loadTimeoutSeconds 1..60 |
 | homes | maximum 0..1000; allowedDimensions list |
@@ -20,13 +20,13 @@
 | messages | generic protection denial and portal denial |
 | defaults | all documented protection flags; child regions inherit unless overridden |
 
-Changing dimension enablement or command-module enablement (homes, tpa, back, rtp, pay, leaderboard, privacy) requires a full restart. Other general settings and region geometry can be reloaded using `/ffa reload`. Reloads are refused while teleport jobs or prepared trades exist. Reloading dimensions in place is never attempted. Configuration version 1 is the initial schema; unknown versions are refused without rewriting files. Back up before any future schema migration.
+Changing dimension enablement or command-module enablement (homes, tpa, rtp, pay, leaderboard, privacy) requires a full restart. Other general settings and region geometry can be reloaded using `/ffa reload`. Reloads are refused while teleport jobs or prepared trades exist. Reloading dimensions in place is never attempted. Configuration version 1 is the initial schema; unknown versions are refused without rewriting files. Back up before any future schema migration.
 
 ## Authoritative region definitions
 
 `<world>/ffa/regions.toml` contains every region immediately after successful creation. It is the sole authoritative region definition: in-game commands write this file, and reload reads it. Every entry has readable ID, display name, kind (`SPAWN`, `CHILD`, `STANDALONE`), dimension, horizontal boundaries, parent, priority, settlement override, messages, interaction allowlist, access rule and flags.
 
-Boundaries are inclusive block coordinates. A region covering X 0..10 includes a player at X 10.9 but excludes X 11.0. Y spans the dimension's full build height. IDs contain 1..48 lowercase letters, digits, underscores or hyphens. Rename display names freely; update all child `parent` references when renaming the main spawn ID. Parent/child dimensions and enclosure must remain valid. Child and standalone overlaps are rejected even when priorities differ.
+Boundaries are inclusive block coordinates. A region covering X 0..10 includes a player at X 10.9 but excludes X 11.0. Y spans the dimension's full build height. Region IDs contain 1..48 uppercase or lowercase letters, digits, underscores or hyphens. Rename display names freely; update all child `parent` references when renaming the main spawn ID. Parent/child dimensions and enclosure must remain valid. Child and standalone overlaps are rejected even when priorities differ.
 
 Edit the file and run `/ffa reload`. An invalid reload retains the last active regions. If the file has external edits not yet reloaded, in-game edits refuse to overwrite them. Resolve the file and reload first. Reloading reevaluates online players' protection state.
 
@@ -52,7 +52,7 @@ On reconnect, an interrupted prepared trade is settled once if the saved invento
 
 For a configuration/region rollback, stop the server, retain a copy of the current files, restore only `server.toml` and/or `regions.toml` from the selected snapshot, and start the server to validate them. Never overwrite unrelated world files. If validation fails, restore the retained current files.
 
-Do **not** roll back `state.json` balances independently after trades. That could credit currency while retaining purchased items. Economy rollback requires a matching, consistent stopped-server backup of the entire server's player inventory state and this mod's state. Such a full-world backup/restore is an external administrator operation; this mod neither performs it nor claims its own snapshots can replace it. There is deliberately no live balance-rollback command. For individual account corrections, investigate the audit trail and use `/ffa economy set` with the server online.
+Do **not** roll back `state.json` balances independently after trades. That could credit currency while retaining purchased items. Economy rollback requires a matching, consistent stopped-server backup of the entire server's player inventory state and this mod's state. Such a full-world backup/restore is an external administrator operation; this mod neither performs it nor claims its own snapshots can replace it. There is deliberately no live balance-rollback command. For individual account corrections, investigate the audit trail and use `/ffa balance set` with the server online.
 
 Keep snapshots until you have verified recovery. Snapshot creation does not automatically prune administrator backups.
 
@@ -73,6 +73,8 @@ Windows' Java NIO provider does not support opening a parent directory as a file
 
 Windows rename durability during a system power loss depends on the operating system and filesystem because Java cannot request the equivalent parent-directory flush. Keep the consistent backups described above; the existing power-loss recovery acceptance checks still apply.
 
-## Built-in ranks and personal chat styles (0.2.0)
+## Built-in ranks and personal chat styles (0.3.0)
 
 `<world>/ffa/ranks.json` stores local ranks and UUID assignments. Use `/ffa ranks reload` after file edits; general `/ffa reload` does not reload ranks. Invalid edits keep the previous active ranks. Backups now include this file, which can be restored independently with the server stopped. Personal chat overrides are stored in existing `state.json`; use chat commands to clear/reset them instead of rolling back financial state. See [ranks](../wiki/Ranks.md) and [chat](../wiki/Chat-and-Nicknames.md).
+
+For 0.3.0, `modules.back` and `administration.verboseFeedback` remain accepted compatibility keys: Back is always available and feedback is always concise. See [all new settings and region fields](../wiki/Configuration.md), including portal creation and moderation timers.

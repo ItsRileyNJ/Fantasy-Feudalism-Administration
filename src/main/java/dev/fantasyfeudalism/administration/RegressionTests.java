@@ -213,6 +213,7 @@ public final class RegressionTests {
       ranks(h, p, app);
       chatStyles(h, p, app);
       ToolsRegression.verify(h, p, app);
+      UsabilityRegression.verify(h, p, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");
@@ -681,10 +682,9 @@ public final class RegressionTests {
       h.assertTrue(
           operatorTree.getChild("operation") == null,
           "Client command tree has no opaque greedy operation argument");
-      if (!app.settings.back)
-        h.assertTrue(
-            operatorTree.getChild("back") == null,
-            "Disabled modules are omitted from the client command tree");
+      h.assertTrue(
+          operatorTree.getChild("back") != null,
+          "Back is available without the old optional module.");
       app.server.getPlayerList().deop(p.getGameProfile());
       var playerTree = clientCommands(p, true).getChild("ffa");
       h.assertTrue(

@@ -4,7 +4,7 @@
 
 Type `/ffa ` (including the space), then press **Tab** to browse commands. Continue using Tab for actions, region/warp/portal IDs, your home names, flags, dye colors, item/block IDs and online player names. Management commands are shown only when you have the required permissions, and disabled modules are omitted. `/ffa reload` refreshes the client command list after supported config edits.
 
-All command responses are private. Administration confirmations include time, operation, object, dimension/location and persistence result when verbose feedback is enabled. Failures preserve the previous definition. None of these commands replaces another mod's command root.
+All command responses are private. Administration confirmations are concise; the audit log retains operation and persistence details. Failures preserve the previous definition. None of these commands replaces another mod's command root.
 
 Arguments containing spaces, including messages and team coordinates, must be quoted.
 
@@ -15,8 +15,8 @@ Arguments containing spaces, including messages and team coordinates, must be qu
 | `/ffa pos1`, `/ffa pos2` | Select two block positions by standing at each corner; same dimension |
 | `/ffa spawn create [override]` | Create the one full-height main spawn; optional explicit settlement overlap override |
 | `/ffa spawn setpoint` | Save safe spawn arrival coordinates and orientation |
-| `/ffa region create NAME [override]` | Create a child using the selection |
-| `/ffa region standalone NAME [override]` | Create an independent region if the module is enabled |
+| `/ffa region create child NAME [override]` | Create a child using the selection |
+| `/ffa region create standalone NAME [override]` | Create an independent region if the module is enabled |
 | `/ffa region delete NAME` | Delete; children must be deleted before their parent |
 | `/ffa region flag NAME FLAG true\|false\|inherit` | Allow, block or inherit a rule |
 | `/ffa region message NAME entry\|exit "message"` | Set a boundary-crossing message; empty quoted text clears it |
@@ -24,7 +24,7 @@ Arguments containing spaces, including messages and team coordinates, must be qu
 | `/ffa region access NAME public\|admin\|permission\|group\|team [VALUE]` | Restrict arrival access; membership does not confer town ownership |
 | `/ffa region expand NAME BLOCKS` | Expand all horizontal edges |
 | `/ffa region contract NAME BLOCKS` | Contract all horizontal edges; invalid results are rejected |
-| `/ffa region visualize NAME` | Show the boundary with one private particle burst near your current height |
+| `/ffa region visualize NAME` | Refresh private boundary particles until `/ffa region visualize cancel` |
 | `/ffa region list` | List IDs, types and boundaries |
 | `/ffa setwarp NAME` | Create/update a warp at your location |
 | `/ffa delwarp NAME` | Delete an unreferenced warp; remove portal references first |
@@ -36,7 +36,7 @@ Arguments containing spaces, including messages and team coordinates, must be qu
 | `/ffa portal access NAME public\|admin\|permission\|group\|team [VALUE]` | Set portal access |
 | `/ffa shop set NAME minecraft:item BUY_PRICE SELL_PRICE` | Create/update an item shop; `-1` disables a direction; sell must not exceed buy |
 | `/ffa shop delete NAME` | Delete a shop |
-| `/ffa economy set ONLINE_PLAYER WHOLE_AMOUNT` | Set an online player's Denar balance within configured limits |
+| `/ffa balance set ONLINE_PLAYER WHOLE_AMOUNT` | Set an online player's Denar balance within configured limits |
 | `/ffa reload` | Validate and apply reloadable settings and region edits together |
 | `/ffa backup` | Snapshot this mod's state and configuration; see recovery restrictions |
 
@@ -50,7 +50,7 @@ A `team` restriction uses Mercenaries settlement ownership/membership at the tar
 - `/ffa sethome NAME`, `/ffa home NAME`, `/ffa delhome NAME`, `/ffa homes`
 - `/ffa tpa PLAYER`, `/ffa tpahere PLAYER`, `/ffa tpaccept`, `/ffa tpdeny`, `/ffa tpcancel`
 - `/ffa balance`, `/ffa shop list`, `/ffa shop buy NAME QUANTITY`, `/ffa shop sell NAME QUANTITY`
-- When explicitly enabled: `/ffa back`, `/ffa rtp`, `/ffa pay PLAYER AMOUNT`, `/ffa baltop`, `/ffa tptoggle`, `/ffa tpignore ONLINE_PLAYER`
+- Available by default: `/ffa back`. When explicitly enabled: `/ffa rtp`, `/ffa pay PLAYER AMOUNT`, `/ffa baltop`, `/ffa tptoggle`, `/ffa tpignore ONLINE_PLAYER`
 
 Native home/request/privacy operations decline to run when FTB Essentials is detected. Use FTB's own commands in that case. `/ffa spawn` and `/ffa warp` remain separate.
 
@@ -63,10 +63,12 @@ explosions pistons fluids automation dispensers hanging_damage animal_damage fli
 teleport_in teleport_out home_creation
 ```
 
-Allowing `build` does not remove vanilla Adventure Mode's item placement requirements. Administrators are exempt from Adventure Mode.
+A child allowing `build` or `break` restores the prior game mode so those permissions work. Administrators remain exempt.
 
-## Ranks and chat (0.2.0)
+## Ranks and chat (0.3.0)
 
 See the [complete command reference](../wiki/Command-Reference.md), [built-in ranks tutorial](../wiki/Ranks.md), and [chat tools](../wiki/Chat-and-Nicknames.md). `/ffa ranks` provides creation, assignment, typed nodes, inheritance, defaults, priorities, checks and familiar FTB-style aliases. `/ffa chat` supplies personal/rank colors, nicknames, titles, bold and italic, with separate self-edit permissions. Rank/chat administration supports console use. Management commands are filtered out of ordinary client trees and `/ffa help`.
 
 See [staff tools](../wiki/Staff-Tools.md) for `/ffa vanish` and editable `/ffa invisee PLAYER`. [Whispers and stats](../wiki/Whispers-and-Stats.md) cover `/ffa whisper PLAYER MESSAGE`, recipient Accept/Deny, permanent consent, `/ffa whispers on|off` for each administrator, and public `/ffa stats PLAYER`.
+
+See the [0.3.0 complete reference](../wiki/Command-Reference.md) for persistent visualization, explicit child/standalone creation, item allowlists, title styles, sign shops, punishment/cell commands, smite and god mode. `/ffa back` is always registered; other optional utilities still need their modules.

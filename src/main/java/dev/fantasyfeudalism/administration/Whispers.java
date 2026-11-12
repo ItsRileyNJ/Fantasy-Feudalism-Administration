@@ -56,6 +56,8 @@ public final class Whispers {
 
   public void send(ServerPlayer from, ServerPlayer to, String body) throws Exception {
     validate(body);
+    if (app.moderation != null && app.moderation.banned(from, "chatban"))
+      throw new IllegalArgumentException("You cannot send messages right now.");
     if (from == to) throw new IllegalArgumentException("Choose another player");
     if (Vanish.hidden(from.getUUID()))
       throw new IllegalArgumentException("Leave vanish before sending player messages");

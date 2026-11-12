@@ -30,7 +30,9 @@ public final class Storage {
         || state.players == null
         || state.warps == null
         || state.portals == null
-        || state.trades == null)
+        || state.trades == null
+        || state.shopSigns == null
+        || state.jailCells == null)
       throw new IOException(
           "Invalid state.json; restore an offline backup. File was not modified.");
   }

@@ -23,7 +23,7 @@
 
 Reload is refused while teleport jobs or prepared trades are pending. Do not change dimension registration live. In-game region edits refuse to overwrite unreloaded external edits.
 
-The [full default server.toml](examples/server.toml) is extracted from 0.2.0's actual template. Use it for comparison; replacing your existing settings with the whole template resets your custom general rules. Config/state schema versions remain 1. Unknown versions are refused; do not manually increment version fields.
+The [full default server.toml](examples/server.toml) is extracted from 0.3.0's actual template. Use it for comparison; replacing your existing settings with the whole template resets your custom general rules. Config/state schema versions remain 1. Unknown versions are refused; do not manually increment version fields.
 
 ## Every general setting
 
@@ -31,7 +31,7 @@ The [full default server.toml](examples/server.toml) is extracted from 0.2.0's a
 | --- | --- | --- | --- | --- |
 | `configVersion` | `1` | 1 only | Restart | Initial schema identifier; do not increment it manually. |
 | `administration.operatorLevel` | `2` | 2..4 | Reload | Minimum built-in operator level for FFA administration. |
-| `administration.verboseFeedback` | `true` | Boolean | Reload | Detailed private management confirmations. |
+| `administration.verboseFeedback` | `false` | Boolean | Compatibility | Retained for older files; feedback is always concise. Full details stay in audit logs. |
 | `permissions.defaultPlayerCommands` | `true` | Boolean | Reload | Fallback for player command families when no explicit provider decision exists. |
 | `dimension.enabled` | `false` | Boolean | Restart | Register the optional ffa:spawn void-dimension datapack. |
 | `modules.standaloneRegions` | `false` | Boolean | Reload* | Allow independent regions; existing ones must remain valid when disabling. |
@@ -39,7 +39,7 @@ The [full default server.toml](examples/server.toml) is extracted from 0.2.0's a
 | `modules.homes` | `true` | Boolean | Restart | Enable native home commands when FTB Essentials is absent. |
 | `modules.tpa` | `true` | Boolean | Restart | Enable native teleport requests when FTB Essentials is absent. |
 | `modules.portals` | `true` | Boolean | Reload | Enable portal travel and management; stored definitions remain. |
-| `modules.back` | `false` | Boolean | Restart | Enable previous-FFA-origin return. |
+| `modules.back` | `true` | Boolean | Compatibility | Retained for older files; `/ffa back` is always registered and uses its normal permission. |
 | `modules.rtp` | `false` | Boolean | Restart | Enable bounded random wilderness teleport. |
 | `modules.pay` | `false` | Boolean | Restart | Enable player transfers; economy must also be enabled. |
 | `modules.leaderboard` | `false` | Boolean | Restart | Enable stored UUID/balance leaderboard visibility. |
@@ -84,7 +84,7 @@ Create the initial region in-game, then edit its generated entry. The [complete 
 
 | Field | How to edit it |
 | --- | --- |
-| `id` | Unique 1..48 lowercase letters/digits/underscores/hyphens; update child parent references if a parent ID changes |
+| `id` | Unique 1..48 uppercase or lowercase letters/digits/underscores/hyphens; case-insensitive lookup; update child parent references if a parent ID changes |
 | `name` | Human-readable nonblank display name, separate from the ID |
 | `type` | `SPAWN`, `CHILD`, or enabled `STANDALONE` |
 | `dimension` | An already registered dimension ID; children must match the parent |
@@ -92,7 +92,10 @@ Create the initial region in-game, then edit its generated entry. The [complete 
 | `minX`, `maxX`, `minZ`, `maxZ` | Inclusive horizontal block bounds, each -29999984..29999984; minimum must not exceed maximum |
 | `priority` | -10000..10000; does not legalize overlap. Children take precedence over their parent; leave 0 unless deliberately organizing metadata |
 | `settlementOverride` | Explicitly accept overlap with a Mercenaries claimed settlement |
-| `entry`, `exit` | Quoted messages; empty strings disable them |
+| `entry`, `exit` | Title text; defaults `Entering {name}` / `Leaving {name}`; empty strings disable them |
+| `entryColor`, `exitColor` | Minecraft color name or `#RRGGBB`; defaults green/yellow |
+| `entryBold`, `exitBold`, `entryItalic`, `exitItalic` | Boolean title styles; default false |
+| `items` | Per-region usable item IDs; default empty, independent of the parent |
 | `interactions` | List of allowed block IDs for that region, e.g. `["minecraft:oak_door"]` |
 | `[regions.access]` | `mode` and `value` for public/admin/permission/group/team arrival access |
 | `[regions.flags]` | Explicit Boolean overrides; remove a key to inherit the applicable baseline/parent |
@@ -100,3 +103,17 @@ Create the initial region in-game, then edit its generated entry. The [complete 
 Boundaries, names, relationships and other fields can be applied by a valid reload after creation. A new dimension must already exist following any required restart. There is no need to manipulate NBT or Java code for ordinary region edits.
 
 Do not live-edit `state.json` to change balances or portals. Use the [commands](Command-Reference.md) for these world-specific objects and follow [recovery instructions](Backups-and-Recovery.md) before any offline restoration.
+
+## Portal creation and punishment settings
+
+These optional keys default as shown when loading older files. Edit their existing section if present, then `/ffa reload`.
+
+| Setting | Default | Meaning |
+| --- | --- | --- |
+| `portals.adminCreationOnly` | `true` | Only full administrators may create supported portals; [portal details](Warps-and-Portals.md) |
+| `moderation.defaultJailSeconds` | `300` | Default jail duration, in real seconds |
+| `moderation.defaultChatBanSeconds` | `300` | Default chat-ban duration, in real seconds |
+| `moderation.defaultWarpBanSeconds` | `300` | Default named-warp ban duration, in real seconds |
+| `moderation.maximumDurationSeconds` | `31536000` | Maximum punishment duration, 1..31536000 seconds; defaults must be within it |
+
+Jail cells, punishments, god mode, linked shop signs and latest back locations are persisted in `state.json`. Configure them through commands, without live-editing financial state.

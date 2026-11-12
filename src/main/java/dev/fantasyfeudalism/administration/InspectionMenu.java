@@ -54,10 +54,7 @@ public final class InspectionMenu extends ChestMenu {
         new SimpleMenuProvider(
             (id, inv, player) -> new InspectionMenu(id, inv, target, app),
             Component.literal("Inventory: " + target.getGameProfile().getName())));
-    Teleports.tell(
-        viewer,
-        "Live editing: slots 1–36 inventory, 37–40 armor (feet to head), 41 offhand. Remaining"
-            + " upper slots are locked.");
+    Teleports.tell(viewer, "Inventory opened.");
   }
 
   public static boolean busy(Administration app, ServerPlayer player) {

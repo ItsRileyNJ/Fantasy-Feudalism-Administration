@@ -28,6 +28,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class Protection {
   private final Administration app;
   private final Map<UUID, String> previous = new HashMap<>();
+  private final Map<UUID, Region> previousRegions = new HashMap<>();
   private final Map<UUID, BlockPos> positions = new HashMap<>();
   private final Map<UUID, String> dimensions = new HashMap<>();
   private final Map<UUID, Long> notices = new HashMap<>();
@@ -37,12 +38,16 @@ public final class Protection {
   }
 
   public boolean allowed(LevelAccessor level, BlockPos pos, Flag flag) {
-    return !(level instanceof ServerLevel l) || app.regions.allowed(l, pos, flag, app.settings);
+    return !(level instanceof ServerLevel l)
+        || (app.moderation == null || !app.moderation.cellAt(l, pos))
+            && app.regions.allowed(l, pos, flag, app.settings);
   }
 
   public boolean denied(Player player, ServerLevel level, BlockPos target, Flag flag) {
     if (player instanceof ServerPlayer p && !(p instanceof FakePlayer) && app.compat.admin(p))
       return false;
+    if (player instanceof ServerPlayer p && app.moderation != null && app.moderation.confined(p))
+      return true;
     if (player instanceof FakePlayer && !allowed(level, target, Flag.AUTOMATION)) return true;
     return !allowed(level, target, flag);
   }
@@ -56,14 +61,20 @@ public final class Protection {
   }
 
   public void update(ServerPlayer p) {
-    if (Vanish.hidden(p.getUUID())) return;
+    if (Vanish.hidden(p.getUUID()) || app.moderation != null && app.moderation.confined(p)) return;
     PlayerData data = app.storage.player(p.getUUID());
     if (data == null) return;
     boolean
         protectedArea = app.regions.protectedAt(p.serverLevel(), p.blockPosition(), app.settings),
         admin = app.compat.admin(p);
     Region r = app.regions.at(p.serverLevel(), p.blockPosition());
-    boolean force = protectedArea && (r == null || r.kind != Kind.STANDALONE) && !admin;
+    boolean childBuilding =
+        r != null
+            && r.kind == Kind.CHILD
+            && (app.regions.resolve(r, Flag.BUILD, app.settings)
+                || app.regions.resolve(r, Flag.BREAK, app.settings));
+    boolean force =
+        protectedArea && (r == null || r.kind != Kind.STANDALONE) && !childBuilding && !admin;
     try {
       if (protectedArea && !admin && !data.flightTracked) {
         boolean may = p.getAbilities().mayfly, flying = p.getAbilities().flying;
@@ -122,15 +133,8 @@ public final class Protection {
             ? (Regions.isSpawnDimension(p.serverLevel(), app.settings) ? "@dimension" : "")
             : r.id;
     String old = previous.put(p.getUUID(), current);
-    if (old != null && !old.equals(current)) {
-      if (!old.isEmpty() && !old.equals("@dimension"))
-        try {
-          String msg = app.regions.get(old).exit;
-          if (!msg.isEmpty()) Teleports.tell(p, msg);
-        } catch (IllegalArgumentException ignored) {
-        }
-      if (r != null && !r.entry.isEmpty()) Teleports.tell(p, r.entry);
-    }
+    Region prior = previousRegions.put(p.getUUID(), r);
+    if (old == null || !old.equals(current)) RegionTitles.show(p, prior, r);
   }
 
   @SubscribeEvent
@@ -165,6 +169,7 @@ public final class Protection {
   public void logout(PlayerEvent.PlayerLoggedOutEvent e) {
     UUID id = e.getEntity().getUUID();
     previous.remove(id);
+    previousRegions.remove(id);
     positions.remove(id);
     dimensions.remove(id);
     notices.remove(id);
@@ -199,9 +204,15 @@ public final class Protection {
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
+  public void portalCreation(BlockEvent.PortalSpawnEvent event) {
+    if (!PortalCreation.permitted()) event.setCanceled(true);
+  }
+
+  @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void breaking(BlockEvent.BreakEvent e) {
-    if (e.getLevel() instanceof ServerLevel l && denied(e.getPlayer(), l, e.getPos(), Flag.BREAK))
-      e.setCanceled(true);
+    if (e.getLevel() instanceof ServerLevel l
+        && (app.signShops != null && app.signShops.linked(l, e.getPos())
+            || denied(e.getPlayer(), l, e.getPos(), Flag.BREAK))) e.setCanceled(true);
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -224,6 +235,11 @@ public final class Protection {
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void interact(PlayerInteractEvent.RightClickBlock e) {
     if (!(e.getEntity() instanceof ServerPlayer p)) return;
+    if (app.signShops != null && app.signShops.click(p, e.getPos(), e.getHand(), true)) {
+      e.setCanceled(true);
+      e.setCancellationResult(InteractionResult.SUCCESS);
+      return;
+    }
     if (app.compat.admin(p) && Portals.recolor(app, p, e.getPos(), p.getItemInHand(e.getHand()))) {
       e.setCanceled(true);
       e.setCancellationResult(InteractionResult.SUCCESS);
@@ -243,7 +259,15 @@ public final class Protection {
             .getKey(e.getLevel().getBlockState(e.getPos()).getBlock())
             .toString();
     boolean listed = region != null && region.interactions.contains(block);
-    if (denied(p, p.serverLevel(), e.getPos(), Flag.BUILD))
+    boolean usable =
+        itemAllowed(p, p.blockPosition(), p.getItemInHand(e.getHand()))
+            && itemAllowed(p, e.getPos(), p.getItemInHand(e.getHand()));
+    if (!usable
+        || denied(p, p.serverLevel(), e.getPos(), Flag.BUILD)
+            && !app.regions.itemAllowed(
+                p.serverLevel(),
+                e.getPos(),
+                BuiltInRegistries.ITEM.getKey(p.getItemInHand(e.getHand()).getItem()).toString()))
       e.setUseItem(net.neoforged.neoforge.common.util.TriState.FALSE);
     if (p.getItemInHand(e.getHand()).getItem() instanceof SpawnEggItem
         && (denied(p, p.serverLevel(), e.getPos(), Flag.MOB_SPAWNING)
@@ -267,17 +291,31 @@ public final class Protection {
         || container && denied(p, p.serverLevel(), e.getPos(), Flag.CONTAINERS)
         || p.getItemInHand(e.getHand()).is(Items.ENDER_PEARL)
             && denied(p, p.serverLevel(), e.getPos(), Flag.PEARLS)) {
-      e.setCanceled(true);
-      e.setCancellationResult(InteractionResult.FAIL);
-      notice(p);
+      e.setUseBlock(net.neoforged.neoforge.common.util.TriState.FALSE);
+      if (!usable
+          || p.getItemInHand(e.getHand()).is(Items.ENDER_PEARL)
+              && denied(p, p.serverLevel(), e.getPos(), Flag.PEARLS)) {
+        e.setCanceled(true);
+        e.setCancellationResult(InteractionResult.FAIL);
+        notice(p);
+      }
     }
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void left(PlayerInteractEvent.LeftClickBlock e) {
     if (e.getEntity() instanceof ServerPlayer p
-        && denied(p, p.serverLevel(), e.getPos(), Flag.INTERACT)) {
+        && app.signShops != null
+        && app.signShops.linked(p.serverLevel(), e.getPos())) {
       e.setCanceled(true);
+      if (e.getAction() == PlayerInteractEvent.LeftClickBlock.Action.START)
+        app.signShops.click(p, e.getPos(), net.minecraft.world.InteractionHand.MAIN_HAND, false);
+      return;
+    }
+    if (e.getEntity() instanceof ServerPlayer p) {
+      if (denied(p, p.serverLevel(), e.getPos(), Flag.INTERACT))
+        e.setUseBlock(net.neoforged.neoforge.common.util.TriState.FALSE);
+      if (denied(p, p.serverLevel(), e.getPos(), Flag.BREAK)) e.setCanceled(true);
     }
   }
 
@@ -293,14 +331,39 @@ public final class Protection {
     }
   }
 
+  public boolean itemAllowed(ServerPlayer p, BlockPos at, ItemStack stack) {
+    if (app.compat.admin(p)) return true;
+    if (app.moderation != null && app.moderation.confined(p)) return false;
+    if (stack.getItem() instanceof BlockItem && allowed(p.serverLevel(), at, Flag.BUILD))
+      return true;
+    return !app.regions.protectedAt(p.serverLevel(), at, app.settings)
+        || !stack.isEmpty()
+            && app.regions.itemAllowed(
+                p.serverLevel(), at, BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+  }
+
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void item(PlayerInteractEvent.RightClickItem e) {
     if (e.getEntity() instanceof ServerPlayer p
-        && p.getItemInHand(e.getHand()).is(Items.ENDER_PEARL)
-        && denied(p, p.serverLevel(), p.blockPosition(), Flag.PEARLS)) {
+        && (!itemAllowed(p, p.blockPosition(), p.getItemInHand(e.getHand()))
+            || p.getItemInHand(e.getHand()).is(Items.ENDER_PEARL)
+                && denied(p, p.serverLevel(), p.blockPosition(), Flag.PEARLS))) {
       e.setCanceled(true);
       e.setCancellationResult(InteractionResult.FAIL);
+      notice(p);
     }
+  }
+
+  @SubscribeEvent(priority = EventPriority.HIGHEST)
+  public void using(LivingEntityUseItemEvent.Tick e) {
+    if (e.getEntity() instanceof ServerPlayer p && !itemAllowed(p, p.blockPosition(), e.getItem()))
+      p.stopUsingItem();
+  }
+
+  @SubscribeEvent(priority = EventPriority.HIGHEST)
+  public void releaseItem(LivingEntityUseItemEvent.Stop e) {
+    if (e.getEntity() instanceof ServerPlayer p && !itemAllowed(p, p.blockPosition(), e.getItem()))
+      e.setCanceled(true);
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -360,9 +423,14 @@ public final class Protection {
   public void damage(LivingIncomingDamageEvent e) {
     if (!(e.getEntity().level() instanceof ServerLevel l)) return;
     var target = e.getEntity();
+    if (app.adminPowers != null && app.adminPowers.smiting(target.getUUID())) return;
     if (e.getSource().getEntity() instanceof ServerPlayer source && app.compat.admin(source))
       return;
     if (target instanceof ServerPlayer p && app.compat.admin(p)) return;
+    if (target instanceof ServerPlayer p && app.moderation != null && app.moderation.confined(p)) {
+      e.setCanceled(true);
+      return;
+    }
     if (target instanceof Player && !allowed(l, target.blockPosition(), Flag.DAMAGE)) {
       e.setCanceled(true);
       return;

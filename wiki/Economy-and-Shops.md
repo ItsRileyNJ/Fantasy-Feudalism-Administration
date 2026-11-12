@@ -44,7 +44,7 @@ Setting an existing shop ID updates it. Item IDs can be vanilla or registered mo
 The player must be online:
 
 ```text
-/ffa economy set Alice 100
+/ffa balance set Alice 100
 ```
 
 This **sets the total balance to 100**; it does not add 100 to the current amount. There is no separate `/ffa economy give` command. Use the audit trail when correcting an account.
@@ -76,3 +76,18 @@ The optional leaderboard displays stored player **UUIDs** and balances in the cu
 Purchases/sales use one shared journaled server transaction path. Inventory capacity/contents and balances are validated before applying the change. Interrupted transactions are recovered on reconnect when the saved inventory matches a known snapshot; uncertain recovery locks the account rather than issuing guessed rewards.
 
 Easy NPC buttons can execute the same player shop commands at ordinary player permission. Its native merchant screen does not automatically spend Denar. Mercenaries' own payment items are also not replaced by this virtual ledger. See [the exact bridge setup](Mod-Compatibility.md) and [recovery](Backups-and-Recovery.md).
+
+## Turn an admin sign into a shop
+
+Create a shop offering, place an ordinary sign, look directly at it within six blocks, then bind it:
+
+```text
+/ffa shop set apples minecraft:apple 5 2
+/ffa shop sign bind apples 1
+```
+
+The optional number is the quantity per click (default one). **Right click buys** and **left click sells**. Labels show the offering, quantity and total prices; price changes refresh loaded linked signs. Disabled buy/sell directions remain disabled. Buyers still need the public shop permission and sufficient funds/space; sellers need the items. The existing durable item/currency journal handles each trade.
+
+Only full administrators can bind/unlink signs. Linked signs work inside protected spawn without opening general block interaction. A short click cooldown prevents accidental repeats; holding left click does not repeatedly sell. Signs are waxed and protected against breaking while linked.
+
+To remove one, look at it and run `/ffa shop sign remove`, then edit or break it normally. Unlink signs before deleting their shop offering. Replacing a sign cannot inherit the old link. Both faces show the shop labels; unlinking restores its prior wax state.
