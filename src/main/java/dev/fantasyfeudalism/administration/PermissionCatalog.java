@@ -50,7 +50,7 @@ public final class PermissionCatalog {
     add(
         "chat",
         "ffa.chat.format",
-        "Let players toggle their own bold/italic styles",
+        "Let players toggle their own bold/italic/underline styles",
         "true or false");
     add("chat", "ffa.chat.manage", "Edit any player's appearance", "true or false");
     for (String property : ChatStyles.PROPERTIES)
@@ -58,7 +58,9 @@ public final class PermissionCatalog {
           "style",
           ChatStyles.PREFIX + property,
           "Default rank " + property.replace('_', ' '),
-          property.endsWith("bold") || property.endsWith("italic")
+          property.endsWith("bold")
+                  || property.endsWith("italic")
+                  || property.endsWith("underlined")
               ? "true or false"
               : "text or color name");
   }

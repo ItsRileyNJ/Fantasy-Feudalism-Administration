@@ -46,7 +46,9 @@ public final class ChatStyles {
                   "name_bold",
                   "name_italic",
                   "title_bold",
-                  "title_italic")));
+                  "title_italic",
+                  "name_underlined",
+                  "title_underlined")));
   private final Administration app;
 
   public ChatStyles(Administration app) {
@@ -71,7 +73,7 @@ public final class ChatStyles {
     if (key.endsWith("_color")) {
       if (!COLORS.contains(value))
         throw new IllegalArgumentException("Use a named Minecraft chat color");
-    } else if (key.endsWith("_bold") || key.endsWith("_italic")) {
+    } else if (key.endsWith("_bold") || key.endsWith("_italic") || key.endsWith("_underlined")) {
       if (!value.equals("true") && !value.equals("false"))
         throw new IllegalArgumentException("Formatting must be true or false");
     } else {
@@ -109,7 +111,10 @@ public final class ChatStyles {
     if (!node.startsWith(PREFIX)) return;
     String property = node.substring(PREFIX.length());
     permission(property);
-    boolean flag = property.endsWith("_bold") || property.endsWith("_italic");
+    boolean flag =
+        property.endsWith("_bold")
+            || property.endsWith("_italic")
+            || property.endsWith("_underlined");
     if (flag ? !value.isBoolean() : !value.isString())
       throw new IllegalArgumentException(node + " must be " + (flag ? "Boolean" : "a string"));
     validate(property, value.getAsString());
@@ -176,7 +181,8 @@ public final class ChatStyles {
     return Style.EMPTY
         .withColor(ChatFormatting.getByName(values.getOrDefault(part + "_color", "white")))
         .withBold(Boolean.parseBoolean(values.getOrDefault(part + "_bold", "false")))
-        .withItalic(Boolean.parseBoolean(values.getOrDefault(part + "_italic", "false")));
+        .withItalic(Boolean.parseBoolean(values.getOrDefault(part + "_italic", "false")))
+        .withUnderlined(Boolean.parseBoolean(values.getOrDefault(part + "_underlined", "false")));
   }
 
   @SubscribeEvent(priority = EventPriority.LOWEST)

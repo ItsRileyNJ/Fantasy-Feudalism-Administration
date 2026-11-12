@@ -41,6 +41,16 @@
 | `flight` | `false` | Player flight and elytra flight; false disables them for nonadministrators. |
 | `teleport_in` | `true` | Supported arrivals into the region. |
 | `teleport_out` | `true` | Supported departures from the region; does not block walking. |
+| `farming` | `false` | Planting, harvesting and bone-mealing supported crops, including stems, nether wart, cocoa, sugar cane, berries, melons and pumpkins; independent of build/break. Also controls player farmland trampling. |
+| `tilling` | `false` | Hoe soil transformations, independently of building. |
+| `strip_wood` | `false` | Axe stripping of logs/wood, independently of building. |
+| `dirt_path` | `false` | Shovel conversion of soil into paths, independently of building. |
+| `item_drop` | `false` | Voluntary Q/stack drops, inventory throws/outside-click drops and creative discard; blocked actions preserve inventory/cursor contents. |
+| `item_pickup` | `false` | Picking up ground item entities; both the player and item positions must allow it. |
+| `catch_fire` | `false` | Catching fire; false also extinguishes existing burning when entering. Does not grant immunity to direct lava/fire contact damage; use `damage` for that. |
+| `vehicle_enter` | `false` | Boarding boats and minecarts; disembarking remains possible. Both rider and vehicle positions must allow boarding. |
+| `flint_and_steel` | `false` | Using flint and steel/fire charges; the `fire` flag must also permit ignition. Administrator-only portal creation remains a separate setting. |
+| `shears` | `false` | Shearing entities, pumpkin carving, beehive harvesting and supported shear tool transformations. Ordinary mining still follows break/farming flags. |
 | `home_creation` | `false` | Creating/updating homes with the native FFA home system. |
 
 The table describes FFA's supported hooks. Mods that bypass those hooks need verified compatibility adapters; do not assume universal automation protection.
@@ -81,7 +91,7 @@ Create/select `storage_counter` first. This allows matching chest blocks inside 
 
 For a PvP arena, allow both `pvp` and `damage`. An attack can still be refused when the attacker is in a region that forbids PvP. Animal/hanging-entity protections are separate flags.
 
-Children explicitly allowing `build` or `break` restore the prior game mode. Other child flags still apply individually. Operators and `ffa.admin` users bypass gameplay restrictions; use a nonadministrator to test.
+Children explicitly allowing `build` or `break`, and regions enabling specific farming/tool editing permissions, restore the prior game mode. Other child flags still apply individually. Operators and `ffa.admin` users bypass gameplay restrictions; use a nonadministrator to test.
 
 Freezing hunger does not automatically refill an empty food bar. A permitted-flight region does not guarantee a safe landing after you leave it.
 
@@ -110,3 +120,36 @@ A shot fired outside spawn still checks the **player's effective region at impac
 Blocked direct hits are cancelled before the projectile's fire, tipped-arrow effects, knockback or other hit processing runs. Projectiles are retained rather than deleted, so a blocked thrown trident is not destroyed. The ordinary damage handler also checks the victim's region for damage paths that do not use the projectile-impact hook, including splash/explosion health damage.
 
 A child arena explicitly allowing both `damage` and `pvp` still allows combat; inheritance otherwise retains the parent's rules. Full administrators retain their existing gameplay exemption. No additional configuration is needed for default protected spawn.
+
+## A working farm inside protected spawn
+
+Select a child region as described in [Regions](Regions.md), then:
+
+```text
+/ffa region flag FarmYard farming true
+/ffa region flag FarmYard tilling true
+```
+
+Players can plant supported crop blocks, harvest those crops and apply bone meal while `build`, `break` and `interact` remain false. Tilling is separate so you can permit tending an established farm without allowing soil changes. Ordinary stone/wood construction or destruction remains blocked. World editing permissions restore the player's previous game mode so vanilla Adventure restrictions do not swallow the explicitly allowed action. This also applies when enabling these specific action flags on the main spawn.
+
+For other independent permissions:
+
+```text
+/ffa region flag Workshop strip_wood true
+/ffa region flag Workshop dirt_path true
+/ffa region flag Workshop shears true
+/ffa region flag Spawn item_drop false
+/ffa region flag Spawn item_pickup true
+/ffa region flag Spawn catch_fire false
+/ffa region flag Station vehicle_enter true
+/ffa region flag Workshop flint_and_steel true
+/ffa region flag Workshop fire true
+```
+
+Dedicated action flags permit the relevant tool/seed use without needing an ordinary item allowlist entry. Allowlisting an item or block cannot bypass a denied dedicated action. Other transformations, such as axe scraping/wax removal or shovel campfire extinguishing, still need general building permission. Container vehicles also retain container protection; boarding permission does not grant storage access.
+
+All ten new flags default to false in protected areas, including when loading older configuration files. Outside protected areas normal behavior continues. Children inherit each flag unless explicitly overridden, and administrators retain their exemption. Add optional keys under your existing `[defaults]` section to change the server-wide baseline, or use region commands for local exceptions.
+
+`flight` already controls elytra launch and ongoing gliding, so no duplicate elytra flag is needed. Disabling it stops gliding when entering protection. `fire` controls world fire; `catch_fire` controls burning players; `flint_and_steel` controls ignition tools.
+
+`item_drop` targets voluntary player drops. Death drops and Minecraft-forced inventory cleanup are retained rather than deleting items. `item_pickup` governs ground item pickups, not shop transactions or direct administrator inventory edits. Mod features that bypass vanilla/NeoForge hooks need their own verified adapters.

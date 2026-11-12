@@ -74,7 +74,11 @@ public final class Protection {
             && (app.regions.resolve(r, Flag.BUILD, app.settings)
                 || app.regions.resolve(r, Flag.BREAK, app.settings));
     boolean force =
-        protectedArea && (r == null || r.kind != Kind.STANDALONE) && !childBuilding && !admin;
+        protectedArea
+            && (r == null || r.kind != Kind.STANDALONE)
+            && !childBuilding
+            && !RegionActions.editsAllowed(this, p)
+            && !admin;
     try {
       if (protectedArea && !admin && !data.flightTracked) {
         boolean may = p.getAbilities().mayfly, flying = p.getAbilities().flying;
@@ -212,22 +216,33 @@ public final class Protection {
   public void breaking(BlockEvent.BreakEvent e) {
     if (e.getLevel() instanceof ServerLevel l
         && (app.signShops != null && app.signShops.linked(l, e.getPos())
-            || denied(e.getPlayer(), l, e.getPos(), Flag.BREAK))) e.setCanceled(true);
+            || denied(
+                e.getPlayer(),
+                l,
+                e.getPos(),
+                RegionActions.farm(e.getState()) ? Flag.FARMING : Flag.BREAK))) e.setCanceled(true);
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void placing(BlockEvent.EntityPlaceEvent e) {
     if (!(e.getLevel() instanceof ServerLevel l)) return;
-    Flag f = e.getPlacedBlock().is(Blocks.TNT) ? Flag.TNT : Flag.BUILD;
+    Flag f =
+        e.getPlacedBlock().is(Blocks.TNT)
+            ? Flag.TNT
+            : RegionActions.changeFlag(e.getBlockSnapshot().getState(), e.getPlacedBlock());
     boolean deny =
         e.getEntity() instanceof Player p
-            ? (denied(p, l, e.getPos(), Flag.BUILD) || denied(p, l, e.getPos(), f))
+            ? denied(p, l, e.getPos(), f) || f == Flag.TNT && denied(p, l, e.getPos(), Flag.BUILD)
             : !allowed(l, e.getPos(), Flag.AUTOMATION);
     if (e instanceof BlockEvent.EntityMultiPlaceEvent multi)
       for (var snap : multi.getReplacedBlockSnapshots())
         deny |=
             e.getEntity() instanceof Player p
-                ? denied(p, l, snap.getPos(), Flag.BUILD)
+                ? denied(
+                    p,
+                    l,
+                    snap.getPos(),
+                    RegionActions.changeFlag(snap.getState(), l.getBlockState(snap.getPos())))
                 : !allowed(l, snap.getPos(), Flag.AUTOMATION);
     if (deny) e.setCanceled(true);
   }
@@ -263,7 +278,8 @@ public final class Protection {
         itemAllowed(p, p.blockPosition(), p.getItemInHand(e.getHand()))
             && itemAllowed(p, e.getPos(), p.getItemInHand(e.getHand()));
     if (!usable
-        || denied(p, p.serverLevel(), e.getPos(), Flag.BUILD)
+        || RegionActions.itemFlag(p.getItemInHand(e.getHand())) == null
+            && denied(p, p.serverLevel(), e.getPos(), Flag.BUILD)
             && !app.regions.itemAllowed(
                 p.serverLevel(),
                 e.getPos(),
@@ -287,7 +303,11 @@ public final class Protection {
                         e.getPos(),
                         null)
                 != null;
-    if (denied(p, p.serverLevel(), e.getPos(), Flag.INTERACT) && !listed
+    var blockAction =
+        RegionActions.blockFlag(
+            e.getLevel().getBlockState(e.getPos()), p.getItemInHand(e.getHand()));
+    if (denied(p, p.serverLevel(), e.getPos(), blockAction)
+            && (!listed || blockAction != Flag.INTERACT)
         || container && denied(p, p.serverLevel(), e.getPos(), Flag.CONTAINERS)
         || p.getItemInHand(e.getHand()).is(Items.ENDER_PEARL)
             && denied(p, p.serverLevel(), e.getPos(), Flag.PEARLS)) {
@@ -315,7 +335,12 @@ public final class Protection {
     if (e.getEntity() instanceof ServerPlayer p) {
       if (denied(p, p.serverLevel(), e.getPos(), Flag.INTERACT))
         e.setUseBlock(net.neoforged.neoforge.common.util.TriState.FALSE);
-      if (denied(p, p.serverLevel(), e.getPos(), Flag.BREAK)) e.setCanceled(true);
+      if (denied(
+          p,
+          p.serverLevel(),
+          e.getPos(),
+          RegionActions.farm(e.getLevel().getBlockState(e.getPos())) ? Flag.FARMING : Flag.BREAK))
+        e.setCanceled(true);
     }
   }
 
@@ -342,6 +367,10 @@ public final class Protection {
   public boolean itemAllowed(ServerPlayer p, BlockPos at, ItemStack stack) {
     if (app.compat.admin(p)) return true;
     if (app.moderation != null && app.moderation.confined(p)) return false;
+    var action = RegionActions.itemFlag(stack);
+    if (action != null)
+      return !denied(p, p.serverLevel(), at, action)
+          && (action != Flag.FLINT_AND_STEEL || !denied(p, p.serverLevel(), at, Flag.FIRE));
     if (stack.getItem() instanceof BlockItem && allowed(p.serverLevel(), at, Flag.BUILD))
       return true;
     return !app.regions.protectedAt(p.serverLevel(), at, app.settings)
@@ -374,6 +403,31 @@ public final class Protection {
       e.setCanceled(true);
   }
 
+  private Flag entityFlag(Entity entity, ItemStack held) {
+    if (app.compat.npc(entity) || entity instanceof net.minecraft.world.entity.npc.Villager)
+      return Flag.NPC_TRADING;
+    if (RegionActions.vehicle(entity)) return Flag.VEHICLE_ENTER;
+    var action = RegionActions.itemFlag(held);
+    if (action == Flag.SHEARS
+        && (entity instanceof net.neoforged.neoforge.common.IShearable
+            || entity instanceof net.minecraft.world.entity.animal.Wolf)) return Flag.SHEARS;
+    if (action == Flag.FLINT_AND_STEEL
+        && entity instanceof net.minecraft.world.entity.monster.Creeper)
+      return Flag.FLINT_AND_STEEL;
+    return Flag.ENTITY_INTERACT;
+  }
+
+  private boolean entityDenied(ServerPlayer player, Entity target, ItemStack held) {
+    Flag flag = entityFlag(target, held);
+    return denied(player, player.serverLevel(), player.blockPosition(), flag)
+        || denied(player, player.serverLevel(), target.blockPosition(), flag)
+        || flag == Flag.FLINT_AND_STEEL
+            && (denied(player, player.serverLevel(), player.blockPosition(), Flag.FIRE)
+                || denied(player, player.serverLevel(), target.blockPosition(), Flag.FIRE))
+        || target instanceof net.minecraft.world.Container
+            && denied(player, player.serverLevel(), target.blockPosition(), Flag.CONTAINERS);
+  }
+
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void entity(PlayerInteractEvent.EntityInteract e) {
     if (e.getEntity() instanceof ServerPlayer p) {
@@ -384,12 +438,7 @@ public final class Protection {
         e.setCancellationResult(InteractionResult.SUCCESS);
         return;
       }
-      Flag f =
-          app.compat.npc(e.getTarget())
-                  || e.getTarget() instanceof net.minecraft.world.entity.npc.Villager
-              ? Flag.NPC_TRADING
-              : Flag.ENTITY_INTERACT;
-      if (denied(p, p.serverLevel(), e.getTarget().blockPosition(), f)) {
+      if (entityDenied(p, e.getTarget(), p.getItemInHand(e.getHand()))) {
         e.setCanceled(true);
         e.setCancellationResult(InteractionResult.FAIL);
       }
@@ -407,8 +456,7 @@ public final class Protection {
       return;
     }
     if (e.getEntity() instanceof ServerPlayer p
-        && !app.compat.npc(e.getTarget())
-        && denied(p, p.serverLevel(), e.getTarget().blockPosition(), Flag.ENTITY_INTERACT)) {
+        && entityDenied(p, e.getTarget(), p.getItemInHand(e.getHand()))) {
       e.setCanceled(true);
       e.setCancellationResult(InteractionResult.FAIL);
     }

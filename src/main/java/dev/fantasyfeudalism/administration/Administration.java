@@ -36,6 +36,7 @@ public final class Administration {
   public SignShops signShops;
   public AdminPowers adminPowers;
   public Protection protection;
+  public RegionActions regionActions;
   public Economy economy;
   public MinecraftServer server;
   public final Path settingsFile = FMLPaths.CONFIGDIR.get().resolve("ffa/server.toml");
@@ -86,6 +87,8 @@ public final class Administration {
       signShops = new SignShops(this);
       adminPowers = new AdminPowers(this);
       protection = new Protection(this);
+      regionActions = new RegionActions(this);
+      NeoForge.EVENT_BUS.register(regionActions);
       whispers = new Whispers(this);
       vanish = new Vanish(this);
       NeoForge.EVENT_BUS.register(whispers);
@@ -129,6 +132,7 @@ public final class Administration {
     if (adminPowers != null) NeoForge.EVENT_BUS.unregister(adminPowers);
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
     if (protection != null) NeoForge.EVENT_BUS.unregister(protection);
+    if (regionActions != null) NeoForge.EVENT_BUS.unregister(regionActions);
     if (commandPermissions != null) commandPermissions.close();
     if (chatStyles != null) NeoForge.EVENT_BUS.unregister(chatStyles);
     if (vanish != null) NeoForge.EVENT_BUS.unregister(vanish);

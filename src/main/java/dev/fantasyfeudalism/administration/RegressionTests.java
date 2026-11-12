@@ -215,6 +215,7 @@ public final class RegressionTests {
       ToolsRegression.verify(h, p, app);
       UsabilityRegression.verify(h, p, app);
       ProjectileRegression.verify(h, p, app);
+      ActionRegression.verify(h, p, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");

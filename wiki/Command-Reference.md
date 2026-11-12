@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.3.2**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.4.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -39,7 +39,7 @@ The first two commands show help. `spawn` teleports players. The remaining selec
 /ffa region interaction <name> <block_id> <allow|remove>
 /ffa region item <name> <item_id> <allow|remove>
 /ffa region title <name> <entry|exit> color <color>
-/ffa region title <name> <entry|exit> <bold|italic> <true|false>
+/ffa region title <name> <entry|exit> <bold|italic|underline> <true|false>
 /ffa region access <name> <mode> [value]
 ```
 
@@ -140,8 +140,10 @@ Shop quantities: 1..2304, subject to actual funds/items/space. Prices: -1 disabl
 /ffa chat titlecolor <color>
 /ffa chat bold <true|false>
 /ffa chat italic <true|false>
+/ffa chat underline <true|false>
 /ffa chat titlebold <true|false>
 /ffa chat titleitalic <true|false>
+/ffa chat titleunderline <true|false>
 /ffa chat inherit <property>
 /ffa chat view
 /ffa chat view <player_or_uuid>

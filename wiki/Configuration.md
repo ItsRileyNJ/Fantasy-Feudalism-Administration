@@ -94,7 +94,7 @@ Create the initial region in-game, then edit its generated entry. The [complete 
 | `settlementOverride` | Explicitly accept overlap with a Mercenaries claimed settlement |
 | `entry`, `exit` | Title text; defaults `Entering {name}` / `Leaving {name}`; empty strings disable them |
 | `entryColor`, `exitColor` | Minecraft color name or `#RRGGBB`; defaults green/yellow |
-| `entryBold`, `exitBold`, `entryItalic`, `exitItalic` | Boolean title styles; default false |
+| `entryBold`, `exitBold`, `entryItalic`, `exitItalic`, `entryUnderlined`, `exitUnderlined` | Boolean title styles; default false |
 | `items` | Per-region usable item IDs; default empty, independent of the parent |
 | `interactions` | List of allowed block IDs for that region, e.g. `["minecraft:oak_door"]` |
 | `[regions.access]` | `mode` and `value` for public/admin/permission/group/team arrival access |
@@ -117,3 +117,5 @@ These optional keys default as shown when loading older files. Edit their existi
 | `moderation.maximumDurationSeconds` | `31536000` | Maximum punishment duration, 1..31536000 seconds; defaults must be within it |
 
 Jail cells, punishments, god mode, linked shop signs and latest back locations are persisted in `state.json`. Configure them through commands, without live-editing financial state.
+
+The 0.4.0 action flags are optional additions to `[defaults]`: older files load them as false. Their names and behavior are listed in [Flags and interactions](Flags-and-Interactions.md). Region underline fields are also optional and default to false. Config/state versions remain 1.

@@ -156,6 +156,16 @@ final class UsabilityRegression {
       h.assertTrue(
           cmd(app, "ffa ranks nodes player", staff) == 1,
           "Rank node categories have readable help");
+      var homeValues = complete(app, staff, "ffa ranks node add member ffa.homes.maximum ");
+      h.assertTrue(
+          homeValues.contains("3")
+              && homeValues.stream().allMatch(value -> value.matches("[0-9]+")),
+          "Numeric home-limit suggestions contain whole numbers and no Boolean values");
+      h.assertTrue(
+          complete(app, staff, "ffa ranks node add member ffa.command.home ")
+              .containsAll(List.of("true", "false")),
+          "Boolean permission nodes retain true/false suggestions");
+
     } finally {
       app.regionVisuals.stop(admin);
       app.settings.standalone = standalone;
@@ -241,6 +251,7 @@ final class UsabilityRegression {
     cmd(app, "ffa region title Market entry color gold", staff);
     cmd(app, "ffa region title Market entry bold true", staff);
     cmd(app, "ffa region title Market entry italic true", staff);
+    cmd(app, "ffa region title Market entry underline true", staff);
     p.setPos(h.absoluteVec(new Vec3(2.5, 1, 4.5)));
     app.protection.update(p);
     outgoing(p);
@@ -274,6 +285,7 @@ final class UsabilityRegression {
                         && title.text().getString().equals("Arriving Market")
                         && title.text().getStyle().isBold()
                         && title.text().getStyle().isItalic()
+                        && title.text().getStyle().isUnderlined()
                         && title.text().getStyle().getColor().getValue() == 0xFFAA00),
         "Entry-only notice keeps configured text, color and formatting at subtitle size");
     RegionTitles.show(p, market, null);

@@ -114,7 +114,8 @@ final class CommandTree {
                                   (c, b) ->
                                       SharedSuggestionProvider.suggest(ChatStyles.COLORS, b))))
               .then(node("bold").then(choices("value", "true", "false")))
-              .then(node("italic").then(choices("value", "true", "false"))));
+              .then(node("italic").then(choices("value", "true", "false")))
+              .then(node("underline").then(choices("value", "true", "false"))));
     region.then(node("title").then(title));
     region.then(node("access").then(withAccess(saved("region", Saved.REGION))));
     root.then(region);

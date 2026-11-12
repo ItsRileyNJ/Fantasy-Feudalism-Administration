@@ -8,7 +8,7 @@ This is a development build, not a certification against every mod combination o
 
 - CI runs the build, policy checks and headless regression suite on Ubuntu and Windows. Atomic-save coverage includes creation, UTF-8 replacement, truncation, replacement failures and temporary-file cleanup.
 - Java 21 compilation against NeoForge **21.1.262**, Minecraft **1.21.1**.
-- **102** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
+- **118** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
 - Headless NeoForge runtime regression suite with actual ServerPlayers, mock network connections, real vanilla player saves, loaded mixins and registered production event handlers.
 - The runtime suite was also run with the exact uploaded **Mercenaries 1.20.4**, **Easy NPC 7.18.0**, and **Easy NPC Config UI 7.18.0** JARs installed together.
 - Runtime assertions include Adventure Mode entry and original-mode restoration, administrator exemption, inventory/XP preservation, hunger/saturation freezing, blocked fire placement, solid-destination rejection through vanilla teleport entry points, mob-spawn restrictions, purchases/sales and interrupted-transaction recovery settling once.
@@ -31,6 +31,10 @@ This is a development build, not a certification against every mod combination o
 - Version 0.3.1 projectile checks run a real flaming tipped arrow from outside spawn through vanilla collision and the registered impact event, verifying cancellation and unchanged health, fire, poison and motion. Additional cases cover player/mob/ownerless arrow damage, tridents without item destruction, fireballs and direct potion hits, PvP-only protection, child combat overrides, wilderness combat and administrator exemptions.
 
 - Version 0.3.2 packet checks verify entry-only and exit-only notices at subtitle size, clearing the previous large title, preserved custom text/color/bold/italic, combined parent/child transitions with independent styles, disabled-message silence and no chat announcements. The size ratio was checked against Minecraft 1.21.1’s renderer (main title 4x, subtitle 2x).
+
+- Version 0.4.0 checks the real rank-command completion results: home-limit values suggest whole numbers without Boolean choices, while Boolean command permissions retain true/false suggestions.
+
+- Version 0.4.0 checks safe new-flag defaults in legacy files, underline validation/round trips, actual hoe/seed/bone-meal/harvest/axe/shovel/shears/flint actions with build/interact disabled, blocked Q/menu/cursor drops without inventory loss, independent ground pickup, boat/minecart boarding and disembarking, player ignition/extinguishing, the existing elytra flag, administrator-assigned and rank-inherited underlines, and self-service permission/override/reset behavior.
 
 ## Remaining deployment acceptance checks
 
