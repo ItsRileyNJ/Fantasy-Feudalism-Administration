@@ -27,10 +27,17 @@ public final class RegionTitles {
     Component enter = current != null && !current.entry.isEmpty() ? text(current, true) : null;
     Component exit = previous != null && !previous.exit.isEmpty() ? text(previous, false) : null;
     if (enter == null && exit == null) return;
+    MutableComponent notice = (enter == null ? exit : enter).copy();
+    if (enter != null && exit != null)
+      notice
+          .append(
+              Component.literal(" · ")
+                  .withStyle(Style.EMPTY.withColor(0xAAAAAA).withBold(false).withItalic(false)))
+          .append(exit);
     player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 50, 20));
-    player.connection.send(new ClientboundSetTitleTextPacket(enter == null ? exit : enter));
-    player.connection.send(
-        new ClientboundSetSubtitleTextPacket(
-            enter != null && exit != null ? exit : Component.empty()));
+    // Vanilla renders the title at 4x and the subtitle at 2x; no arbitrary scale is available.
+    // A blank title starts the display timer and clears any previous large title.
+    player.connection.send(new ClientboundSetTitleTextPacket(Component.empty()));
+    player.connection.send(new ClientboundSetSubtitleTextPacket(notice));
   }
 }

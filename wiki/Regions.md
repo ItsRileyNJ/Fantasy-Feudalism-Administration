@@ -103,7 +103,7 @@ The current implementation tracks the **effective current region**. Moving from 
 
 For precise boundary changes, renaming, dimension changes, access or bulk edits, use the authoritative [region TOML file](Configuration.md). In-game edits refuse to overwrite external edits that have not yet been reloaded.
 
-Entering/leaving uses a large on-screen title, never a chat announcement. The defaults are `Entering {name}` and `Leaving {name}`. `{name}` means the display name; `{id}` means the region ID. When two transitions happen together, entry is the main title and exit is the subtitle. A player logging in inside a region receives its entry title. To suppress a parent exit title, use `/ffa region message spawn exit ""`.
+Entering/leaving uses a smaller centered on-screen notice, never a chat announcement. Vanilla clients render this at subtitle size, 50% smaller than the former main title; an exact 40% reduction would require client-side font changes. The defaults are `Entering {name}` and `Leaving {name}`. `{name}` means the display name; `{id}` means the region ID. When two transitions happen together, both appear on the smaller line as `Entering Child · Leaving Parent`, with each message keeping its own color and formatting. A player logging in inside a region receives its entry title. To suppress a parent exit title, use `/ffa region message spawn exit ""`.
 
 ## Choosing child or standalone
 
