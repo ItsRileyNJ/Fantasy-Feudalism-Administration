@@ -140,6 +140,23 @@ public final class ChatStyles {
     return result;
   }
 
+  public static String describe(Map<String, String> values) {
+    if (values == null || values.isEmpty()) return "Default chat appearance.";
+    return String.join(
+            ". ",
+            values.entrySet().stream()
+                .map(
+                    e -> {
+                      String key = e.getKey().replace('_', ' ');
+                      return Character.toUpperCase(key.charAt(0))
+                          + key.substring(1)
+                          + ": "
+                          + e.getValue();
+                    })
+                .toList())
+        + ".";
+  }
+
   public Component format(ServerPlayer player, Component original) {
     Map<String, String> values = effective(player);
     if (values.isEmpty()) return original;

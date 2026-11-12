@@ -8,7 +8,7 @@
 /ffa backup
 ```
 
-The private confirmation identifies the saved snapshot under `<world>/ffa/backups/<timestamp>/`. It includes:
+The snapshot is stored under `<world>/ffa/backups/<timestamp>/`; chat gives a short confirmation. It includes:
 
 - `state.json`: FFA account, shop, spawn, warp, portal, home, personal chat styles, vanish flags/prior modes, whisper approvals/monitor preferences and related state.
 - `server.toml`: general FFA settings.
@@ -39,7 +39,7 @@ To restore permissions alone, restore `ranks.json` with the server stopped. Use 
 
 Restoring an old `state.json` after trades can credit old currency while purchased items remain in player inventories. FFA therefore has no live snapshot-to-balance rollback command. Its own snapshot alone cannot safely undo every item transaction.
 
-Use a matching, consistent external stopped-server backup for a full financial/inventory rollback. For an investigated individual correction, use `/ffa economy set ONLINE_PLAYER AMOUNT` and retain the audit record; this sets a total, not a delta.
+Use a matching, consistent external stopped-server backup for a full financial/inventory rollback. For an investigated individual correction, use `/ffa balance set ONLINE_PLAYER AMOUNT` and retain the audit record; this sets a total, not a delta.
 
 ## Interrupted trades and failed saves
 

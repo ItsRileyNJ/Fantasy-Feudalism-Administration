@@ -8,7 +8,7 @@ This is a development build, not a certification against every mod combination o
 
 - CI runs the build, policy checks and headless regression suite on Ubuntu and Windows. Atomic-save coverage includes creation, UTF-8 replacement, truncation, replacement failures and temporary-file cleanup.
 - Java 21 compilation against NeoForge **21.1.262**, Minecraft **1.21.1**.
-- **90** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
+- **102** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
 - Headless NeoForge runtime regression suite with actual ServerPlayers, mock network connections, real vanilla player saves, loaded mixins and registered production event handlers.
 - The runtime suite was also run with the exact uploaded **Mercenaries 1.20.4**, **Easy NPC 7.18.0**, and **Easy NPC Config UI 7.18.0** JARs installed together.
 - Runtime assertions include Adventure Mode entry and original-mode restoration, administrator exemption, inventory/XP preservation, hunger/saturation freezing, blocked fire placement, solid-destination rejection through vanilla teleport entry points, mob-spawn restrictions, purchases/sales and interrupted-transaction recovery settling once.
@@ -23,6 +23,10 @@ This is a development build, not a certification against every mod combination o
 - Consent tests cover withheld first-message bodies, clickable/native token acceptance, permanent UUID approval and revocation, stale/replayed/expired requests, denied requests, monitoring copies and persisted per-admin monitoring controls.
 - Staff-tool runtime checks cover live editable inventory packets while vanished, actual vanilla player-data persistence, armor updates, locked padding and closing inspections before item trades; public Stats fields and real Mercenaries settlement names are checked.
 - Vanish checks cover ordinary/spectator tracking, tab update/removal packets and new observers, native/FFA names, `/list`, direct selectors/tell, hidden public Stats/whispers, suppressed joins, reconnect persistence, mode restoration and privilege revocation. Actual TCP status handling (including stale JSON bypass), both legacy ping response formats and GS4 full-query response builders are exercised without opening external sockets.
+
+- Version 0.3.0 checks cover mixed-case homes/regions, concise private confirmations, explicit child/standalone creation and inherited rule overrides, real block placement/mining in building children, per-region item lists, title packets/styles without chat, continuing/cancelled boundary particles, sign binding and click trades through the real journal, label updates and persistence.
+- Travel/moderation checks cover successful vanilla teleport origins, actual death and respawn history, rejected destination preservation, two occupied jail cells, escape correction and blocked teleport/drop/command routes, real-time deadlines including offline expiry, spawn release, chat/warp-ban scope, administrator exemption, configurable portal creation, god damage immunity and explicit smite overriding FFA protection/god mode.
+- Additional standalone assertions verify legacy config/region defaults, case-insensitive duplicate rejection, duration limits/overflow and item/title TOML round trips.
 
 ## Remaining deployment acceptance checks
 

@@ -5,12 +5,19 @@ configVersion = 1
 [administration]
 # Operator permission level 2..4. Operators bypass gameplay protection, never transaction checks.
 operatorLevel = 2
-# Private detailed feedback; audit records always include timestamp, location and actor.
-verboseFeedback = true
+# Legacy setting retained for compatibility. Chat feedback stays concise; audit logs retain details.
+verboseFeedback = false
 [permissions]
 # FTB Ranks, LuckPerms, then built-in rank nodes ffa.command.<name> override this fallback.
 # Administrator management always requires operator level or the documented management node.
 defaultPlayerCommands = true
+[moderation]
+defaultJailSeconds = 300
+defaultChatBanSeconds = 300
+defaultWarpBanSeconds = 300
+maximumDurationSeconds = 31536000
+[portals]
+adminCreationOnly = true
 [dimension]
 # Restart required. No terrain or automatic platform is generated. Build before setting spawn.
 enabled = false
@@ -20,7 +27,8 @@ economy = true
 homes = true
 tpa = true
 portals = true
-back = false
+# Legacy compatibility flag; /ffa back is always available and controlled by permissions.
+back = true
 rtp = false
 pay = false
 leaderboard = false

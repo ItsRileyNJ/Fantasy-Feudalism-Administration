@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [Whispers and stats](Whispers-and-Stats.md) · [Permissions](Permissions-and-Access.md)
 
-These **0.2.0** tools require an in-game operator at the configured level or full `ffa.admin` authority. They are hidden from ordinary players' command trees and `/ffa help`. Giving a rank nickname permission does not unlock them.
+These **0.3.0** tools require an in-game operator at the configured level or full `ffa.admin` authority. They are hidden from ordinary players' command trees and `/ffa help`. Giving a rank nickname permission does not unlock them.
 
 ## Vanish
 
@@ -52,3 +52,14 @@ If either participant starts an FFA shop item trade, the inspection closes befor
 Player inventories are saved and read back for verification after edits and on close. A save-verification failure stops the editor and reports the player-data error to the administrator/server log; resolve the storage problem before further edits. Administrative edits follow vanilla cursor/drop behavior and are not the Denar transaction journal or a crash-proof inventory rollback system. Keep normal stopped-server world/player-data backups.
 
 Commands and edit results use private feedback. The FFA audit identifies the editor, target and save result. It does not create a staff-wide chat announcement for each edit.
+
+## God mode and smite
+
+```text
+/ffa god
+/ffa smite Alice
+```
+
+`god` toggles immediate invulnerability for the administrator using it. It survives reconnects and respawns; toggling off restores normal mode-dependent vulnerability. Losing full administrator rights removes FFA god mode. Ordinary administrator protection bypass alone does not grant god mode.
+
+`smite` produces a visual lightning strike on the online target and immediately kills them. The strike avoids collateral lightning fire. It intentionally overrides FFA region damage protection and FFA god mode; another mod can still veto death. Use the real online account name. Both commands are hidden from nonadministrators.

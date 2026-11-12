@@ -48,9 +48,12 @@ public final class Model {
     public Kind kind;
     public int minX, minZ, maxX, maxZ, priority;
     public boolean settlementOverride;
-    public String entry = "", exit = "";
+    public String entry = "Entering {name}", exit = "Leaving {name}";
+    public String entryColor = "green", exitColor = "yellow";
+    public boolean entryBold, entryItalic, exitBold, exitItalic;
     public Map<Flag, Boolean> flags = new EnumMap<>(Flag.class);
     public Set<String> interactions = new LinkedHashSet<>();
+    public Set<String> items = new LinkedHashSet<>();
     public Access access = new Access();
 
     public boolean contains(double x, double z) {
@@ -131,11 +134,41 @@ public final class Model {
     public Map<String, Point> homes = new TreeMap<>();
     public Set<String> ignored = new HashSet<>();
     public Point back;
+    public boolean god, godPreviousInvulnerable;
+    public Map<String, Punishment> punishments = new TreeMap<>();
   }
 
   public static final class Shop {
     public String item = "minecraft:stone";
     public long buy = 1, sell = 0;
+  }
+
+  public static final class JailCell {
+    public String id, dimension;
+    public int minX, minY, minZ, maxX, maxY, maxZ;
+    public Point arrival;
+    public boolean settlementOverride;
+
+    public boolean contains(Point point) {
+      return dimension.equals(point.dimension)
+          && point.x >= minX
+          && point.x < maxX + 1.0
+          && point.y >= minY
+          && point.y < maxY + 1.0
+          && point.z >= minZ
+          && point.z < maxZ + 1.0;
+    }
+  }
+
+  public static final class Punishment {
+    public long until;
+    public String reason = "", cell = "", previousMode = "survival";
+  }
+
+  public static final class ShopSign {
+    public String dimension, shop, token;
+    public int x, y, z, quantity = 1;
+    public boolean wasWaxed;
   }
 
   public static final class PendingTrade {
@@ -151,5 +184,7 @@ public final class Model {
     public Map<String, PlayerData> players = new TreeMap<>();
     public Map<String, Shop> shops = new TreeMap<>();
     public Map<String, PendingTrade> trades = new TreeMap<>();
+    public Map<String, JailCell> jailCells = new TreeMap<>();
+    public Map<String, ShopSign> shopSigns = new TreeMap<>();
   }
 }

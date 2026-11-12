@@ -26,7 +26,7 @@ Test with a nonoperator, non-`ffa.admin` account. Administrators are exempt even
 
 ## A command is red, hidden, or incomplete
 
-Use Tab and the [exact reference](Command-Reference.md). Namespaced block/item IDs need their namespace, e.g. `minecraft:stone`. Quote messages or team-center strings containing spaces. Region/warp/home IDs are lowercase letters, digits, underscores or hyphens; there is no unnamed `/ffa home` in this release.
+Use Tab and the [exact reference](Command-Reference.md). Namespaced block/item IDs need their namespace, e.g. `minecraft:stone`. Quote messages or team-center strings containing spaces. Region and home names accept uppercase/lowercase letters, digits, underscores or hyphens; warp IDs remain lowercase; there is no unnamed `/ffa home` in this release.
 
 A hidden command can be a permission/module restriction, not a missing installation. With `defaultPlayerCommands = false`, delegated staff may need the relevant command-family permission as well as a management node.
 

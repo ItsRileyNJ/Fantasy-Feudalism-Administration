@@ -23,6 +23,7 @@ public final class Administration {
   public Settings settings;
   public Storage storage;
   public Regions regions;
+  public RegionVisuals regionVisuals;
   public Compat compat;
   public Ranks ranks;
   public CommandPermissions commandPermissions;
@@ -30,6 +31,10 @@ public final class Administration {
   public Vanish vanish;
   public Whispers whispers;
   public Teleports teleports;
+  public BackHistory backHistory;
+  public Moderation moderation;
+  public SignShops signShops;
+  public AdminPowers adminPowers;
   public Protection protection;
   public Economy economy;
   public MinecraftServer server;
@@ -74,6 +79,12 @@ public final class Administration {
       regions.reload(server, settings, compat);
       teleports = new Teleports(this);
       economy = new Economy(this);
+      regionVisuals = new RegionVisuals(this);
+      NeoForge.EVENT_BUS.register(regionVisuals);
+      backHistory = new BackHistory(this);
+      moderation = new Moderation(this);
+      signShops = new SignShops(this);
+      adminPowers = new AdminPowers(this);
       protection = new Protection(this);
       whispers = new Whispers(this);
       vanish = new Vanish(this);
@@ -85,6 +96,9 @@ public final class Administration {
       Portals.reindex(this);
       NeoForge.EVENT_BUS.register(teleports);
       NeoForge.EVENT_BUS.register(protection);
+      NeoForge.EVENT_BUS.register(backHistory);
+      NeoForge.EVENT_BUS.register(moderation);
+      NeoForge.EVENT_BUS.register(adminPowers);
       for (var portal : storage.state().portals.values()) Portals.visualize(this, portal);
       LOG.info(
           "FFA enabled; server-only protection. FTB Essentials detected: {}",
@@ -109,6 +123,10 @@ public final class Administration {
   }
 
   private void stop(ServerStoppedEvent e) {
+    if (regionVisuals != null) NeoForge.EVENT_BUS.unregister(regionVisuals);
+    if (backHistory != null) NeoForge.EVENT_BUS.unregister(backHistory);
+    if (moderation != null) NeoForge.EVENT_BUS.unregister(moderation);
+    if (adminPowers != null) NeoForge.EVENT_BUS.unregister(adminPowers);
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
     if (protection != null) NeoForge.EVENT_BUS.unregister(protection);
     if (commandPermissions != null) commandPermissions.close();
@@ -127,7 +145,6 @@ public final class Administration {
           "Wait until pending teleports/trades finish before reload");
     if (candidate.homes != settings.homes
         || candidate.tpa != settings.tpa
-        || candidate.back != settings.back
         || candidate.rtp != settings.rtp
         || candidate.pay != settings.pay
         || candidate.leaderboard != settings.leaderboard

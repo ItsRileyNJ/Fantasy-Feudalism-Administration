@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [Permission nodes](Permissions-and-Access.md) · [Command reference](Command-Reference.md)
 
-Available in **0.2.0**. FFA includes its own server-side ranks manager; players need no additional client mod. Use `/ffa ranks` and Tab. FTB Ranks keeps `/ftbranks` and its own data when installed.
+Available in **0.3.0**. FFA includes its own server-side ranks manager; players need no additional client mod. Use `/ffa ranks` and Tab. FTB Ranks keeps `/ftbranks` and its own data when installed.
 
 ## Create and assign your first rank
 
@@ -144,6 +144,48 @@ General `/ffa reload` continues to reload server settings/regions; it does not r
 
 `/ffa backup` now includes `ranks.json`. To restore permissions, stop the server, retain the current file, restore the chosen ranks file and restart. Restoring ranks does not require restoring balances. Full economy rollbacks still need matching player inventories as described in [recovery](Backups-and-Recovery.md).
 
-Limits: 256 ranks, 4096 nodes per rank, 32 direct parents per rank, powers -1000000..1000000, 100000 explicit UUID records. Permission node names use lowercase letters/numbers, underscores, hyphens and colons separated by dots, up to 256 characters. Rank IDs follow the normal 1..48-character FFA identifier rule.
+Limits: 256 ranks, 4096 nodes per rank, 32 direct parents per rank, powers -1000000..1000000, 100000 explicit UUID records. Permission node names use lowercase letters/numbers, underscores, hyphens and colons separated by dots, up to 256 characters. Rank IDs use 1..48 lowercase letters, digits, underscores or hyphens.
 
 Values can be Boolean, signed 32-bit whole integers, or strings up to 512 characters. `ffa.homes.maximum` specifically requires 0..1000; FTB Essentials still owns its own homes when installed. Strings can supply the [built-in chat style metadata](Chat-and-Nicknames.md), including titles and colors. FFA does not implement timed ranks, FTB condition expressions or automatic migration of another mod's rank files. Built-in ranks use their own JSON format rather than FTB's SNBT.
+
+## What a node means, and which ones you need
+
+A **rank** is a named collection of settings. A **node** is one setting's exact name. You do not need to configure every node offered by Tab. Most servers can start with the empty default `member` rank and add a few privileges to higher ranks.
+
+| Node/value | Effect | Example |
+| --- | --- | --- |
+| Permission + `true` | Allows an action | `ffa.chat.nickname true` lets a player set their own nickname |
+| Permission + `false` | Explicitly refuses an action | `ffa.command.pay false` blocks transfers |
+| Limit + whole number | Sets a numeric limit | `ffa.homes.maximum 5` allows five homes |
+| Style metadata + text | Supplies the rank's default appearance | `ffa.chat.style.title "Noble"` supplies a title |
+| `command.…` + Boolean | Allows/refuses another registered command branch | `command.time true` grants access to `/time` |
+
+Permission to edit appearance and a default appearance are separate. Giving `ffa.chat.nickname true` does not choose a nickname; giving style metadata does not let members edit it. See the exact style nodes in [chat styling](Chat-and-Nicknames.md).
+
+A practical nonadministrator noble rank:
+
+```text
+/ffa ranks create noble 20
+/ffa ranks node add noble ffa.homes.maximum 5
+/ffa ranks node add noble ffa.chat.nickname true
+/ffa ranks node add noble ffa.chat.style.title "Noble"
+/ffa ranks node add noble ffa.chat.style.title_color gold
+/ffa ranks add Alice noble
+```
+
+Alice can then run `/ffa chat nickname "Lady Alice"`. Giving this rank `ffa.admin` would also exempt its members from region restrictions and unlock full staff tools, so only add that node to your actual administrator rank. Region editors use `ffa.region.edit`; that grants editing without the gameplay exemption.
+
+To find a short explanation in game:
+
+```text
+/ffa ranks nodes player
+/ffa ranks nodes staff 1
+/ffa ranks nodes chat
+/ffa ranks nodes style
+/ffa ranks nodes limits
+/ffa ranks nodes commands
+```
+
+These lists show six nodes per page and describe the accepted value. Tab begins with common FFA nodes and nodes you have already saved; hover suggestions for their meanings. To explore the many vanilla/mod command nodes, begin typing `command.` in the permission argument. `/ffa ranks refresh_readme` writes the complete installed command tree to a file instead of flooding chat.
+
+Use `/ffa ranks node remove noble NODE` to undo a setting and return to inheritance/fallback. Use `false` only when you intend an explicit denial. Higher power wins between active ranks; inheritance makes another rank active rather than copying its settings. Existing explicit FTB Ranks decisions still take precedence, so inspect those too if a local change appears ineffective.

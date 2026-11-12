@@ -31,7 +31,7 @@ Operators at `administration.operatorLevel` have management rights. The default 
 
 `permissions.defaultPlayerCommands = true` is the player-command fallback. An explicit provider decision overrides that fallback; operators/full FFA administrators retain their exemption. If you set the fallback to false, grant the desired command-family nodes.
 
-For delegated staff who are not full administrators, spawn management, warp-access edits and shop management also pass their public command-family checks. Grant `ffa.command.spawn`, `ffa.command.warp`, or `ffa.command.shop` as applicable alongside the management node. There are no separate per-flag editing permissions in 0.2.0.
+For delegated staff who are not full administrators, spawn management, warp-access edits and shop management also pass their public command-family checks. Grant `ffa.command.spawn`, `ffa.command.warp`, or `ffa.command.shop` as applicable alongside the management node. There are no separate per-flag editing permissions in 0.3.0.
 
 FTB Ranks explicit Boolean decisions take precedence over LuckPerms, followed by FFA's built-in ranks. The [built-in ranks guide](Ranks.md) covers creation, assignment, default ranks, inheritance, priority, wildcards and explicit command permissions. A fresh install creates only an empty default member rank. Use `/ffa ranks` for local ranks, `/ftbranks` for external FTB ranks.
 

@@ -27,7 +27,44 @@ final class RankCommands {
                                 "/ffa ranks"
                                     + " create|delete|list|info|add|remove|player|power|default|parent|node|check|reload."
                                     + " See the Ranks wiki.")));
-    root.then(literal("list").executes(c -> run(c, () -> tell(c, app().ranks.ids().toString()))));
+    root.then(
+        literal("nodes")
+            .executes(
+                c ->
+                    run(
+                        c,
+                        () ->
+                            tell(
+                                c,
+                                "Node groups: player, staff, chat, style, limits, commands. Use"
+                                    + " /ffa ranks nodes GROUP [PAGE].")))
+            .then(
+                argument("category", StringArgumentType.word())
+                    .suggests(
+                        (c, b) ->
+                            SharedSuggestionProvider.suggest(PermissionCatalog.categories(), b))
+                    .executes(
+                        c ->
+                            run(
+                                c,
+                                () ->
+                                    PermissionCatalog.explain(text(c, "category"), 1)
+                                        .forEach(line -> tell(c, line))))
+                    .then(
+                        argument("page", IntegerArgumentType.integer(1))
+                            .executes(
+                                c ->
+                                    run(
+                                        c,
+                                        () ->
+                                            PermissionCatalog.explain(
+                                                    text(c, "category"),
+                                                    IntegerArgumentType.getInteger(c, "page"))
+                                                .forEach(line -> tell(c, line)))))));
+    root.then(
+        literal("list")
+            .executes(
+                c -> run(c, () -> tell(c, "Ranks: " + String.join(", ", app().ranks.ids())))));
     root.then(
         literal("create")
             .then(
@@ -67,7 +104,8 @@ final class RankCommands {
                                 () ->
                                     tell(
                                         c,
-                                        Storage.JSON.toJson(
+                                        describeRank(
+                                            text(c, "rank"),
                                             require(app().ranks.copy(), text(c, "rank"))))))));
     root.then(
         literal("power")
@@ -379,6 +417,20 @@ final class RankCommands {
         });
   }
 
+  private static String describeRank(String name, Ranks.Rank rank) {
+    return "Rank: "
+        + name
+        + ". Priority: "
+        + rank.power
+        + ". Default: "
+        + (rank.defaultRank ? "yes" : "no")
+        + ". Inherits: "
+        + (rank.parents.isEmpty() ? "none" : String.join(", ", rank.parents))
+        + ". Permission rules: "
+        + rank.permissions.size()
+        + ".";
+  }
+
   private static Administration app() {
     return Administration.INSTANCE;
   }
@@ -417,35 +469,17 @@ final class RankCommands {
     return argument("permission", StringArgumentType.string())
         .suggests(
             (c, b) -> {
-              Set<String> keys =
-                  new TreeSet<>(
-                      List.of(
-                          "ffa.admin",
-                          "ffa.ranks.manage",
-                          "ffa.region.edit",
-                          "ffa.spawn.manage",
-                          "ffa.warp.manage",
-                          "ffa.portal.manage",
-                          "ffa.shop.manage",
-                          "ffa.economy.manage",
-                          "ffa.reload",
-                          "ffa.backup",
-                          "ffa.homes.maximum",
-                          "ffa.chat.manage",
-                          "ffa.chat.nickname",
-                          "ffa.chat.title",
-                          "ffa.chat.color",
-                          "ffa.chat.format",
-                          "ffa.homes.unlimited",
-                          "ffa.command.spawn",
-                          "ffa.command.home",
-                          "ffa.command.shop"));
-              for (var r : app().ranks.copy().ranks.values()) keys.addAll(r.permissions.keySet());
-              for (String property : ChatStyles.PROPERTIES) keys.add(ChatStyles.PREFIX + property);
-              keys.addAll(app().commandPermissions.nodes());
-              return SharedSuggestionProvider.suggest(
-                  keys.stream().map(k -> k.contains("*") || k.contains(":") ? "\"" + k + "\"" : k),
-                  b);
+              Set<String> keys = new TreeSet<>(PermissionCatalog.common());
+              for (var rank : app().ranks.copy().ranks.values())
+                keys.addAll(rank.permissions.keySet());
+              String prefix = b.getRemaining().toLowerCase(Locale.ROOT).replace("\"", "");
+              if (prefix.startsWith("command.")) keys.addAll(app().commandPermissions.nodes());
+              for (String key : keys)
+                if (key.toLowerCase(Locale.ROOT).startsWith(prefix))
+                  b.suggest(
+                      key.contains("*") || key.contains(":") ? "\"" + key + "\"" : key,
+                      new com.mojang.brigadier.LiteralMessage(PermissionCatalog.description(key)));
+              return b.buildFuture();
             });
   }
 

@@ -17,12 +17,19 @@ configVersion = 1
 [administration]
 # Operator permission level 2..4. Operators bypass gameplay protection, never transaction checks.
 operatorLevel = 2
-# Private detailed feedback; audit records always include timestamp, location and actor.
-verboseFeedback = true
+# Legacy setting retained for compatibility. Chat feedback stays concise; audit logs retain details.
+verboseFeedback = false
 [permissions]
 # FTB Ranks, LuckPerms, then built-in rank nodes ffa.command.<name> override this fallback.
 # Administrator management always requires operator level or the documented management node.
 defaultPlayerCommands = true
+[moderation]
+defaultJailSeconds = 300
+defaultChatBanSeconds = 300
+defaultWarpBanSeconds = 300
+maximumDurationSeconds = 31536000
+[portals]
+adminCreationOnly = true
 [dimension]
 # Restart required. No terrain or automatic platform is generated. Build before setting spawn.
 enabled = false
@@ -32,7 +39,8 @@ economy = true
 homes = true
 tpa = true
 portals = true
-back = false
+# Legacy compatibility flag; /ffa back is always available and controlled by permissions.
+back = true
 rtp = false
 pay = false
 leaderboard = false
@@ -111,6 +119,11 @@ teleport_out = true
 home_creation = false
 """;
   public int queuedLoads, loadTimeout;
+  public int defaultJailSeconds,
+      defaultChatBanSeconds,
+      defaultWarpBanSeconds,
+      maximumDurationSeconds;
+  public boolean adminPortalCreationOnly;
   public int operatorLevel,
       homeMax,
       cooldown,
@@ -153,6 +166,28 @@ home_creation = false
     try (var c = CommentedFileConfig.of(file)) {
       c.load();
       Settings s = new Settings();
+      s.adminPortalCreationOnly =
+          c.contains("portals.adminCreationOnly") ? bool(c, "portals.adminCreationOnly") : true;
+      s.defaultJailSeconds =
+          c.contains("moderation.defaultJailSeconds")
+              ? integer(c, "moderation.defaultJailSeconds", 1, 31536000)
+              : 300;
+      s.defaultChatBanSeconds =
+          c.contains("moderation.defaultChatBanSeconds")
+              ? integer(c, "moderation.defaultChatBanSeconds", 1, 31536000)
+              : 300;
+      s.defaultWarpBanSeconds =
+          c.contains("moderation.defaultWarpBanSeconds")
+              ? integer(c, "moderation.defaultWarpBanSeconds", 1, 31536000)
+              : 300;
+      s.maximumDurationSeconds =
+          c.contains("moderation.maximumDurationSeconds")
+              ? integer(c, "moderation.maximumDurationSeconds", 1, 31536000)
+              : 31536000;
+      if (Math.max(s.defaultJailSeconds, Math.max(s.defaultChatBanSeconds, s.defaultWarpBanSeconds))
+          > s.maximumDurationSeconds)
+        throw new IllegalArgumentException(
+            "Default punishments cannot exceed the maximum duration.");
       if (scalar(c, "configVersion", Number.class).intValue() != 1)
         throw new IllegalArgumentException("Unsupported configVersion; back up before migration.");
       s.operatorLevel = integer(c, "administration.operatorLevel", 2, 4);

@@ -49,6 +49,10 @@ public final class Teleports {
     return System.nanoTime() / 1_000_000;
   }
 
+  public boolean busyFor(ServerPlayer p) {
+    return waiting.containsKey(p.getUUID()) || loading.containsKey(p.getUUID());
+  }
+
   public boolean busy() {
     return !waiting.isEmpty() || !loading.isEmpty();
   }
@@ -70,6 +74,9 @@ public final class Teleports {
 
   public String validate(ServerPlayer p, Point dest) {
     if (dest == null) return "Destination is not configured.";
+    if (app.moderation != null
+        && app.moderation.confined(p)
+        && !app.moderation.permittedMove(p, dest)) return "You cannot teleport while jailed.";
     if (!Double.isFinite(dest.x)
         || !Double.isFinite(dest.y)
         || !Double.isFinite(dest.z)
@@ -98,7 +105,10 @@ public final class Teleports {
     if (!(app.compat.admin(p) && p.getAbilities().mayfly)
         && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty())
       return "Destination has no safe support.";
-    if (!app.compat.admin(p)) {
+    if (!app.compat.admin(p)
+        && !(app.moderation != null && app.moderation.permittedMove(p, dest))) {
+      if (app.moderation != null && app.moderation.cellAt(level, pos))
+        return "You cannot teleport into a jail cell.";
       if (!app.regions.allowed(p.serverLevel(), p.blockPosition(), Flag.TELEPORT_OUT, app.settings)
           || !app.regions.allowed(level, pos, Flag.TELEPORT_IN, app.settings))
         return app.settings.denied;
@@ -115,7 +125,9 @@ public final class Teleports {
     if (app.storage.state().trades.containsKey(p.getUUID().toString()))
       throw new IllegalArgumentException(
           "Resolve the pending shop transaction before teleporting.");
-    if (!app.compat.admin(p) && cooldowns.getOrDefault(p.getUUID(), 0L) > now())
+    if (!app.compat.admin(p)
+        && !(app.moderation != null && app.moderation.forcing(p))
+        && cooldowns.getOrDefault(p.getUUID(), 0L) > now())
       throw new IllegalArgumentException("Teleport cooldown is active.");
     String error = validate(p, destination);
     if (error != null && error.startsWith("Destination chunk is unloaded")) {
@@ -146,21 +158,24 @@ public final class Teleports {
   private void execute(ServerPlayer p, Point dest) throws Exception {
     String error = validate(p, dest);
     if (error != null) throw new IllegalArgumentException(error);
-    Point old = point(p);
     p.closeContainer();
     p.teleportTo(level(dest), dest.x, dest.y, dest.z, dest.yaw, dest.pitch);
     // External protection mods may veto transit. Do not record successful arrival in that case.
     if (!point(p).dimension.equals(dest.dimension)
         || p.position().distanceToSqr(new Vec3(dest.x, dest.y, dest.z)) > 0.01)
       throw new IllegalArgumentException("Teleport was declined by another server rule.");
-    app.storage.update(s -> s.players.get(p.getUUID().toString()).back = old);
+
     cooldowns.put(p.getUUID(), now() + app.settings.cooldown * 1000L);
     portalCooldowns.put(p.getUUID(), now() + app.settings.portalCooldown * 1000L);
     app.protection.update(p);
-    tell(p, "Teleported.");
+    boolean forced = app.moderation != null && app.moderation.forcing(p);
+    if (app.moderation != null) app.moderation.arrived(p);
+    if (!forced) tell(p, "Teleported.");
   }
 
   public void warp(ServerPlayer p, String name) throws Exception {
+    if (app.moderation != null && app.moderation.banned(p, "warpban"))
+      throw new IllegalArgumentException("You cannot use warps right now.");
     Warp w = app.storage.state().warps.get(name);
     if (w == null) throw new IllegalArgumentException("Unknown warp: " + name);
     ServerLevel l = level(w.point);
@@ -241,20 +256,32 @@ public final class Teleports {
   }
 
   public void cancel(ServerPlayer p) {
+    cancel(p, true);
+  }
+
+  public void cancel(ServerPlayer p, boolean notify) {
     boolean removed = waiting.remove(p.getUUID()) != null;
     removed |= loading.remove(p.getUUID()) != null;
     removed |= requests.entrySet().removeIf(e -> e.getValue().from.equals(p.getUUID()));
-    tell(p, removed ? "Cancelled." : "Nothing pending.");
+    if (notify) tell(p, removed ? "Cancelled." : "Nothing pending.");
   }
 
   public void home(ServerPlayer p, String name, boolean set, boolean delete) throws Exception {
+    var savedHomes = app.storage.player(p.getUUID()).homes;
+    String existing =
+        savedHomes.containsKey(name)
+            ? name
+            : savedHomes.keySet().stream()
+                .filter(k -> k.equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
     if (!set && !delete) {
-      Point pt = app.storage.player(p.getUUID()).homes.get(name);
+      Point pt = existing == null ? null : savedHomes.get(existing);
       if (pt == null) throw new IllegalArgumentException("Unknown home.");
       teleport(p, pt, false);
       return;
     }
-    Regions.checkId(name);
+    Regions.checkName(name);
     if (set) {
       if (!app.compat.admin(p) && !app.settings.homeDimensions.contains(point(p).dimension))
         throw new IllegalArgumentException("Homes are disabled in this dimension.");
@@ -263,22 +290,21 @@ public final class Teleports {
               p.serverLevel(), p.blockPosition(), Flag.HOME_CREATION, app.settings))
         throw new IllegalArgumentException("Homes cannot be created here.");
       if (!app.compat.admin(p)
-          && !app.storage.player(p.getUUID()).homes.containsKey(name)
+          && existing == null
           && app.storage.player(p.getUUID()).homes.size()
               >= app.compat.homeLimit(p, app.settings.homeMax)
           && !app.compat.permission(p, "ffa.homes.unlimited"))
         throw new IllegalArgumentException("Home limit reached.");
       String error = validate(p, point(p));
       if (error != null) throw new IllegalArgumentException(error);
-    } else if (!app.storage.player(p.getUUID()).homes.containsKey(name))
-      throw new IllegalArgumentException("Unknown home.");
+    } else if (existing == null) throw new IllegalArgumentException("Unknown home.");
     app.storage.update(
         s -> {
           var homes = s.players.get(p.getUUID().toString()).homes;
-          if (delete) homes.remove(name);
-          else homes.put(name, point(p));
+          if (existing != null) homes.remove(existing);
+          if (!delete) homes.put(name, point(p));
         });
-    tell(p, "Home " + name + (delete ? " deleted." : " saved."));
+    tell(p, delete ? "Home deleted." : "Home set.");
   }
 
   public void random(ServerPlayer p) throws Exception {

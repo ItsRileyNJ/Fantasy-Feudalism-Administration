@@ -80,6 +80,14 @@ Default command teleport cooldown: **3 seconds**. Default portal cooldown: **5 s
 /ffa portal delete market_gate
 ```
 
-Deleting a portal removes its definition and loaded visual markers, not its destination warp or world frame. FFA has no portal-resize command in 0.2.0: delete/recreate the trigger to change its geometry.
+Deleting a portal removes its definition and loaded visual markers, not its destination warp or world frame. FFA has no portal-resize command in 0.3.0: delete/recreate the trigger to change its geometry.
 
 `modules.portals = false` disables travel and portal management. Saved definitions remain; existing visual markers can remain visible. Re-enable the module to resume using them, or delete unwanted portals while it is enabled.
+
+## Restrict portal creation to administrators
+
+The optional `[portals]` setting `adminCreationOnly = true` is enabled by default, including for older configuration files. With it enabled, full administrators can create supported portals and ordinary players cannot. This includes vanilla Nether/End portal construction, supported tagged portal blocks/events, and new FFA portal definitions. Delegating `ffa.portal.manage` alone does not override it.
+
+Existing portals can still be used. For Nether travel, establish **both ends** as an administrator: a normal player's first trip cannot generate a missing destination portal. Natural/environmental portal creation without an administrator actor is also refused while the setting is enabled.
+
+Set `adminCreationOnly = false` and `/ffa reload` to restore normal portal-creation permissions; region flags and other mods' restrictions still apply. Custom mods that create entity portals or bypass vanilla/event/tag hooks need a specific compatibility adapter.

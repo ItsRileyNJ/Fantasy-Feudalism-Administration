@@ -80,7 +80,7 @@ public final class Portals {
         try {
           color(app, p, portal.id, dye.getDyeColor().getName());
         } catch (Exception e) {
-          Teleports.tell(p, "FAILED portal " + portal.id + ": " + e.getMessage());
+          Teleports.tell(p, "Portal " + portal.id + ": " + e.getMessage());
         }
         return true;
       }

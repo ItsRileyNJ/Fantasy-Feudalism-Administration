@@ -25,7 +25,7 @@ The default command cooldown is 3 seconds. The default warmup is zero; if the ad
 /ffa delhome base
 ```
 
-A name is required. Default limit: **3 homes**. Names use lowercase letters, digits, underscores and hyphens. Setting an existing name updates it.
+A name is required. Default limit: **3 homes**. Home names accept uppercase/lowercase letters, digits, underscores and hyphens. Lookup ignores case; setting an existing name updates it. Confirmation simply says “Home set.”
 
 By default, normal players can create homes only in the Overworld and cannot create them inside protected regions. The allowed-dimensions list governs **creation**; changing it does not automatically delete existing homes. Existing destinations still pass teleport safety and region checks. A reduced home limit does not delete homes already saved.
 
@@ -61,14 +61,14 @@ If the administrator enables `modules.privacy`, restart to enable:
 
 `tptoggle` switches acceptance of incoming requests on/off. `tpignore` toggles an online player in your stored ignore list; running it again removes that block. These preferences apply to the native FFA request system and do not stop authorized vanilla/admin `/tp`.
 
-## Optional back and random teleport
+## Back and optional random teleport
 
 ```text
 /ffa back
 /ffa rtp
 ```
 
-Both modules default to disabled. `back` returns to the recorded origin of your previous successful **FFA** teleport. It is not an automatic death-location return or a history of every vanilla/other-mod teleport.
+`back` is available by default. It returns to your latest death location or the origin of your latest successful teleport, whichever event happened last. Respawning does not replace a death location. Native vanilla/FFA teleport entry points are tracked; a custom mod that moves players directly without those APIs needs an adapter. Failed/no-op teleports leave the location unchanged. Normal destination-safety checks, permissions, warmup and cooldown still apply. `rtp` remains disabled by default.
 
 `rtp` searches around your current location in a permitted dimension. It considers only already loaded terrain, rejects protected/settlement/hazardous destinations, and has a bounded number of attempts. Finding no destination is a safe refusal, not permission to generate unlimited wilderness chunks.
 

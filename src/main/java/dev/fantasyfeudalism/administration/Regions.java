@@ -28,7 +28,7 @@ public final class Regions {
 
   public Region get(String id) {
     return regions.stream()
-        .filter(r -> r.id.equals(id))
+        .filter(r -> r.id.equalsIgnoreCase(id))
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Unknown region: " + id));
   }
@@ -105,8 +105,9 @@ public final class Regions {
     Set<String> ids = new HashSet<>();
     Region spawn = null;
     for (var r : candidate) {
-      checkId(r.id);
-      if (!ids.add(r.id)) throw new IllegalArgumentException("Duplicate region ID: " + r.id);
+      checkName(r.id);
+      if (!ids.add(r.id.toLowerCase(Locale.ROOT)))
+        throw new IllegalArgumentException("Duplicate region ID: " + r.id);
       if (r.kind == null || r.name == null || r.name.isBlank())
         throw new IllegalArgumentException(r.id + ": name/type required");
       if (r.minX > r.maxX
@@ -127,9 +128,22 @@ public final class Regions {
         spawn = r;
       }
       if (r.kind == Kind.STANDALONE && !settings.standalone)
-        throw new IllegalArgumentException(r.id + ": enable modules.standaloneRegions first");
+        throw new IllegalArgumentException(
+            "Standalone regions are disabled. Enable modules.standaloneRegions and reload.");
       if (r.kind != Kind.CHILD && !r.parent.isEmpty())
         throw new IllegalArgumentException(r.id + ": only child regions have a parent");
+      if (r.items == null)
+        throw new IllegalArgumentException(r.id + ": items must be a list of item IDs");
+      for (String item : r.items) {
+        var itemKey = ResourceLocation.tryParse(item);
+        if (itemKey == null
+            || item.equals("minecraft:air")
+            || server != null
+                && !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(itemKey))
+          throw new IllegalArgumentException(r.id + ": unknown usable item: " + item);
+      }
+      RegionTitles.color(r.entryColor);
+      RegionTitles.color(r.exitColor);
       Compat.validateAccess(r.access);
       if (compat != null && !r.settlementOverride && compat.overlaps(server, r))
         throw new IllegalArgumentException(
@@ -137,7 +151,7 @@ public final class Regions {
     }
     for (var r : candidate)
       if (r.kind == Kind.CHILD
-          && (spawn == null || !r.parent.equals(spawn.id) || !spawn.encloses(r)))
+          && (spawn == null || !r.parent.equalsIgnoreCase(spawn.id) || !spawn.encloses(r)))
         throw new IllegalArgumentException(
             r.id + ": child must be fully inside the main spawn in the same dimension");
     for (int i = 0; i < candidate.size(); i++)
@@ -149,6 +163,16 @@ public final class Regions {
         throw new IllegalArgumentException(
             a.id + " overlaps " + b.id + "; overlapping sibling/standalone regions are rejected");
       }
+  }
+
+  public static void checkName(String name) {
+    if (name == null || !name.matches("[A-Za-z0-9_-]{1,48}"))
+      throw new IllegalArgumentException("Use 1–48 letters, numbers, underscores or hyphens.");
+  }
+
+  public boolean itemAllowed(ServerLevel level, BlockPos pos, String item) {
+    Region region = at(level, pos);
+    return region != null && region.items.contains(item);
   }
 
   public static void checkId(String id) {
@@ -164,7 +188,7 @@ public final class Regions {
         + "# Every field below is editable; name changes preserve ID. ID renames require"
         + " parent references updated.\n"
         + "# Flag true = allow; omitted = inherit. Adventure mode is mandatory inside"
-        + " spawn/children.\n"
+        + " spawn except children that allow building/breaking.\n"
         + "configVersion = 1\n\n";
   }
 
@@ -203,8 +227,22 @@ public final class Regions {
           .append(quote(r.entry))
           .append("\nexit = ")
           .append(quote(r.exit))
+          .append("\nentryColor = ")
+          .append(quote(r.entryColor))
+          .append("\nexitColor = ")
+          .append(quote(r.exitColor))
+          .append("\nentryBold = ")
+          .append(r.entryBold)
+          .append("\nentryItalic = ")
+          .append(r.entryItalic)
+          .append("\nexitBold = ")
+          .append(r.exitBold)
+          .append("\nexitItalic = ")
+          .append(r.exitItalic)
           .append("\ninteractions = [")
           .append(String.join(", ", r.interactions.stream().map(Regions::quote).toList()))
+          .append("]\nitems = [")
+          .append(String.join(", ", r.items.stream().map(Regions::quote).toList()))
           .append("]\n");
       b.append("[regions.access]\nmode = ")
           .append(quote(r.access.mode))
@@ -246,7 +284,14 @@ public final class Regions {
         r.settlementOverride = Settings.bool(v, "settlementOverride");
         r.entry = Settings.scalar(v, "entry", String.class);
         r.exit = Settings.scalar(v, "exit", String.class);
+        if (v.contains("entryColor")) r.entryColor = Settings.scalar(v, "entryColor", String.class);
+        if (v.contains("exitColor")) r.exitColor = Settings.scalar(v, "exitColor", String.class);
+        if (v.contains("entryBold")) r.entryBold = Settings.bool(v, "entryBold");
+        if (v.contains("entryItalic")) r.entryItalic = Settings.bool(v, "entryItalic");
+        if (v.contains("exitBold")) r.exitBold = Settings.bool(v, "exitBold");
+        if (v.contains("exitItalic")) r.exitItalic = Settings.bool(v, "exitItalic");
         r.interactions.addAll(Settings.strings(v, "interactions"));
+        if (v.contains("items")) r.items.addAll(Settings.strings(v, "items"));
         r.access.mode = Settings.scalar(v, "access.mode", String.class);
         r.access.value = Settings.scalar(v, "access.value", String.class);
         UnmodifiableConfig flags = v.get("flags");

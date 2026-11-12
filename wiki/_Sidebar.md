@@ -20,3 +20,5 @@
 - [Troubleshooting](Troubleshooting.md)
 - [IntelliJ and Building](IntelliJ-and-Building.md)
 - [Command Reference](Command-Reference.md)
+
+- [Punishments and jail](Moderation.md)

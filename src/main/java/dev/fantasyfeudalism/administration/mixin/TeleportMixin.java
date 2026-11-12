@@ -19,6 +19,28 @@ public abstract class TeleportMixin {
         new Model.Point(l.dimension().location().toString(), x, y, z, yaw, pitch));
   }
 
+  @Inject(method = "teleportTo(DDD)V", at = @At("HEAD"), cancellable = true)
+  private void ffa$same(double x, double y, double z, CallbackInfo ci) {
+    var p = (ServerPlayer) (Object) this;
+    String error = ffa$validate(p.serverLevel(), x, y, z, p.getYRot(), p.getXRot());
+    if (error != null) {
+      Teleports.tell(p, error);
+      ci.cancel();
+    }
+  }
+
+  @Inject(method = "teleportRelative", at = @At("HEAD"), cancellable = true)
+  private void ffa$relative(double x, double y, double z, CallbackInfo ci) {
+    var p = (ServerPlayer) (Object) this;
+    String error =
+        ffa$validate(
+            p.serverLevel(), p.getX() + x, p.getY() + y, p.getZ() + z, p.getYRot(), p.getXRot());
+    if (error != null) {
+      Teleports.tell(p, error);
+      ci.cancel();
+    }
+  }
+
   @Inject(
       method = "teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FF)Z",
       at = @At("HEAD"),

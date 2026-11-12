@@ -86,7 +86,7 @@ public final class Vanish {
           });
       hidden.add(player.getUUID());
       app.whispers.cancelFor(player.getUUID());
-      app.teleports.cancel(player);
+      app.teleports.cancel(player, false);
       player.setGameMode(GameType.SPECTATOR);
       refresh(null);
       syncAll();
@@ -130,7 +130,7 @@ public final class Vanish {
         observer.sendSystemMessage(
             Component.translatable("multiplayer.player.joined", player.getDisplayName()));
     app.protection.update(player);
-    Teleports.tell(player, "Vanish off.");
+    Teleports.tell(player, "Vanish disabled.");
     app.server.invalidateStatus();
   }
 
