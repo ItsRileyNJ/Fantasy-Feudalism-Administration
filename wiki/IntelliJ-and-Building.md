@@ -22,7 +22,7 @@ Set the **Project SDK to Java 21**. Under **Settings → Build, Execution, Deplo
 4. Find the result in:
 
    ```text
-   build/libs/fantasy-feudalism-administration-0.3.0.jar
+   build/libs/fantasy-feudalism-administration-0.3.1.jar
    ```
 
 5. Stop your separate server, replace its previous FFA JAR, and restart. Rebuilding alone does not update an already running server.

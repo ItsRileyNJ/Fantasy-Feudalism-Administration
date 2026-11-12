@@ -28,6 +28,8 @@ This is a development build, not a certification against every mod combination o
 - Travel/moderation checks cover successful vanilla teleport origins, actual death and respawn history, rejected destination preservation, two occupied jail cells, escape correction and blocked teleport/drop/command routes, real-time deadlines including offline expiry, spawn release, chat/warp-ban scope, administrator exemption, configurable portal creation, god damage immunity and explicit smite overriding FFA protection/god mode.
 - Additional standalone assertions verify legacy config/region defaults, case-insensitive duplicate rejection, duration limits/overflow and item/title TOML round trips.
 
+- Version 0.3.1 projectile checks run a real flaming tipped arrow from outside spawn through vanilla collision and the registered impact event, verifying cancellation and unchanged health, fire, poison and motion. Additional cases cover player/mob/ownerless arrow damage, tridents without item destruction, fireballs and direct potion hits, PvP-only protection, child combat overrides, wilderness combat and administrator exemptions.
+
 ## Remaining deployment acceptance checks
 
 - Join a dedicated server using an unmodified-by-FFA client; confirm visible portals, dye interaction and clickable request messages from a real client.

@@ -1,4 +1,4 @@
-# Development build 0.3.0
+# Development build 0.3.1
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 

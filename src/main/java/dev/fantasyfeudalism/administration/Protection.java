@@ -322,6 +322,14 @@ public final class Protection {
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void projectile(ProjectileImpactEvent e) {
     if (e.getRayTraceResult() instanceof net.minecraft.world.phys.EntityHitResult hit
+        && hit.getEntity() instanceof Player target
+        && playerDamageDenied(target, e.getProjectile().getOwner())) {
+      // Cancel the hit before fire, potion effects, knockback or enchantment effects run.
+      // Keep the projectile: discarding it here would destroy thrown tridents.
+      e.setCanceled(true);
+      return;
+    }
+    if (e.getRayTraceResult() instanceof net.minecraft.world.phys.EntityHitResult hit
         && (hit.getEntity() instanceof HangingEntity || hit.getEntity() instanceof ArmorStand)
         && !allowed(
             hit.getEntity().level(), hit.getEntity().blockPosition(), Flag.HANGING_DAMAGE)) {
@@ -424,27 +432,29 @@ public final class Protection {
     if (!(e.getEntity().level() instanceof ServerLevel l)) return;
     var target = e.getEntity();
     if (app.adminPowers != null && app.adminPowers.smiting(target.getUUID())) return;
+    if (target instanceof Player player) {
+      if (playerDamageDenied(player, e.getSource().getEntity())) e.setCanceled(true);
+      return;
+    }
     if (e.getSource().getEntity() instanceof ServerPlayer source && app.compat.admin(source))
       return;
-    if (target instanceof ServerPlayer p && app.compat.admin(p)) return;
-    if (target instanceof ServerPlayer p && app.moderation != null && app.moderation.confined(p)) {
-      e.setCanceled(true);
-      return;
-    }
-    if (target instanceof Player && !allowed(l, target.blockPosition(), Flag.DAMAGE)) {
-      e.setCanceled(true);
-      return;
-    }
-    if (target instanceof Player
-        && e.getSource().getEntity() instanceof Player attacker
-        && (!allowed(l, target.blockPosition(), Flag.PVP)
-            || !allowed(l, attacker.blockPosition(), Flag.PVP))) {
-      e.setCanceled(true);
-      return;
-    }
     if ((target instanceof net.minecraft.world.entity.animal.Animal
             || target instanceof net.minecraft.world.entity.TamableAnimal)
         && !allowed(l, target.blockPosition(), Flag.ANIMAL_DAMAGE)) e.setCanceled(true);
+  }
+
+  /** Shared by projectile impacts and final damage; the victim's effective region wins. */
+  private boolean playerDamageDenied(Player target, Entity attacker) {
+    if (!(target.level() instanceof ServerLevel level)) return false;
+    if (attacker instanceof ServerPlayer source && app.compat.admin(source)) return false;
+    if (target instanceof ServerPlayer player) {
+      if (app.compat.admin(player)) return false;
+      if (app.moderation != null && app.moderation.confined(player)) return true;
+    }
+    return !allowed(level, target.blockPosition(), Flag.DAMAGE)
+        || attacker instanceof Player
+            && (!allowed(level, target.blockPosition(), Flag.PVP)
+                || !allowed(attacker.level(), attacker.blockPosition(), Flag.PVP));
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
