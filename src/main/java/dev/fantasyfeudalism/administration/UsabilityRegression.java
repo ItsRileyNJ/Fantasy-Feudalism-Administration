@@ -227,9 +227,9 @@ final class UsabilityRegression {
         titlePackets.stream()
             .anyMatch(
                 packet ->
-                    packet instanceof ClientboundSetTitleTextPacket title
-                        && title.text().getString().equals("Entering Market")),
-        "Region entry uses the full-screen title packet");
+                    packet instanceof ClientboundSetSubtitleTextPacket title
+                        && title.text().getString().startsWith("Entering Market")),
+        "Region entry uses the smaller centered subtitle");
     h.assertFalse(
         titlePackets.stream()
             .anyMatch(
@@ -250,11 +250,58 @@ final class UsabilityRegression {
         outgoing(p).stream()
             .anyMatch(
                 packet ->
-                    packet instanceof ClientboundSetTitleTextPacket t
-                        && t.text().getString().equals("Arriving Market")
+                    packet instanceof ClientboundSetSubtitleTextPacket t
+                        && t.text().getString().startsWith("Arriving Market")
                         && t.text().getStyle().isBold()
                         && t.text().getStyle().isItalic()),
         "Custom region title text/color/bold/italic survive configuration and render");
+    outgoing(p);
+    var market = app.regions.get("Market");
+    RegionTitles.show(p, null, market);
+    var entryOnly = outgoing(p);
+    h.assertTrue(
+        entryOnly.stream()
+            .anyMatch(
+                packet ->
+                    packet instanceof ClientboundSetTitleTextPacket title
+                        && title.text().getString().isEmpty()),
+        "Region notice clears the old large title while starting its timer");
+    h.assertTrue(
+        entryOnly.stream()
+            .anyMatch(
+                packet ->
+                    packet instanceof ClientboundSetSubtitleTextPacket title
+                        && title.text().getString().equals("Arriving Market")
+                        && title.text().getStyle().isBold()
+                        && title.text().getStyle().isItalic()
+                        && title.text().getStyle().getColor().getValue() == 0xFFAA00),
+        "Entry-only notice keeps configured text, color and formatting at subtitle size");
+    RegionTitles.show(p, market, null);
+    h.assertTrue(
+        outgoing(p).stream()
+            .anyMatch(
+                packet ->
+                    packet instanceof ClientboundSetSubtitleTextPacket title
+                        && title.text().getString().equals("Leaving Market")),
+        "Exit-only notice also uses subtitle size");
+    RegionTitles.show(p, app.regions.get("test_spawn"), market);
+    h.assertTrue(
+        outgoing(p).stream()
+            .anyMatch(
+                packet ->
+                    packet instanceof ClientboundSetSubtitleTextPacket title
+                        && title.text().getString().equals("Arriving Market · Leaving test_spawn")
+                        && title.text().getSiblings().getLast().getStyle().getColor().getValue()
+                            == 0xFFFF55
+                        && !title.text().getSiblings().getLast().getStyle().isBold()),
+        "Direct parent/child transitions retain both messages and independent styles in the smaller"
+            + " line");
+    var silent = new Region();
+    silent.entry = "";
+    silent.exit = "";
+    RegionTitles.show(p, silent, silent);
+    h.assertTrue(outgoing(p).isEmpty(), "Disabled region messages send no title packets");
+
     p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD, 2));
     var blocked = new PlayerInteractEvent.RightClickItem(p, InteractionHand.MAIN_HAND);
     NeoForge.EVENT_BUS.post(blocked);

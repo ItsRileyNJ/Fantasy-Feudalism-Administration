@@ -30,6 +30,8 @@ This is a development build, not a certification against every mod combination o
 
 - Version 0.3.1 projectile checks run a real flaming tipped arrow from outside spawn through vanilla collision and the registered impact event, verifying cancellation and unchanged health, fire, poison and motion. Additional cases cover player/mob/ownerless arrow damage, tridents without item destruction, fireballs and direct potion hits, PvP-only protection, child combat overrides, wilderness combat and administrator exemptions.
 
+- Version 0.3.2 packet checks verify entry-only and exit-only notices at subtitle size, clearing the previous large title, preserved custom text/color/bold/italic, combined parent/child transitions with independent styles, disabled-message silence and no chat announcements. The size ratio was checked against Minecraft 1.21.1’s renderer (main title 4x, subtitle 2x).
+
 ## Remaining deployment acceptance checks
 
 - Join a dedicated server using an unmodified-by-FFA client; confirm visible portals, dye interaction and clickable request messages from a real client.

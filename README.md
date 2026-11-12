@@ -4,11 +4,11 @@ A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do
 
 **[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, built-in ranks, chat styling, compatibility, recovery and IntelliJ guides.
 
-**Development release 0.3.1.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.3.2.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.3.1.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.3.2.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
@@ -40,3 +40,5 @@ No uploaded third-party JARs are included in this repository or release.
 Version 0.3.0 also adds persistent region visualization, explicit child/standalone creation, per-region usable items and styled entry/exit titles, sign shops, `/ffa back`, `/ffa balance set`, [timed punishments/jail](wiki/Moderation.md), configurable administrator-only portal creation, smite and god mode. Home and region names preserve uppercase letters; command confirmations are concise.
 
 Version 0.3.1 cancels projectile impacts on protected players even when shots originate outside spawn. It preserves child combat overrides, administrator exemptions and thrown tridents.
+
+Version 0.3.2 uses the smaller centered subtitle size for region entry/exit notices, retaining configured messages, colors, bold and italic. Vanilla subtitle text is half the previous title size.
