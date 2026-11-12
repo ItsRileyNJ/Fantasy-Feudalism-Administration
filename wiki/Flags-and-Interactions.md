@@ -102,3 +102,11 @@ Environmental flags govern supported world effects. An unattributed fluid flow o
 Each region has an `items` list in `regions.toml`, empty by default. Add food, tools or other usable items by registry ID. Children use their own list rather than inheriting the parent's list. Full administrators bypass it.
 
 This permits item use without opening every door, chest or button. Block interactions have their separate `interactions` list and flags. Allowed block placement follows `build`; a child with building enabled can use block items without listing every building material. Specific restrictions such as `pearls` or spawn-egg rules still apply, and town/mod rules can impose additional checks. Jail confinement still blocks items.
+
+## Projectiles crossing a boundary
+
+A shot fired outside spawn still checks the **player's effective region at impact**. With `damage = false`, player, mob and ownerless/dispenser projectiles cannot damage players inside. When damage is enabled but `pvp = false`, player-fired projectiles remain blocked. Both the shooter's and victim's PvP rules must permit player combat.
+
+Blocked direct hits are cancelled before the projectile's fire, tipped-arrow effects, knockback or other hit processing runs. Projectiles are retained rather than deleted, so a blocked thrown trident is not destroyed. The ordinary damage handler also checks the victim's region for damage paths that do not use the projectile-impact hook, including splash/explosion health damage.
+
+A child arena explicitly allowing both `damage` and `pvp` still allows combat; inheritance otherwise retains the parent's rules. Full administrators retain their existing gameplay exemption. No additional configuration is needed for default protected spawn.
