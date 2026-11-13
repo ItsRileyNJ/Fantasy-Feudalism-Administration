@@ -13,13 +13,15 @@ def texture(rgb):
  raw=bytearray()
  for frame in range(32):
   t=frame*2*math.pi/32
-  for y in range(16):
+  for y in range(32):
    raw.append(0)
-   for x in range(16):
-    u=(x-7.5)/8;v=(y-7.5)/8;r=math.hypot(u,v);a=math.atan2(v,u)
-    wave=math.sin(2*a+7*r-t)+.6*math.sin(4*a-5*r+2*t)+.35*math.sin(1.8*x+1.1*y+2*t)
-    raw.append(max(0,min(31,round((wave/3.9+.5)*31))))
- return b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',16,512,8,3,0,0,0))+chunk(b'PLTE',bytes(palette))+chunk(b'tRNS',bytes(alpha))+chunk(b'IDAT',zlib.compress(bytes(raw),9))+chunk(b'IEND',b'')
+   for x in range(32):
+    # Periodic flow, with identical opposite edges in every frame. Sharing the
+    # same animation across tiles also preserves these seams during interpolation.
+    u=2*math.pi*(x%31)/31;v=2*math.pi*(y%31)/31
+    wave=math.sin(u+.85*math.sin(v+t)-t)+math.sin(v+.85*math.sin(u-t)+t)+.5*math.sin(2*u+2*v-2*t)+.25*math.cos(3*u-2*v+t)
+    raw.append(max(0,min(31,round((wave/5.5+.5)*31))))
+ return b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',32,1024,8,3,0,0,0))+chunk(b'PLTE',bytes(palette))+chunk(b'tRNS',bytes(alpha))+chunk(b'IDAT',zlib.compress(bytes(raw),9))+chunk(b'IEND',b'')
 files={}
 def js(name,obj):files[name]=json.dumps(obj,separators=(',',':')).encode()
 js('pack.mcmeta',{'pack':{'pack_format':34,'description':'FFA animated colored portal surfaces (Minecraft 1.21.1)'}})

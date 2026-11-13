@@ -8,6 +8,7 @@ Create and verify the [spawn teleport point](Getting-Started.md) before enabling
 
 ```toml
 [spawn]
+invulnerabilitySeconds = 8
 firstJoin = true
 respawnPolicy = "vanilla"
 ```
@@ -15,6 +16,14 @@ respawnPolicy = "vanilla"
 FFA uses its own joined record and the existence of the player's vanilla player-data file to distinguish new arrivals from returning players. Installing FFA on an established world is not intended to repeatedly redirect existing players.
 
 A new player's first arrival can be sent to the configured FFA spawn, including the optional void dimension. Inventory/XP are not rewritten. Safety and destination availability still apply. If the initial move is refused or cancelled, do not depend on repeated login redirects as a repair mechanism; fix the destination and use `/ffa spawn`.
+
+## Spawn invincibility
+
+Every player, including administrators, receives eight seconds of invincibility on joining the server and after respawning from death. This works at any arrival location, including beds and respawn anchors, regardless of the death policy or region flags.
+
+Set `spawn.invulnerabilitySeconds` in `config/ffa/server.toml` to a whole number from **0 to 3600**. `0` disables this grace period, including Minecraft's separate default spawn immunity. Missing this setting in an older config uses **8**. Run `/ffa reload` after editing; the new duration applies at the next login or death respawn. Existing timers finish using their original duration.
+
+The timer uses elapsed time starting at server login or respawn, including loading time. It blocks incoming damage, fatal damage, and direct projectile impacts. It does not change Creative mode or `/ffa god`, and the administrator's intentional `/ffa smite` still works. Ordinary teleports, `/ffa spawn`, portals and returning from the End do not renew it. There is no extra chat message.
 
 ## Death policies
 

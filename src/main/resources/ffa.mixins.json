@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "PlayerListAccess",
+    "SpawnImmunityAccess",
     "BlockDisplayAccess",
     "FoodMixin",
     "FluidMixin",

@@ -107,3 +107,7 @@ Deleting a portal removes its definition and loaded visuals, not world blocks or
 `portals.adminCreationOnly = true` defaults on. Full administrators can create supported vanilla Nether/End portals and new FFA portals. Delegating `ffa.portal.manage` alone does not override this creation policy. Set it false and reload to restore normal creation permissions, while retaining region restrictions.
 
 For ordinary Nether travel, establish both ends as an administrator: a player's first trip cannot generate a missing destination portal while administrator-only creation is enabled. Custom mods bypassing vanilla/event/tag hooks need a verified adapter.
+
+### Continuous portal animation
+
+Version 0.5.1 keeps the sixteen dye colors and uses smoother 32-pixel animated surfaces. Opposite edges match in every frame, so neighboring tiles blend into a continuous flowing pattern. The updated resource pack is bundled in the mod and automatically offered with a new content hash. If you host `portalPack.url` yourself, replace the hosted ZIP with the newly extracted `<world>/ffa/portal-pack/ffa-portals.zip`. Players must accept the updated pack to see the change.

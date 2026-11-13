@@ -29,6 +29,10 @@ public final class RegressionTests {
   }
 
   static ServerPlayer player(GameTestHelper h, GameProfile profile) {
+    return player(h, profile, false);
+  }
+
+  static ServerPlayer player(GameTestHelper h, GameProfile profile, boolean keepSpawnProtection) {
     var cookie = CommonListenerCookie.createInitial(profile, false);
     var p =
         new ServerPlayer(
@@ -40,6 +44,7 @@ public final class RegressionTests {
     new EmbeddedChannel(c);
     h.getLevel().getServer().getPlayerList().placeNewPlayer(c, p, cookie);
     net.neoforged.neoforge.network.registration.NetworkRegistry.configureMockConnection(c);
+    if (!keepSpawnProtection) Administration.INSTANCE.spawnProtection.clear(p);
     return p;
   }
 
@@ -217,6 +222,7 @@ public final class RegressionTests {
       ProjectileRegression.verify(h, p, app);
       ActionRegression.verify(h, p, app);
       CommerceRegression.verify(h, p, app);
+      SpawnRegression.verify(h, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");

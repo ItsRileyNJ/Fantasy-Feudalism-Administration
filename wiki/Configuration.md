@@ -45,6 +45,7 @@ The [full default server.toml](examples/server.toml) is extracted from 0.3.0's a
 | `modules.leaderboard` | `false` | Boolean | Restart | Enable stored UUID/balance leaderboard visibility. |
 | `modules.privacy` | `false` | Boolean | Restart | Enable native request toggle/ignore controls; overlapping FTB mode disables them. |
 | `spawn.firstJoin` | `false` | Boolean | Reload | Redirect genuinely new players to a valid configured FFA spawn. |
+| `spawn.invulnerabilitySeconds` | `8` | 0–3600 whole seconds; 0 disables | Reload; next login/death respawn | Invincibility for all players, including admins; see [spawn protection](First-Join-and-Respawns.md#spawn-invincibility). |
 | `spawn.respawnPolicy` | `"vanilla"` | vanilla / bed_first / spawn_first | Reload | Death arrival policy; see the respawn guide. |
 | `teleport.cooldownSeconds` | `3` | 0..86400 seconds | Reload | Ordinary command teleport cooldown. |
 | `teleport.warmupSeconds` | `0` | 0..300 seconds | Reload | Delay before ordinary player travel; zero is immediate. |
