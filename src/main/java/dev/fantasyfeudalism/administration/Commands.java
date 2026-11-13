@@ -182,7 +182,23 @@ public final class Commands {
         }
         case "warp" -> {
           requirePlayer(p);
-          if (args.size() > 2) {
+          if (args.size() > 2 && arg(args, 1).equals("create")) {
+            authorize(app, source, "ffa.warp.manage");
+            String id = arg(args, 2);
+            Regions.checkId(id);
+            if (app.storage.state().warps.containsKey(id))
+              throw new IllegalArgumentException(
+                  "Warp already exists. Use /ffa setwarp " + id + " to update it.");
+            String error = app.teleports.validate(p, Teleports.point(p));
+            if (error != null) throw new IllegalArgumentException(error);
+            app.storage.update(
+                st -> {
+                  var w = new Warp();
+                  w.point = Teleports.point(p);
+                  st.warps.put(id, w);
+                });
+            feedback(app, source, text, Teleports.point(p).describe(), "SUCCESS persisted");
+          } else if (args.size() > 2) {
             authorize(app, source, "ffa.warp.manage");
             String id = arg(args, 1);
             Access access = access(args, 2);
@@ -269,7 +285,20 @@ public final class Commands {
         case "balance" -> {
           requirePlayer(p);
           if (!app.settings.economy) throw new IllegalArgumentException("Economy is disabled.");
-          if (args.size() > 1) {
+          if (args.size() > 1
+              && Set.of("send", "request", "accept", "deny").contains(arg(args, 1))) {
+            String action = arg(args, 1);
+            if (action.equals("send") || action.equals("request")) {
+              var target = player(app, p, arg(args, 2));
+              long amount = Long.parseLong(arg(args, 3));
+              if (action.equals("send")) app.payments.send(p, target, amount);
+              else app.payments.request(p, target, amount);
+            } else
+              app.payments.answer(
+                  p,
+                  action.equals("accept"),
+                  args.size() > 2 ? UUID.fromString(arg(args, 2)) : null);
+          } else if (args.size() > 1) {
             authorize(app, source, "ffa.economy.manage");
             if (!arg(args, 1).equals("set"))
               throw new IllegalArgumentException("Use /ffa balance set PLAYER AMOUNT.");
@@ -572,9 +601,13 @@ public final class Commands {
         throw new IllegalArgumentException("Only administrators can create portals.");
       if (old != null) throw new IllegalArgumentException("Portal ID already exists");
       Selection sel = selection(p);
-      String warp = arg(a, 3);
-      if (!app.storage.state().warps.containsKey(warp))
-        throw new IllegalArgumentException("Unknown warp");
+      String warp =
+          a.size() > 3
+              ? arg(a, 3).equals("to") ? arg(a, 4) : arg(a, 3)
+              : app.storage.state().warps.containsKey(id) ? id : "";
+      if (!warp.isEmpty() && !app.storage.state().warps.containsKey(warp))
+        throw new IllegalArgumentException(
+            "Unknown warp. Create it at the destination with /ffa warp create " + warp + ".");
       Portal portal = new Portal();
       portal.id = id;
       portal.dimension = sel.dimension;
@@ -612,16 +645,53 @@ public final class Commands {
           String warp = arg(a, 3);
           if (!app.storage.state().warps.containsKey(warp))
             throw new IllegalArgumentException("Unknown warp");
-          app.storage.update(st -> st.portals.get(id).warp = warp);
+          app.storage.update(
+              st -> {
+                st.portals.get(id).warp = warp;
+                st.portals.get(id).managedWarp = false;
+              });
+        }
+        case "destination" -> {
+          authorize(app, s, "ffa.warp.manage");
+          if (old.dimension.equals(p.level().dimension().location().toString())
+              && old.contains(p.getX(), p.getY(), p.getZ()))
+            throw new IllegalArgumentException(
+                "Stand outside the portal at its destination first.");
+          String error = app.teleports.validate(p, Teleports.point(p));
+          if (error != null) throw new IllegalArgumentException(error);
+          String warp = old.warp == null || old.warp.isEmpty() ? id : old.warp;
+          app.storage.update(
+              st -> {
+                var portal = st.portals.get(id);
+                var w = st.warps.get(warp);
+                if (w == null) {
+                  w = new Warp();
+                  w.access =
+                      Storage.JSON.fromJson(Storage.JSON.toJson(portal.access), Access.class);
+                  portal.managedWarp = true;
+                }
+                w.point = Teleports.point(p);
+                st.warps.put(warp, w);
+                portal.warp = warp;
+              });
         }
         case "access" -> {
           Access access = access(a, 3);
-          app.storage.update(st -> st.portals.get(id).access = access);
+          app.storage.update(
+              st -> {
+                var portal = st.portals.get(id);
+                portal.access = access;
+                if (portal.managedWarp && st.warps.containsKey(portal.warp))
+                  st.warps.get(portal.warp).access =
+                      Storage.JSON.fromJson(Storage.JSON.toJson(access), Access.class);
+              });
         }
         default -> throw new IllegalArgumentException("Unknown portal operation");
       }
     }
     Portals.reindex(app);
+    if (action.equals("create") && app.storage.state().portals.get(id).warp.isEmpty())
+      Teleports.tell(p, "Stand at the destination, then run /ffa portal destination " + id + ".");
     Portal result = app.storage.state().portals.getOrDefault(id, old);
     feedback(
         app,
@@ -668,16 +738,66 @@ public final class Commands {
       Teleports.tell(p, app.storage.state().shops.keySet().toString());
       return;
     }
-    String id = arg(a, 2);
+    String id = app.economy.shopId(arg(a, 2));
     if (action.equals("buy") || action.equals("sell")) {
       app.economy.trade(p, id, Integer.parseInt(arg(a, 3)), action.equals("buy"));
       Teleports.tell(p, "Trade saved.");
       return;
     }
     authorize(app, s, "ffa.shop.manage");
-    Regions.checkId(id);
+    Regions.checkName(id);
+    if (action.equals("limits")) {
+      if (a.size() == 3) {
+        var shop = app.storage.state().shops.get(id);
+        if (shop == null) throw new IllegalArgumentException("Unknown shop.");
+        Teleports.tell(
+            p,
+            (shop.limitScope.equals("shared") ? "Shared shop totals" : "Per-player limits")
+                + "; "
+                + (shop.limitReset.equals("daily") ? "resets daily at 00:00 UTC" : "manual reset")
+                + ". Buy: "
+                + (shop.buyLimit < 0 ? "unlimited" : shop.buyLimit + " items")
+                + ". Sell: "
+                + (shop.sellLimit < 0 ? "unlimited" : shop.sellLimit + " items")
+                + ".");
+        return;
+      }
+      app.economy.limits(
+          id, arg(a, 3), arg(a, 4), Long.parseLong(arg(a, 5)), Long.parseLong(arg(a, 6)));
+      app.storage.audit(
+          app.settings,
+          s.getTextName(),
+          text,
+          Teleports.point(p).describe(),
+          "SUCCESS limits configured");
+      Teleports.tell(p, "Shop limits updated.");
+      return;
+    }
+    if (action.equals("reset")) {
+      UUID target = null;
+      if (a.size() > 3) {
+        var online = app.server.getPlayerList().getPlayerByName(arg(a, 3));
+        if (online != null && !Vanish.canSee(p, online)) online = null;
+        target = online == null ? UUID.fromString(arg(a, 3)) : online.getUUID();
+      }
+      app.economy.resetLimits(id, target);
+      app.storage.audit(
+          app.settings,
+          s.getTextName(),
+          text,
+          Teleports.point(p).describe(),
+          "SUCCESS counters reset");
+      Teleports.tell(p, "Shop counters reset.");
+      return;
+    }
+    if (app.economy.pendingShop(id))
+      throw new IllegalArgumentException("Recover this shop's pending transactions first.");
     if (action.equals("set")) {
-      Shop shop = new Shop();
+      Shop shop =
+          app.storage.state().shops.containsKey(id)
+              ? Storage.JSON.fromJson(
+                  Storage.JSON.toJson(app.storage.state().shops.get(id)), Shop.class)
+              : new Shop();
       shop.item = arg(a, 3);
       var key = net.minecraft.resources.ResourceLocation.tryParse(shop.item);
       if (key == null
@@ -753,7 +873,7 @@ public final class Commands {
         case "spawn" -> operation.equals("create") ? "Spawn region created." : "Spawn point set.";
         case "setwarp" -> "Warp set.";
         case "delwarp" -> "Warp deleted.";
-        case "warp" -> "Warp access updated.";
+        case "warp" -> operation.equals("create") ? "Warp created." : "Warp access updated.";
         case "region" ->
             switch (operation) {
               case "create", "standalone" -> "Region created.";

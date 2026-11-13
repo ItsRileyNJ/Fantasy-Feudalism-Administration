@@ -63,3 +63,11 @@ Commands and edit results use private feedback. The FFA audit identifies the edi
 `god` toggles immediate invulnerability for the administrator using it. It survives reconnects and respawns; toggling off restores normal mode-dependent vulnerability. Losing full administrator rights removes FFA god mode. Ordinary administrator protection bypass alone does not grant god mode.
 
 `smite` produces a visual lightning strike on the online target and immediately kills them. The strike avoids collateral lightning fire. It intentionally overrides FFA region damage protection and FFA god mode; another mod can still veto death. Use the real online account name. Both commands are hidden from nonadministrators.
+
+## Immediate administrator teleport
+
+```text
+/ffa tp Alice
+```
+
+This teleports the administrator using it to the online player's current location, without a TPA request, warmup or ordinary cooldown. It cancels the administrator's pending command teleport. It does not bring the target to the administrator. Existing world/destination-safety checks and other mods' protection decisions still apply. The command is hidden from nonadministrators.

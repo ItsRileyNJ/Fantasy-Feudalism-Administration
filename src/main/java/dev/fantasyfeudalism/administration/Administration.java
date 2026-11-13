@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 public final class Administration {
   public static final Logger LOG = LogUtils.getLogger();
   public static Administration INSTANCE;
-  public Settings settings;
+  public volatile Settings settings;
   public Storage storage;
   public Regions regions;
   public RegionVisuals regionVisuals;
@@ -38,6 +38,9 @@ public final class Administration {
   public Protection protection;
   public RegionActions regionActions;
   public Economy economy;
+  public Payments payments;
+  public PortalPack portalPack;
+  public PortalEffects portalEffects;
   public MinecraftServer server;
   public final Path settingsFile = FMLPaths.CONFIGDIR.get().resolve("ffa/server.toml");
 
@@ -79,7 +82,13 @@ public final class Administration {
       regions = new Regions(storage.directory.resolve("regions.toml"));
       regions.reload(server, settings, compat);
       teleports = new Teleports(this);
+      portalPack = new PortalPack(this);
+      NeoForge.EVENT_BUS.register(portalPack);
+      portalEffects = new PortalEffects(this);
+      NeoForge.EVENT_BUS.register(portalEffects);
       economy = new Economy(this);
+      payments = new Payments(this);
+      NeoForge.EVENT_BUS.register(payments);
       regionVisuals = new RegionVisuals(this);
       NeoForge.EVENT_BUS.register(regionVisuals);
       backHistory = new BackHistory(this);
@@ -131,6 +140,12 @@ public final class Administration {
     if (moderation != null) NeoForge.EVENT_BUS.unregister(moderation);
     if (adminPowers != null) NeoForge.EVENT_BUS.unregister(adminPowers);
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
+    if (payments != null) NeoForge.EVENT_BUS.unregister(payments);
+    if (portalEffects != null) NeoForge.EVENT_BUS.unregister(portalEffects);
+    if (portalPack != null) {
+      NeoForge.EVENT_BUS.unregister(portalPack);
+      portalPack.close();
+    }
     if (protection != null) NeoForge.EVENT_BUS.unregister(protection);
     if (regionActions != null) NeoForge.EVENT_BUS.unregister(regionActions);
     if (commandPermissions != null) commandPermissions.close();
@@ -156,8 +171,20 @@ public final class Administration {
       throw new IllegalArgumentException("Command module enable/disable requires restart");
     Compat next = new Compat(candidate, ranks);
     regions.reload(server, candidate, next);
+    boolean packChanged =
+        settings.portalPack != candidate.portalPack
+            || settings.portals != candidate.portals
+            || !settings.portalPackUrl.equals(candidate.portalPackUrl);
     settings = candidate;
     compat = next;
+    portalEffects.refreshAll();
+    if (packChanged) {
+      for (var player : server.getPlayerList().getPlayers()) {
+        if (settings.portalPack && settings.portals) portalPack.offer(player);
+        else portalPack.remove(player);
+      }
+      portalEffects.refreshAll();
+    }
     refreshPermissions();
   }
 

@@ -41,7 +41,7 @@ The [full default server.toml](examples/server.toml) is extracted from 0.3.0's a
 | `modules.portals` | `true` | Boolean | Reload | Enable portal travel and management; stored definitions remain. |
 | `modules.back` | `true` | Boolean | Compatibility | Retained for older files; `/ffa back` is always registered and uses its normal permission. |
 | `modules.rtp` | `false` | Boolean | Restart | Enable bounded random wilderness teleport. |
-| `modules.pay` | `false` | Boolean | Restart | Enable player transfers; economy must also be enabled. |
+| `modules.pay` | `false` | Boolean | Restart | Enable the legacy `/ffa pay` alias; balance send/request use the economy and payment permissions. |
 | `modules.leaderboard` | `false` | Boolean | Restart | Enable stored UUID/balance leaderboard visibility. |
 | `modules.privacy` | `false` | Boolean | Restart | Enable native request toggle/ignore controls; overlapping FTB mode disables them. |
 | `spawn.firstJoin` | `false` | Boolean | Reload | Redirect genuinely new players to a valid configured FFA spawn. |
@@ -119,3 +119,12 @@ These optional keys default as shown when loading older files. Edit their existi
 Jail cells, punishments, god mode, linked shop signs and latest back locations are persisted in `state.json`. Configure them through commands, without live-editing financial state.
 
 The 0.4.0 action flags are optional additions to `[defaults]`: older files load them as false. Their names and behavior are listed in [Flags and interactions](Flags-and-Interactions.md). Region underline fields are also optional and default to false. Config/state versions remain 1.
+
+## Bundled portal pack
+
+| Setting | Default | Apply | Meaning |
+| --- | --- | --- | --- |
+| `portalPack.enabled` | `true` | Reload | Require/offer the bundled animated portal pack while the portal module is active. False uses native purple surfaces and colored motes. |
+| `portalPack.url` | `""` | Reload | Empty uses the Minecraft TCP port automatically. Otherwise an absolute HTTP(S) URL (up to 2048 characters, no embedded credentials) serving the exact extracted ZIP; useful behind proxies/CDNs. |
+
+Older configs get these defaults without being overwritten. Players accept the standard Minecraft resource-pack download. See [portal setup and hosting](Warps-and-Portals.md). Shop quotas/counters remain in managed `state.json`; use shop commands rather than editing financial state.

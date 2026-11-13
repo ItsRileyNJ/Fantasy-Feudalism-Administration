@@ -130,7 +130,11 @@ final class CommandTree {
             .then(saved("warp", Saved.MANAGED_WARP)));
     var warp = saved("warp", Saved.WARP);
     withAccess(warp, "ffa.warp.manage");
-    root.then(node("warp").requires(s -> usable(s, "warp")).then(warp));
+    root.then(
+        node("warp")
+            .requires(s -> usable(s, "warp") || manages(s, "ffa.warp.manage"))
+            .then(warp)
+            .then(node("create").requires(s -> manages(s, "ffa.warp.manage")).then(word("name"))));
     root.then(node("warps").requires(s -> usable(s, "warps")));
 
     var portal = node("portal").requires(s -> enabled("portal") && manages(s, "ffa.portal.manage"));
@@ -140,7 +144,14 @@ final class CommandTree {
                 s ->
                     !Administration.INSTANCE.settings.adminPortalCreationOnly
                         || StaffCommands.admin(s))
-            .then(word("name").then(saved("warp", Saved.MANAGED_WARP))));
+            .then(
+                word("name")
+                    .then(saved("warp", Saved.MANAGED_WARP))
+                    .then(node("to").then(saved("warp", Saved.MANAGED_WARP)))));
+    portal.then(
+        node("destination")
+            .requires(s -> manages(s, "ffa.warp.manage"))
+            .then(saved("portal", Saved.PORTAL)));
     portal.then(node("delete").then(saved("portal", Saved.PORTAL)));
     portal.then(
         node("link").then(saved("portal", Saved.PORTAL).then(saved("warp", Saved.MANAGED_WARP))));
@@ -171,16 +182,33 @@ final class CommandTree {
     for (String command : List.of("tpcancel", "tptoggle", "back", "rtp", "baltop"))
       root.then(node(command).requires(s -> usable(s, command)));
 
-    root.then(
+    var balance =
         node("balance")
             .requires(
                 s ->
                     enabled("balance")
-                        && (permitted(s, "balance") || manages(s, "ffa.economy.manage")))
-            .then(
-                node("set")
-                    .requires(s -> manages(s, "ffa.economy.manage"))
-                    .then(onlinePlayer(false).then(arg("amount", LongArgumentType.longArg(0))))));
+                        && (permitted(s, "balance") || manages(s, "ffa.economy.manage")));
+    balance.then(
+        node("set")
+            .requires(s -> manages(s, "ffa.economy.manage"))
+            .then(onlinePlayer(false).then(arg("amount", LongArgumentType.longArg(0)))));
+    for (String action : List.of("send", "request"))
+      balance.then(
+          node(action)
+              .requires(
+                  s ->
+                      s.getPlayer() != null
+                          && Administration.INSTANCE.payments.allowed(s.getPlayer()))
+              .then(onlinePlayer(true).then(arg("amount", LongArgumentType.longArg(1)))));
+    for (String action : List.of("accept", "deny"))
+      balance.then(
+          node(action)
+              .requires(
+                  s ->
+                      s.getPlayer() != null
+                          && Administration.INSTANCE.payments.waiting(s.getPlayer()))
+              .then(word("request")));
+    root.then(balance);
     var shop = node("shop").requires(s -> permitted(s, "shop"));
     shop.then(node("list"));
     for (String direction : List.of("buy", "sell"))
@@ -204,6 +232,25 @@ final class CommandTree {
                             .then(
                                 arg("buyPrice", LongArgumentType.longArg(-1))
                                     .then(arg("sellPrice", LongArgumentType.longArg(-1)))))));
+    shop.then(
+        node("limits")
+            .requires(s -> manages(s, "ffa.shop.manage"))
+            .then(
+                saved("shop", Saved.SHOP)
+                    .then(
+                        choices("scope", "shared", "player")
+                            .then(
+                                choices("reset", "manual", "daily")
+                                    .then(
+                                        arg("buyLimit", LongArgumentType.longArg(-1))
+                                            .then(
+                                                arg(
+                                                    "sellLimit",
+                                                    LongArgumentType.longArg(-1))))))));
+    shop.then(
+        node("reset")
+            .requires(s -> manages(s, "ffa.shop.manage"))
+            .then(saved("shop", Saved.SHOP).then(onlinePlayer(false))));
     shop.then(
         node("delete")
             .requires(s -> manages(s, "ffa.shop.manage"))

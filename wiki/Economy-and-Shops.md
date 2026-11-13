@@ -91,3 +91,48 @@ The optional number is the quantity per click (default one). **Right click buys*
 Only full administrators can bind/unlink signs. Linked signs work inside protected spawn without opening general block interaction. A short click cooldown prevents accidental repeats; holding left click does not repeatedly sell. Signs are waxed and protected against breaking while linked.
 
 To remove one, look at it and run `/ffa shop sign remove`, then edit or break it normally. Unlink signs before deleting their shop offering. Replacing a sign cannot inherit the old link. Both faces show the shop labels; unlinking restores its prior wax state.
+
+## Send or request Denar
+
+```text
+/ffa balance send Alice 100
+/ffa balance request Alice 100
+/ffa balance accept
+/ffa balance deny
+```
+
+Amounts are positive whole Denar, up to `economy.maximumTransfer`. Sending transfers immediately. Requesting asks the named player to pay **you**; their clickable Accept/Deny prompt states the amount. A request never takes money until its payer accepts. Acceptance rechecks funds, permissions, online visibility and balance limits. Expired, denied, stale or replayed buttons cannot debit anyone. Failed acceptance consumes the request; send a new request after correcting the issue.
+
+Only one incoming request per payer and one active outgoing request per requester are allowed. Requests use the configured request cooldown/expiry and are cancelled when either participant disconnects. UUID tokens in buttons are generated automatically; players can use the bare accept/deny command for their current request.
+
+These balance subcommands are available with the economy module. The legacy `modules.pay` setting controls only the older `/ffa pay` alias. Both `ffa.command.balance` and `ffa.command.pay` must allow ordinary players to use the new transfer/request actions; explicit denies still apply. Vanished senders must leave vanish before sending identity-bearing payments or requests.
+
+## Uppercase shop names
+
+Shop names now accept uppercase/lowercase letters, digits, underscores and hyphens. Lookup ignores case, so `DiamondShop`, `diamondshop` and `DIAMONDSHOP` address the same shop. A newly created name preserves its casing; changing prices through another casing updates the existing shop rather than creating a duplicate. Existing signs keep their canonical shop link. Item registry IDs remain lowercase.
+
+## Configurable buy and sell limits
+
+Limits count **item units**, from the player's perspective: buy means players buying from the shop; sell means players selling to it. Each direction can have a different limit. `-1` means unlimited and `0` means no remaining capacity.
+
+```text
+/ffa shop limits DiamondShop shared manual 100 50
+/ffa shop limits DiamondShop player daily 10 20
+/ffa shop limits DiamondShop player manual 25 25
+/ffa shop limits DiamondShop
+/ffa shop reset DiamondShop
+/ffa shop reset DiamondShop Alice
+```
+
+Choose the configuration that suits each shop:
+
+| Scope/reset | Meaning |
+| --- | --- |
+| `shared manual` | Everyone shares the totals until a manager resets them. |
+| `player daily` | Every UUID has its own allowance, resetting at 00:00 UTC. Offline time counts. |
+| `player manual` | Every UUID has its own allowance until reset. |
+| `shared daily` | Shared totals with the same daily reset, if useful. |
+
+A reset without a player clears all counters for that shop. A player argument resets only that UUID's counters on a per-player shop; use a full UUID for an offline player. Changing numeric limits or prices retains usage. Changing scope/reset policy starts a fresh set of counters. Legacy shops start unlimited.
+
+Commands and sign clicks share these limits, including administrator trades. An oversized trade is refused in full; it does not partially charge or consume items. Prepared transactions reserve capacity. Successful recovery commits the balance and usage counters once; unapplied recovery releases the reservation. A shop with unresolved journals cannot be reset, reconfigured or deleted until recovery, preventing limit bypass. Recover legacy prepared transactions before editing shop definitions.

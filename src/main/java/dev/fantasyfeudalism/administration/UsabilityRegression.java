@@ -370,7 +370,7 @@ final class UsabilityRegression {
     admin.lookAt(
         net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(at));
     outgoing(admin);
-    int linked = cmd(app, "ffa shop sign bind apples 2", admin.createCommandSourceStack());
+    int linked = cmd(app, "ffa shop sign bind APPLES 2", admin.createCommandSourceStack());
     h.assertTrue(
         linked == 1 && app.signShops.linked(h.getLevel(), at),
         "Administrator links an actual sign to a shop offering: " + messages(admin));

@@ -41,6 +41,7 @@ public final class SignShops {
 
   public void bind(ServerPlayer p, String offering, int quantity) throws Exception {
     if (!app.compat.admin(p)) throw new IllegalArgumentException("Administrator only.");
+    offering = app.economy.shopId(offering);
     if (!app.storage.state().shops.containsKey(offering))
       throw new IllegalArgumentException("Unknown shop.");
     if (quantity < 1 || quantity > 2304)

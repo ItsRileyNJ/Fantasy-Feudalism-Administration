@@ -48,7 +48,9 @@ Admins in Creative can deliberately set aerial points that are unsafe for normal
 
 ## A portal does not work
 
-Confirm `modules.portals`, a valid linked warp, safe destination, source/destination region rules and **both** portal/warp access. Move into/cross a block boundary in the trigger volume and wait for the default 5-second cooldown. Keep arrival points outside other trigger volumes. Colored markers alone do not prove the module is enabled. Only authorized administrators recolor them; aim at a corner or use `/ffa portal color`. If a corner is missing, load its chunk and reissue the color command to refresh loaded markers.
+Confirm `modules.portals`, a configured destination, safe terrain, source/destination region rules and **both** portal/warp access. The guided setup uses `/ffa portal create NAME`, followed by `/ffa portal destination NAME` while standing at the arrival point. Move into/cross a block boundary in the trigger volume and allow the five-second portal cooldown.
+
+Accept the server resource pack for colored animated surfaces. If the pack fails to download behind a proxy, host the exact extracted `<world>/ffa/portal-pack/ffa-portals.zip` and configure `portalPack.url`; direct/LAN servers normally use the same Minecraft port automatically. Enable Server Resource Packs in the client's server entry after an earlier refusal. Surface entities restore on chunk load; dye clicks target the filled surface, or use `/ffa portal color NAME COLOR`. See [portal setup](Warps-and-Portals.md).
 
 ## Home/TPA conflicts
 

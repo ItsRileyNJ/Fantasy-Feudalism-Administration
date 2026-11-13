@@ -26,6 +26,7 @@ Arguments containing spaces, including messages and team coordinates, must be qu
 | `/ffa region contract NAME BLOCKS` | Contract all horizontal edges; invalid results are rejected |
 | `/ffa region visualize NAME` | Refresh private boundary particles until `/ffa region visualize cancel` |
 | `/ffa region list` | List IDs, types and boundaries |
+| `/ffa warp create NAME` | Create a new warp at your current safe location |
 | `/ffa setwarp NAME` | Create/update a warp at your location |
 | `/ffa delwarp NAME` | Delete an unreferenced warp; remove portal references first |
 | `/ffa warp NAME public\|admin\|permission\|group\|team [VALUE]` | Set warp access |
@@ -40,7 +41,7 @@ Arguments containing spaces, including messages and team coordinates, must be qu
 | `/ffa reload` | Validate and apply reloadable settings and region edits together |
 | `/ffa backup` | Snapshot this mod's state and configuration; see recovery restrictions |
 
-Portals use vanilla stained-glass block displays at the selected volume's corners and vanilla interaction entities. They add no registered blocks or client protocol. Walk through the selected volume to travel. Operators can right-click a visible corner with a dye to recolor it without changing its destination. Corner markers have no block collision, so the portal interior can remain open. Colors persist and loaded markers synchronize from the saved definition.
+Portals use filled animated display surfaces and passable interaction entities. The mod bundles a standard resource pack for sixteen surface colors and normally serves it over the Minecraft TCP port. Players accept the pack; no FFA client mod is required. Use `/ffa portal create NAME`, then stand at the destination and `/ffa portal destination NAME` for automatic warp setup. See [the portal guide](../wiki/Warps-and-Portals.md).
 
 A `team` restriction uses Mercenaries settlement ownership/membership at the target. An optional VALUE is the settlement center in `BlockPos.toShortString()` format, for example `"10, 64, 20"`; an empty value uses the settlement at the target. A `group` VALUE is an FTB rank ID or a LuckPerms `group.ID` permission. A `permission` VALUE is an explicit permission node.
 
@@ -72,3 +73,5 @@ See the [complete command reference](../wiki/Command-Reference.md), [built-in ra
 See [staff tools](../wiki/Staff-Tools.md) for `/ffa vanish` and editable `/ffa invisee PLAYER`. [Whispers and stats](../wiki/Whispers-and-Stats.md) cover `/ffa whisper PLAYER MESSAGE`, recipient Accept/Deny, permanent consent, `/ffa whispers on|off` for each administrator, and public `/ffa stats PLAYER`.
 
 See the [0.3.0 complete reference](../wiki/Command-Reference.md) for persistent visualization, explicit child/standalone creation, item allowlists, title styles, sign shops, punishment/cell commands, smite and god mode. `/ffa back` is always registered; other optional utilities still need their modules.
+
+Version 0.5.0 adds `/ffa balance send PLAYER AMOUNT`, `/ffa balance request PLAYER AMOUNT`, payment Accept/Deny commands, administrator `/ffa tp PLAYER`, and configurable shop limits. See the [complete reference](../wiki/Command-Reference.md).

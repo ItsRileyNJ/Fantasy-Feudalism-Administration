@@ -42,6 +42,7 @@ public final class PolicyTest {
     Path root = Files.createTempDirectory("ffa-tests-");
     atomicWrites(root);
     actionDefaults(root);
+    portalPack(root);
     usability(root);
     ranks(root);
     chatStyles();
@@ -173,6 +174,76 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void portalPack(Path root) throws Exception {
+    Path config = root.resolve("portal-pack-settings.toml");
+    Files.writeString(config, Settings.TEMPLATE);
+    var current = Settings.load(config);
+    check(
+        current.portalPack && current.portalPackUrl.isEmpty(),
+        "Bundled portal pack defaults to native automatic delivery");
+    String legacy = Settings.TEMPLATE.replaceAll("(?s)\\[portalPack\\].*?(?=\\[dimension\\])", "");
+    Files.writeString(config, legacy);
+    check(
+        Settings.load(config).portalPack,
+        "Legacy settings enable bundled portal rendering without rewriting data");
+    Files.writeString(
+        config,
+        Settings.TEMPLATE.replace("url = \"\"", "url = \"file:///private/server.properties\""));
+    rejects(() -> Settings.load(config), "Pack URLs cannot expose local files");
+    Files.writeString(config, Settings.TEMPLATE.replace("url = \"\"", "url = \"relative-path\""));
+    rejects(() -> Settings.load(config), "Pack URL must be absolute HTTP(S)");
+    try (var zip = new java.util.zip.ZipFile("src/main/resources/resourcepacks/ffa-portals.zip")) {
+      var json =
+          com.google.gson.JsonParser.parseString(
+                  new String(
+                      zip.getInputStream(zip.getEntry("pack.mcmeta")).readAllBytes(),
+                      java.nio.charset.StandardCharsets.UTF_8))
+              .getAsJsonObject();
+      check(
+          json.getAsJsonObject("pack").get("pack_format").getAsInt() == 34,
+          "Bundled pack targets Minecraft 1.21.1");
+      var hashes = new HashSet<String>();
+      for (String dye :
+          List.of(
+              "white",
+              "orange",
+              "magenta",
+              "light_blue",
+              "yellow",
+              "lime",
+              "pink",
+              "gray",
+              "light_gray",
+              "cyan",
+              "purple",
+              "blue",
+              "brown",
+              "green",
+              "red",
+              "black")) {
+        byte[] png =
+            zip.getInputStream(zip.getEntry("assets/ffa/textures/block/portal_" + dye + ".png"))
+                .readAllBytes();
+        hashes.add(
+            java.util.HexFormat.of()
+                .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(png)));
+        check(
+            java.nio.ByteBuffer.wrap(png, 16, 8).getInt() == 16
+                && java.nio.ByteBuffer.wrap(png, 20, 4).getInt() == 512,
+            "Portal PNG contains 32 animation frames: " + dye);
+        check(
+            zip.getEntry("assets/ffa/textures/block/portal_" + dye + ".png.mcmeta") != null,
+            "Portal animation metadata is bundled: " + dye);
+      }
+      check(hashes.size() == 16, "All sixteen portal surface colors are distinct");
+    }
+    Shop old =
+        Storage.JSON.fromJson("{\"item\":\"minecraft:apple\",\"buy\":2,\"sell\":1}", Shop.class);
+    check(
+        old.buyLimit == -1 && old.sellLimit == -1 && old.usage.isEmpty(),
+        "Legacy shops retain unlimited trade directions with empty counters");
   }
 
   private static void actionDefaults(Path root) throws Exception {

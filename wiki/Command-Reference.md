@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.4.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.5.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -48,12 +48,16 @@ All region operations require `ffa.region.edit` or the administrator fallback. S
 ## Warps and portals
 
 ```text
+/ffa warp create <name>
 /ffa setwarp <name>
 /ffa delwarp <name>
 /ffa warp <name>
 /ffa warps
 /ffa warp <name> <mode> [value]
+/ffa portal create <name>
+/ffa portal create <name> to <warp>
 /ffa portal create <name> <warp>
+/ffa portal destination <name>
 /ffa portal delete <name>
 /ffa portal link <name> <warp>
 /ffa portal color <name> <color>
@@ -93,10 +97,17 @@ Native home/request modules must be enabled and FTB Essentials absent. Clickable
 
 ```text
 /ffa balance
+/ffa balance send <online_player> <whole_amount>
+/ffa balance request <online_player> <whole_amount>
+/ffa balance accept [request_token]
+/ffa balance deny [request_token]
 /ffa shop list
 /ffa shop buy <name> <quantity>
 /ffa shop sell <name> <quantity>
 /ffa shop set <name> <item_id> <buy_price> <sell_price>
+/ffa shop limits <name>
+/ffa shop limits <name> <shared|player> <manual|daily> <buy_limit> <sell_limit>
+/ffa shop reset <name> [player_or_uuid]
 /ffa shop delete <name>
 /ffa shop sign bind <name> [quantity]
 /ffa shop sign remove
@@ -157,6 +168,7 @@ Rank management and administrator chat operations support console use. Self-serv
 ## Staff tools, whispers and stats
 
 ```text
+/ffa tp <online_player>
 /ffa vanish
 /ffa smite <online_player>
 /ffa god
