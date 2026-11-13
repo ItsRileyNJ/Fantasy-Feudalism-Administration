@@ -4,11 +4,11 @@ A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do
 
 **[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, built-in ranks, chat styling, compatibility, recovery and IntelliJ guides.
 
-**Development release 0.5.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.5.1.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.5.0.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.5.1.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
@@ -48,3 +48,5 @@ Version 0.4.0 corrects rank-node value suggestions: `ffa.homes.maximum` offers w
 Version 0.4.0 adds independent farming/tool permissions, separate item drop/pickup flags, player ignition and vehicle boarding controls, and underlining for chat/rank names, titles and region notices. New action flags default to blocked in protected areas; existing files load with those defaults. [Configure the action flags](wiki/Flags-and-Interactions.md).
 
 Version 0.5.0 adds `/ffa balance send/request` with payment consent, immediate administrator `/ffa tp`, mixed-case shop names, configurable shared/per-player shop quotas, guided warp/portal setup, and filled animated portals in sixteen colors. The resource pack is bundled in the JAR and normally served over the existing Minecraft TCP port.
+
+Version 0.5.1 smooths the colored portal animation across adjacent tiles and adds eight seconds of invincibility on login and death respawn. Configure `spawn.invulnerabilitySeconds` in `config/ffa/server.toml` (0 disables). See [spawn protection](wiki/First-Join-and-Respawns.md#spawn-invincibility).

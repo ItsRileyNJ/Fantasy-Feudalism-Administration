@@ -43,6 +43,7 @@ public final class PolicyTest {
     atomicWrites(root);
     actionDefaults(root);
     portalPack(root);
+    spawnSettings(root);
     usability(root);
     ranks(root);
     chatStyles();
@@ -176,6 +177,27 @@ public final class PolicyTest {
     System.out.println("PASS " + count + " policy, persistence and config checks");
   }
 
+  private static void spawnSettings(Path root) throws Exception {
+    Path file = root.resolve("spawn-settings.toml");
+    Files.writeString(file, Settings.TEMPLATE);
+    check(
+        Settings.load(file).spawnInvulnerabilitySeconds == 8, "Eight-second default spawn shield");
+    Files.writeString(file, Settings.TEMPLATE.replace("invulnerabilitySeconds = 8\n", ""));
+    check(Settings.load(file).spawnInvulnerabilitySeconds == 8, "Legacy settings get spawn shield");
+    Files.writeString(
+        file,
+        Settings.TEMPLATE.replace("invulnerabilitySeconds = 8", "invulnerabilitySeconds = 0"));
+    check(Settings.load(file).spawnInvulnerabilitySeconds == 0, "Spawn shield may be disabled");
+    Files.writeString(
+        file,
+        Settings.TEMPLATE.replace("invulnerabilitySeconds = 8", "invulnerabilitySeconds = -1"));
+    rejects(() -> Settings.load(file), "Negative spawn protection rejected");
+    Files.writeString(
+        file,
+        Settings.TEMPLATE.replace("invulnerabilitySeconds = 8", "invulnerabilitySeconds = 3601"));
+    rejects(() -> Settings.load(file), "Unbounded spawn protection rejected");
+  }
+
   private static void portalPack(Path root) throws Exception {
     Path config = root.resolve("portal-pack-settings.toml");
     Files.writeString(config, Settings.TEMPLATE);
@@ -230,9 +252,17 @@ public final class PolicyTest {
             java.util.HexFormat.of()
                 .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(png)));
         check(
-            java.nio.ByteBuffer.wrap(png, 16, 8).getInt() == 16
-                && java.nio.ByteBuffer.wrap(png, 20, 4).getInt() == 512,
+            java.nio.ByteBuffer.wrap(png, 16, 8).getInt() == 32
+                && java.nio.ByteBuffer.wrap(png, 20, 4).getInt() == 1024,
             "Portal PNG contains 32 animation frames: " + dye);
+        var image = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(png));
+        boolean seamless = true;
+        for (int frame = 0; frame < 32; frame++)
+          for (int pixel = 0; pixel < 32; pixel++) {
+            seamless &= image.getRGB(0, frame * 32 + pixel) == image.getRGB(31, frame * 32 + pixel);
+            seamless &= image.getRGB(pixel, frame * 32) == image.getRGB(pixel, frame * 32 + 31);
+          }
+        check(seamless, "Opposite portal edges match through every animation frame: " + dye);
         check(
             zip.getEntry("assets/ffa/textures/block/portal_" + dye + ".png.mcmeta") != null,
             "Portal animation metadata is bundled: " + dye);

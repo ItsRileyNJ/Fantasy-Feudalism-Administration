@@ -39,6 +39,8 @@ pay = false
 leaderboard = false
 privacy = false
 [spawn]
+# Seconds of invincibility after login and death respawn; 0 disables it.
+invulnerabilitySeconds = 8
 firstJoin = false
 # vanilla | bed_first | spawn_first
 respawnPolicy = "vanilla"

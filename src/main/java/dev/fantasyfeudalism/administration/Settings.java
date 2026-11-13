@@ -51,6 +51,8 @@ pay = false
 leaderboard = false
 privacy = false
 [spawn]
+# Seconds of invincibility after login and death respawn; 0 disables it.
+invulnerabilitySeconds = 8
 firstJoin = false
 # vanilla | bed_first | spawn_first
 respawnPolicy = "vanilla"
@@ -142,6 +144,7 @@ shears = false
   public boolean portalPack;
   public String portalPackUrl;
   public int operatorLevel,
+      spawnInvulnerabilitySeconds,
       homeMax,
       cooldown,
       warmup,
@@ -234,6 +237,10 @@ shears = false
       s.pay = bool(c, "modules.pay");
       s.leaderboard = bool(c, "modules.leaderboard");
       s.privacy = bool(c, "modules.privacy");
+      s.spawnInvulnerabilitySeconds =
+          c.contains("spawn.invulnerabilitySeconds")
+              ? integer(c, "spawn.invulnerabilitySeconds", 0, 3600)
+              : 8;
       s.firstJoin = bool(c, "spawn.firstJoin");
       s.respawn = scalar(c, "spawn.respawnPolicy", String.class);
       if (!Set.of("vanilla", "bed_first", "spawn_first").contains(s.respawn))
