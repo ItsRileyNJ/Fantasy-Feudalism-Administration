@@ -33,7 +33,10 @@
     "PortalDestinationAuthorityMixin",
     "PlayerActionMixin",
     "RegionInventoryMixin",
-    "PlayerFireMixin"
+    "PlayerFireMixin",
+    "PortalPackChannelMixin",
+    "PortalPackHandshakeMixin",
+    "PortalPackStatusMixin"
   ],
   "injectors": {
     "defaultRequire": 1

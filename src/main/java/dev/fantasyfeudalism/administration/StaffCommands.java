@@ -16,6 +16,24 @@ final class StaffCommands {
 
   static void addTo(LiteralArgumentBuilder<CommandSourceStack> root) {
     root.then(
+        literal("tp")
+            .requires(StaffCommands::admin)
+            .then(
+                target()
+                    .executes(
+                        c ->
+                            run(
+                                c,
+                                () -> {
+                                  requireAdmin(c);
+                                  var actor = playerSource(c);
+                                  var target = targetPlayer(c);
+                                  if (actor == target)
+                                    throw new IllegalArgumentException("Choose another player.");
+                                  app().teleports.cancel(actor, false);
+                                  app().teleports.teleport(actor, Teleports.point(target), true);
+                                }))));
+    root.then(
         literal("god")
             .requires(StaffCommands::admin)
             .executes(

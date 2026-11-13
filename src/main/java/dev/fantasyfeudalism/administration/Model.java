@@ -129,6 +129,7 @@ public final class Model {
 
   public static final class Portal {
     public String id, dimension, warp, color = "purple";
+    public boolean managedWarp;
     public int minX, minY, minZ, maxX, maxY, maxZ;
     public Access access = new Access();
 
@@ -161,6 +162,13 @@ public final class Model {
   public static final class Shop {
     public String item = "minecraft:stone";
     public long buy = 1, sell = 0;
+    public long buyLimit = -1, sellLimit = -1;
+    public String limitScope = "shared", limitReset = "manual";
+    public Map<String, ShopUsage> usage = new TreeMap<>();
+  }
+
+  public static final class ShopUsage {
+    public long bought, sold;
   }
 
   public static final class JailCell {
@@ -193,6 +201,9 @@ public final class Model {
 
   public static final class PendingTrade {
     public String id, player, before, after;
+    public String shop = "", quotaKey = "";
+    public int quantity;
+    public boolean buy;
     public long oldBalance, newBalance;
   }
 

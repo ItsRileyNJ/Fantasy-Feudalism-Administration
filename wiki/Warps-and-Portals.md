@@ -1,93 +1,109 @@
 # Warps and portals
 
-[Wiki home](Home.md) · [Access rules](Permissions-and-Access.md)
+[Wiki home](Home.md) · [Access rules](Permissions-and-Access.md) · [Configuration](Configuration.md)
 
-A **warp** is a saved arrival point. A **portal** is a physical trigger volume linked to a warp by name. Updating a warp updates where linked portals lead.
+A **warp** is a named arrival point. A **portal** is a passable trigger volume that travels to a named warp. Updating a shared warp updates every portal linked to it.
 
-## Create and use a warp
+## Simplest portal setup
 
-Stand on a safe full-block floor at the destination, facing the intended direction:
+Select two opposite corners of the portal opening with `/ffa pos1` and `/ffa pos2`. Use a thin, upright rectangle: for example, three blocks wide, four tall and one block deep. Then:
 
 ```text
-/ffa setwarp marketplace
-/ffa warp marketplace
-/ffa warps
+/ffa portal create town_gate
 ```
 
-`setwarp` also updates an existing warp of that name, retaining its access rule. Travel can cross dimensions. Normal teleport timing, permissions and destination safety still apply.
-
-To remove a warp:
+The portal becomes visible immediately. Stand on a safe full-block floor where players should arrive, face their intended direction, then:
 
 ```text
+/ffa portal destination town_gate
+```
+
+FFA creates and links the `town_gate` warp for you. No separate warp-assignment step is required. An unconfigured portal shows its surface but does not teleport players. You must stand outside its own trigger volume when setting the destination.
+
+Setting a destination requires both portal and warp management authority. If the portal already links to an existing warp, this command updates that warp's destination, including other portals that share it.
+
+## Create a warp first, or reuse one
+
+Stand at the arrival point:
+
+```text
+/ffa warp create marketplace
+```
+
+Select the portal opening, then:
+
+```text
+/ffa portal create market_gate to marketplace
+```
+
+The earlier `/ffa portal create market_gate marketplace` syntax also works. Creating a portal without a destination argument automatically links an already existing warp with the same name; otherwise, use the guided destination command above.
+
+```text
+/ffa warp marketplace
+/ffa warps
+/ffa setwarp marketplace
+/ffa portal link market_gate marketplace
 /ffa delwarp marketplace
 ```
 
-Delete or relink portals using it first; FFA refuses to leave those references dangling. Removing a warp does not remove a region or building.
+`warp create` refuses duplicate names. `setwarp` deliberately updates an existing warp, retaining its access rule. Delete or relink portals before deleting a warp they use. Warp IDs remain lowercase letters, digits, underscores or hyphens, up to 48 characters.
 
-## Build a portal
+## Animated, recolored portal surfaces
 
-Create the destination warp first. Choose a walkable entrance volume away from its arrival point. Operators select a **3D cuboid** with the same two position commands used for regions; unlike regions, portal Y coordinates matter.
-
-Example entrance inside the sample spawn: first corner (-30, 65, 0), second corner (-28, 67, 0). Stand or hover at the first corner and `/ffa pos1`; move to the second and run:
+Portals now fill their opening with an animated translucent Nether-style surface, rather than corner glass markers. Sixteen dye colors are available:
 
 ```text
-/ffa pos2
-/ffa portal create market_gate marketplace
-/ffa portal color market_gate light_blue
+/ffa portal color town_gate red
+/ffa portal color town_gate cyan
+/ffa portal color town_gate purple
 ```
 
-The volume includes both selected corner blocks. This example is 3 × 3 × 1 = 9 blocks. Portal volumes must contain 1..4096 blocks, stay within build height, and cannot overlap another portal.
+Administrators can also use a dye on a portal's interaction surface. Colors persist through restarts. Chunk-load reconciliation restores surfaces when their area loads; they do not generate or force-load terrain. Large selections use coarser tiles to keep the surface renderer bounded to 256 tiles per portal. Use compact openings for the clearest effect.
 
-FFA shows non-solid, vanilla stained-glass displays at the corners with interaction targets. It does not generate a building, fill the whole entrance with portal blocks, or require an FFA client renderer. You can build your own frame. Players activate the portal by moving into its configured volume. Select the height where their feet will travel, not only the arch above their heads.
+These are display surfaces, not real vanilla Nether portal blocks: FFA remains in control of the destination and does not accidentally send players to the Nether.
 
-## Recolor or relink
+## The bundled resource pack
 
-An authorized administrator can right-click a colored corner with any vanilla dye, or use:
+The mod JAR includes a small resource pack containing original animated textures and vanilla-compatible models. With portals enabled, Minecraft automatically offers it to joining players. **Players must accept the pack to see the recolored surfaces; no FFA client mod is needed.** If previously declined, edit the server entry in Multiplayer, enable Server Resource Packs, and reconnect.
 
-```text
-/ffa portal color market_gate red
-/ffa portal link market_gate town_hall
+Normally the pack downloads from a read-only route on the **existing Minecraft TCP port**. No additional HTTP port or separate web server is needed for direct/LAN connections. The route serves only the matching bundled ZIP and never exposes server files. Minecraft verifies the advertised SHA-1 and caches the download.
+
+The matching ZIP is also extracted to `<world>/ffa/portal-pack/ffa-portals.zip`. If the server uses a protocol-specific proxy or hosting layer that will not forward HTTP on the game port, upload this exact ZIP to an HTTP(S) host and set its public URL:
+
+```toml
+[portalPack]
+enabled = true
+url = "https://example.org/ffa-portals.zip"
 ```
 
-Create the `town_hall` warp before linking it. Recoloring keeps the destination, and linking keeps the color. Both are saved through restarts.
+Edit the existing section rather than adding a duplicate, then `/ffa reload`. Leave `url = ""` for automatic same-port delivery. Do not edit the hosted ZIP independently: its bytes must match the bundled hash. Pack assets reserve CustomModelData **600000..600015** on the purple stained-glass item; its ordinary item/block appearance is retained. A custom pack overriding that same item model may need its model overrides merged.
 
-All color names:
+Setting `portalPack.enabled = false` uses native animated purple portal surfaces with colored particles instead of requiring the custom pack. Vanilla cannot recolor that native purple texture. Disabling the portals module also stops pack offers and removes loaded FFA surfaces.
 
-```text
-white orange magenta light_blue yellow lime pink gray
-light_gray cyan purple blue brown green red black
-```
-
-## Restrict a portal or warp
+## Access and timing
 
 ```text
-/ffa portal access market_gate public
-/ffa portal access market_gate admin
-/ffa portal access market_gate permission ffa.portal.market
-/ffa portal access market_gate group traders
+/ffa portal access town_gate public
+/ffa portal access town_gate admin
+/ffa portal access town_gate permission ffa.portal.town
+/ffa portal access town_gate group residents
 /ffa warp marketplace permission ffa.warp.market
 ```
 
-Grant the named permission/rank through [the installed permission provider](Permissions-and-Access.md). Travel must pass **both portal and warp access**, plus applicable region and safety rules. A denied player stays in place and receives a cooldown-limited notice.
+Both portal and warp access must pass, along with region and destination-safety rules. For a warp automatically created by the guided workflow, FFA copies portal access to that warp and keeps them aligned when portal access changes. Existing manually linked warps retain their own independent access settings. Configure both when restricting an existing link.
 
-`team` access uses Mercenaries membership at the portal's location for a portal check, and at the destination for a warp check. It needs the supported integration and a relevant settlement there. See [team examples](Permissions-and-Access.md).
+`team` access uses the supported Mercenaries settlement context at the portal and destination respectively. Named-warp bans also block portal routes using those warps. Normal home/TPA/back routes remain separate.
 
-## Timing and maintenance
-
-Default command teleport cooldown: **3 seconds**. Default portal cooldown: **5 seconds**. Administrators bypass ordinary command timing, but portal loop protection remains. Keep arrival points outside other portal trigger volumes to avoid unwanted return travel.
+Normal teleport cooldown defaults to three seconds; portal loop cooldown defaults to five seconds, including for administrators. Put destinations outside portal trigger volumes. Travel uses saved safe terrain; unknown terrain is not generated.
 
 ```text
-/ffa portal delete market_gate
+/ffa portal delete town_gate
 ```
 
-Deleting a portal removes its definition and loaded visual markers, not its destination warp or world frame. FFA has no portal-resize command in 0.3.0: delete/recreate the trigger to change its geometry.
+Deleting a portal removes its definition and loaded visuals, not world blocks or its warp. Delete/recreate a portal to change its trigger bounds. Selections are limited to 4096 blocks and the dimension's build height; portal volumes cannot overlap.
 
-`modules.portals = false` disables travel and portal management. Saved definitions remain; existing visual markers can remain visible. Re-enable the module to resume using them, or delete unwanted portals while it is enabled.
+## Administrator-only portal creation
 
-## Restrict portal creation to administrators
+`portals.adminCreationOnly = true` defaults on. Full administrators can create supported vanilla Nether/End portals and new FFA portals. Delegating `ffa.portal.manage` alone does not override this creation policy. Set it false and reload to restore normal creation permissions, while retaining region restrictions.
 
-The optional `[portals]` setting `adminCreationOnly = true` is enabled by default, including for older configuration files. With it enabled, full administrators can create supported portals and ordinary players cannot. This includes vanilla Nether/End portal construction, supported tagged portal blocks/events, and new FFA portal definitions. Delegating `ffa.portal.manage` alone does not override it.
-
-Existing portals can still be used. For Nether travel, establish **both ends** as an administrator: a normal player's first trip cannot generate a missing destination portal. Natural/environmental portal creation without an administrator actor is also refused while the setting is enabled.
-
-Set `adminCreationOnly = false` and `/ffa reload` to restore normal portal-creation permissions; region flags and other mods' restrictions still apply. Custom mods that create entity portals or bypass vanilla/event/tag hooks need a specific compatibility adapter.
+For ordinary Nether travel, establish both ends as an administrator: a player's first trip cannot generate a missing destination portal while administrator-only creation is enabled. Custom mods bypassing vanilla/event/tag hooks need a verified adapter.

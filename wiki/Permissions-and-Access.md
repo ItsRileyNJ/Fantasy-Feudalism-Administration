@@ -78,3 +78,5 @@ Portal team checks use the portal location. Warp/region arrival checks use the d
 ```
 
 Use the real Mercenaries center coordinates, not arbitrary portal coordinates. `team` does not mean a vanilla scoreboard team or FTB Teams group. Missing/unavailable integrations fail closed for restricted access; administrators still have their explicit bypass.
+
+Balance send/request require both `ffa.command.balance` and `ffa.command.pay` for nonadministrators. Guided portal destination setting requires both `ffa.portal.manage` and `ffa.warp.manage`; administrator-only creation remains authoritative. `/ffa tp` requires full administrator authority.

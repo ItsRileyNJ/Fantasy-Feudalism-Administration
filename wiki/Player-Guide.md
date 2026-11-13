@@ -79,3 +79,5 @@ FFA disables its native home, request and request-privacy operations. Use FTB Es
 ## Private messages and public statistics
 
 Use `/ffa whisper PLAYER MESSAGE` to request consent before first contact. Accepting permanently approves that sender for you. Authorized administrators can monitor these moderated whispers. `/ffa stats PLAYER` privately shows playtime days, deaths, player kills, Denar, settlements and ranks for visible online players. See [whispers and stats](Whispers-and-Stats.md) for consent, monitoring and full syntax.
+
+Use `/ffa balance send PLAYER AMOUNT` to send Denar or `/ffa balance request PLAYER AMOUNT` to ask them to pay you. Requests require the payer’s explicit acceptance. See [payments and limits](Economy-and-Shops.md). Accept the standard resource-pack prompt for colored animated portals.

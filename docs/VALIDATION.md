@@ -8,7 +8,7 @@ This is a development build, not a certification against every mod combination o
 
 - CI runs the build, policy checks and headless regression suite on Ubuntu and Windows. Atomic-save coverage includes creation, UTF-8 replacement, truncation, replacement failures and temporary-file cleanup.
 - Java 21 compilation against NeoForge **21.1.262**, Minecraft **1.21.1**.
-- **118** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
+- **157** standalone assertions for safe defaults, invalid configuration rejection, unchanged last-valid settings, parent/child geometry, sibling-overlap and duplicate-ID rejection, region TOML round trips, inheritance/overrides, external-edit protection, durable balances and failed-mutation rollback, I/O failure lockout and command parsing (including namespaced IDs and malformed input).
 - Headless NeoForge runtime regression suite with actual ServerPlayers, mock network connections, real vanilla player saves, loaded mixins and registered production event handlers.
 - The runtime suite was also run with the exact uploaded **Mercenaries 1.20.4**, **Easy NPC 7.18.0**, and **Easy NPC Config UI 7.18.0** JARs installed together.
 - Runtime assertions include Adventure Mode entry and original-mode restoration, administrator exemption, inventory/XP preservation, hunger/saturation freezing, blocked fire placement, solid-destination rejection through vanilla teleport entry points, mob-spawn restrictions, purchases/sales and interrupted-transaction recovery settling once.
@@ -36,9 +36,12 @@ This is a development build, not a certification against every mod combination o
 
 - Version 0.4.0 checks safe new-flag defaults in legacy files, underline validation/round trips, actual hoe/seed/bone-meal/harvest/axe/shovel/shears/flint actions with build/interact disabled, blocked Q/menu/cursor drops without inventory loss, independent ground pickup, boat/minecart boarding and disembarking, player ignition/extinguishing, the existing elytra flag, administrator-assigned and rank-inherited underlines, and self-service permission/override/reset behavior.
 
+- Version 0.5.0 checks native money send/request/accept/deny commands with no debit before consent, expiry/token mismatch/replay protection; immediate admin TP and hidden access; mixed-case shop operations, shared/per-player manual/daily caps, independent buy/sell counters, preserved usage on price/limit edits, journal capacity reservations and exactly-once recovery; guided portal destination creation/access and all sixteen surface model colors.
+- Pack checks validate 32-frame original textures, sixteen distinct palettes and Minecraft 1.21.1 pack metadata; test exact ZIP/hash delivery on a real loopback Minecraft TCP listener, normal/legacy game-byte passthrough, fragmented HTTP, bounded headers, forbidden-path rejection, native resource-pack offer URL/hash and duplicate-offer prevention. No extra listener port is required. Real clients still need the acceptance check below.
+
 ## Remaining deployment acceptance checks
 
-- Join a dedicated server using an unmodified-by-FFA client; confirm visible portals, dye interaction and clickable request messages from a real client.
+- Join a dedicated server using an unmodified-by-FFA client; accept the bundled resource pack and confirm animated translucent colored surfaces, dye changes and clickable payment/TPA/whisper prompts from a real client. Verify any proxy/CDN URL used by the live server.
 - Test FTB Ranks **2101.1.5** with the actual binary and the server's rank rules. Its adapter was checked against the official source API; that JAR was not uploaded. LuckPerms and FTB Essentials were not installed in the supplied runtime test set.
 - Enable the optional dimension on a dedicated staging server and verify construction, first arrival, return travel and restart behavior. Keep the shipped setting disabled until that check passes.
 - Exercise first join versus existing player, bed/anchor fallback and cross-dimensional death respawns with real client sessions.

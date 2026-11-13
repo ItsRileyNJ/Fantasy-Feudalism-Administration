@@ -18,6 +18,11 @@ defaultWarpBanSeconds = 300
 maximumDurationSeconds = 31536000
 [portals]
 adminCreationOnly = true
+[portalPack]
+# Bundled animated portal surfaces; clients accept a standard resource-pack download.
+enabled = true
+# Empty serves the bundled ZIP over the existing Minecraft port. Set an HTTP(S) URL behind proxies/CDNs.
+url = ""
 [dimension]
 # Restart required. No terrain or automatic platform is generated. Build before setting spawn.
 enabled = false

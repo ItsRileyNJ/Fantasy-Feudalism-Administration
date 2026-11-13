@@ -30,6 +30,11 @@ defaultWarpBanSeconds = 300
 maximumDurationSeconds = 31536000
 [portals]
 adminCreationOnly = true
+[portalPack]
+# Bundled animated portal surfaces; clients accept a standard resource-pack download.
+enabled = true
+# Empty serves the bundled ZIP over the existing Minecraft port. Set an HTTP(S) URL behind proxies/CDNs.
+url = ""
 [dimension]
 # Restart required. No terrain or automatic platform is generated. Build before setting spawn.
 enabled = false
@@ -134,6 +139,8 @@ shears = false
       defaultWarpBanSeconds,
       maximumDurationSeconds;
   public boolean adminPortalCreationOnly;
+  public boolean portalPack;
+  public String portalPackUrl;
   public int operatorLevel,
       homeMax,
       cooldown,
@@ -176,6 +183,19 @@ shears = false
     try (var c = CommentedFileConfig.of(file)) {
       c.load();
       Settings s = new Settings();
+      s.portalPack = c.contains("portalPack.enabled") ? bool(c, "portalPack.enabled") : true;
+      s.portalPackUrl =
+          c.contains("portalPack.url") ? scalar(c, "portalPack.url", String.class) : "";
+      if (!s.portalPackUrl.isEmpty()) {
+        var url = java.net.URI.create(s.portalPackUrl);
+        if (s.portalPackUrl.length() > 2048
+            || !("http".equalsIgnoreCase(url.getScheme())
+                || "https".equalsIgnoreCase(url.getScheme()))
+            || url.getHost() == null
+            || url.getUserInfo() != null)
+          throw new IllegalArgumentException(
+              "portalPack.url must be an HTTP(S) URL without credentials.");
+      }
       s.adminPortalCreationOnly =
           c.contains("portals.adminCreationOnly") ? bool(c, "portals.adminCreationOnly") : true;
       s.defaultJailSeconds =
