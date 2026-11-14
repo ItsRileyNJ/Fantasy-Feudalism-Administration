@@ -145,6 +145,8 @@ public final class Model {
 
   public static final class PlayerData {
     public long balance;
+    public Boolean pvpEnabled;
+    public long pvpToggleAfter;
     public Map<String, String> chat = new TreeMap<>();
     public boolean vanished, whisperMonitor = true;
     public String vanishMode;

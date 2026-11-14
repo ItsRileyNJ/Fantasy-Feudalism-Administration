@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.6.1**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.7.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -227,3 +227,14 @@ See [world border setup and visibility](World-Borders.md). Applies only in the c
 ```
 
 `pos1`/`pos2` reuse the region selection (`/ffa pos1` and `/ffa pos2`). `create` aliases `set`; `remove` aliases `clear`. Setting again replaces the dimension's previous FFA border. The wall appears only within `worldBorder.visibilityDistance` blocks, default 8, while enforcement remains active. Normal players cannot see or run these commands.
+
+## Personal PvP
+
+```text
+/ffa pvp
+/ffa pvp on
+/ffa pvp off
+/ffa pvp status
+```
+
+Player permission: `ffa.command.pvp`. Normal players wait five minutes between changes and cannot switch during active PvP combat. Disabling PvP blocks damage in both directions. Status is read-only. Region/global PvP rules still apply. See [combat and PvP](Combat-and-PvP.md) for administrator behavior, config and travel restrictions.

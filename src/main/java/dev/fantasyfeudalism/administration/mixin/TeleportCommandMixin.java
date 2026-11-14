@@ -39,10 +39,12 @@ public abstract class TeleportCommandMixin {
         && app != null
         && app.server != null
         && app.teleports != null) {
-      String error =
-          app.teleports.validate(
-              player,
-              new Model.Point(level.dimension().location().toString(), x, y, z, yaw, pitch));
+      String error = app.combat == null ? null : app.combat.travelError(player);
+      if (error == null)
+        error =
+            app.teleports.validate(
+                player,
+                new Model.Point(level.dimension().location().toString(), x, y, z, yaw, pitch));
       if (error != null) throw new SimpleCommandExceptionType(Component.literal(error)).create();
     }
     boolean moved = original.call(entity, level, x, y, z, relative, yaw, pitch);

@@ -59,6 +59,14 @@ invulnerabilitySeconds = 8
 firstJoin = false
 # vanilla | bed_first | spawn_first
 respawnPolicy = "vanilla"
+[combat]
+# Block travel after receiving player damage. Administrators remain exempt.
+teleportBlockEnabled = true
+# Applies to the victim's travel lock and both participants' PvP-toggle combat lock.
+tagSeconds = 30
+[pvp]
+# Applies until a player explicitly chooses a PvP preference.
+enabledByDefault = true
 [teleport]
 cooldownSeconds = 3
 warmupSeconds = 0
@@ -139,6 +147,8 @@ flint_and_steel = false
 shears = false
 """;
   public int queuedLoads, loadTimeout;
+  public int combatSeconds;
+  public boolean combatTravel, pvpDefault;
   public int defaultJailSeconds,
       defaultChatBanSeconds,
       defaultWarpBanSeconds,
@@ -249,6 +259,11 @@ shears = false
           c.contains("worldBorder.visibilityDistance")
               ? integer(c, "worldBorder.visibilityDistance", 1, 64)
               : 8;
+      s.combatTravel =
+          c.contains("combat.teleportBlockEnabled") ? bool(c, "combat.teleportBlockEnabled") : true;
+      s.combatSeconds =
+          c.contains("combat.tagSeconds") ? integer(c, "combat.tagSeconds", 1, 3600) : 30;
+      s.pvpDefault = c.contains("pvp.enabledByDefault") ? bool(c, "pvp.enabledByDefault") : true;
       s.firstJoin = bool(c, "spawn.firstJoin");
       s.respawn = scalar(c, "spawn.respawnPolicy", String.class);
       if (!Set.of("vanilla", "bed_first", "spawn_first").contains(s.respawn))

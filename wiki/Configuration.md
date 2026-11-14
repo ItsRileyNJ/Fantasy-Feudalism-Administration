@@ -48,6 +48,9 @@ The [full default server.toml](examples/server.toml) is extracted from the curre
 | `spawn.firstJoin` | `false` | Boolean | Reload | Redirect genuinely new players to a valid configured FFA spawn. |
 | `spawn.invulnerabilitySeconds` | `8` | 0–3600 whole seconds; 0 disables | Reload; next login/death respawn | Invincibility for all players, including admins; see [spawn protection](First-Join-and-Respawns.md#spawn-invincibility). |
 | `spawn.respawnPolicy` | `"vanilla"` | vanilla / bed_first / spawn_first | Reload | Death arrival policy; see the respawn guide. |
+| `combat.teleportBlockEnabled` | `true` | Boolean | Reload | Block FFA/native travel commands after receiving player damage. |
+| `combat.tagSeconds` | `30` | 1–3600 whole seconds | Reload; new hits | Victim travel lock and both participants' PvP-toggle combat timer. |
+| `pvp.enabledByDefault` | `true` | Boolean | Reload | Personal PvP default until a player saves an explicit choice. |
 | `teleport.cooldownSeconds` | `3` | 0..86400 seconds | Reload | Ordinary command teleport cooldown. |
 | `teleport.warmupSeconds` | `0` | 0..300 seconds | Reload | Delay before ordinary player travel; zero is immediate. |
 | `teleport.cancelOnMovement` | `true` | Boolean | Reload | Cancel warmups/prepared chunk loads when the player moves. |

@@ -84,6 +84,7 @@ public final class Commands {
           && !app.compat.admin(p)
           && Set.of(
                   "spawn",
+                  "pvp",
                   "warp",
                   "warps",
                   "home",
@@ -134,7 +135,20 @@ public final class Commands {
         else throw new IllegalArgumentException("Use /ffa worldborder set, clear or info.");
         return 1;
       }
+      if (p != null
+          && (Set.of("home", "back", "rtp", "tpa", "tpahere", "tpaccept").contains(cmd)
+              || cmd.equals("spawn") && args.size() == 1
+              || cmd.equals("warp") && args.size() == 2)) app.combat.requireTravel(p);
       switch (cmd) {
+        case "pvp" -> {
+          requirePlayer(p);
+          String mode = args.size() == 1 ? "toggle" : arg(args, 1);
+          if (mode.equals("status")) Teleports.tell(p, app.combat.status(p));
+          else if (Set.of("toggle", "on", "off").contains(mode))
+            app.combat.set(p, mode.equals("toggle") ? !app.combat.enabled(p) : mode.equals("on"));
+          else throw new IllegalArgumentException("Use /ffa pvp, on, off or status.");
+        }
+
         case "spawn" -> {
           if (args.size() == 1) {
             requirePlayer(p);

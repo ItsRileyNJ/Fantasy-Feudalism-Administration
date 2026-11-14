@@ -8,6 +8,7 @@
 - [Configuration](Configuration.md)
 - [Warps and Portals](Warps-and-Portals.md)
 - [Player Guide](Player-Guide.md)
+- [Combat and PvP](Combat-and-PvP.md)
 - [Economy and Shops](Economy-and-Shops.md)
 - [Built-in Ranks](Ranks.md)
 - [Chat and Nicknames](Chat-and-Nicknames.md)

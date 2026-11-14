@@ -32,7 +32,7 @@ public final class PermissionCatalog {
     add("staff", "ffa.reload", "Reload configuration and regions", "true or false");
     add("staff", "ffa.backup", "Create an FFA snapshot", "true or false");
     for (String family :
-        List.of("spawn", "warp", "home", "back", "balance", "shop", "whisper", "stats"))
+        List.of("spawn", "warp", "home", "back", "balance", "shop", "whisper", "stats", "pvp"))
       add(
           "player",
           "ffa.command." + family,

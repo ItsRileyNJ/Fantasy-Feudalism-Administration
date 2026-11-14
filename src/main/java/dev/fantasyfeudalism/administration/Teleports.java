@@ -120,6 +120,7 @@ public final class Teleports {
   }
 
   public void teleport(ServerPlayer p, Point destination, boolean instant) throws Exception {
+    app.combat.requireTravel(p);
     if (waiting.containsKey(p.getUUID()) || loading.containsKey(p.getUUID()))
       throw new IllegalArgumentException("A teleport is already pending.");
     if (app.storage.state().trades.containsKey(p.getUUID().toString()))
@@ -156,6 +157,7 @@ public final class Teleports {
   }
 
   private void execute(ServerPlayer p, Point dest) throws Exception {
+    app.combat.requireTravel(p);
     String error = validate(p, dest);
     if (error != null) throw new IllegalArgumentException(error);
     p.closeContainer();
@@ -186,6 +188,7 @@ public final class Teleports {
   }
 
   public void request(ServerPlayer from, ServerPlayer to, boolean here) {
+    app.combat.requireTravel(from);
     if (Vanish.hidden(from.getUUID()) || !Vanish.canSee(from, to))
       throw new IllegalArgumentException("Player is offline or messaging is unavailable");
     if (from == to) throw new IllegalArgumentException("Choose another player.");
@@ -253,6 +256,17 @@ public final class Teleports {
     if (!prefs.requestsEnabled || prefs.ignored.contains(from.getUUID().toString()))
       throw new IllegalArgumentException("Request blocked by current privacy preferences.");
     teleport(r.here ? p : from, point(r.here ? from : p), false);
+  }
+
+  void cancelForCombat(ServerPlayer p) {
+    UUID id = p.getUUID();
+    boolean removed = waiting.remove(id) != null;
+    removed |= loading.remove(id) != null;
+    removed |=
+        requests
+            .entrySet()
+            .removeIf(e -> e.getValue().from.equals(id) || e.getValue().to.equals(id));
+    if (removed) tell(p, "Teleport cancelled: you were hit by a player.");
   }
 
   public void cancel(ServerPlayer p) {

@@ -37,6 +37,7 @@ public final class Administration {
   public SignShops signShops;
   public AdminPowers adminPowers;
   public SpawnProtection spawnProtection;
+  public Combat combat;
   public Protection protection;
   public RegionActions regionActions;
   public Economy economy;
@@ -102,6 +103,8 @@ public final class Administration {
       adminPowers = new AdminPowers(this);
       spawnProtection = new SpawnProtection(this);
       NeoForge.EVENT_BUS.register(spawnProtection);
+      combat = new Combat(this);
+      NeoForge.EVENT_BUS.register(combat);
       protection = new Protection(this);
       regionActions = new RegionActions(this);
       NeoForge.EVENT_BUS.register(regionActions);
@@ -150,6 +153,7 @@ public final class Administration {
     if (backHistory != null) NeoForge.EVENT_BUS.unregister(backHistory);
     if (moderation != null) NeoForge.EVENT_BUS.unregister(moderation);
     if (adminPowers != null) NeoForge.EVENT_BUS.unregister(adminPowers);
+    if (combat != null) NeoForge.EVENT_BUS.unregister(combat);
     if (spawnProtection != null) NeoForge.EVENT_BUS.unregister(spawnProtection);
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
     if (payments != null) NeoForge.EVENT_BUS.unregister(payments);
