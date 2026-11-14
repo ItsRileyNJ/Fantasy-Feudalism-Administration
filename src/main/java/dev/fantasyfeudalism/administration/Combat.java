@@ -56,6 +56,7 @@ public final class Combat {
   public String travelError(ServerPlayer player) {
     if (!app.settings.combatTravel
         || app.compat.admin(player)
+        || app.teleports.staffForcing(player)
         || app.moderation != null && app.moderation.forcing(player)) return null;
     long left = remaining(travel, player.getUUID());
     return left == 0

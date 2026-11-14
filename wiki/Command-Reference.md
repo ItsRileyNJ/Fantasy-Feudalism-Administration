@@ -238,3 +238,7 @@ See [world border setup and visibility](World-Borders.md). Applies only in the c
 ```
 
 Player permission: `ffa.command.pvp`. Normal players wait five minutes between changes and cannot switch during active PvP combat. Disabling PvP blocks damage in both directions. Status is read-only. Region/global PvP rules still apply. See [combat and PvP](Combat-and-PvP.md) for administrator behavior, config and travel restrictions.
+
+## Force bring (administrators)
+
+`/ffa tphere PLAYER` immediately brings the online player to you. Combat, normal timing and region travel restrictions are bypassed for this move. Destination safety, jail and transaction checks remain. Hidden from ordinary players; see [staff tools](Staff-Tools.md#bring-a-player-to-you).

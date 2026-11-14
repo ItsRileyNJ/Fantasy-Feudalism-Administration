@@ -27,7 +27,7 @@ The restriction is scoped to these travel routes. Natural Minecraft portals, end
 
 A brief private command error shows the remaining wait. There is no chat message for each hit. If a pending FFA teleport is actually cancelled, the victim receives one cancellation message.
 
-Combat timers use elapsed time and remain active through logout/relogin on the same running server. They expire normally while offline, clear on death, and reset on a server restart. Administrator travel remains exempt, and moderation's forced jail/release moves continue to work.
+Combat timers use elapsed time and remain active through logout/relogin on the same running server. They expire normally while offline, clear on death, and reset on a server restart. Administrator travel remains exempt, and moderation's forced jail/release moves continue to work. `/ffa tphere PLAYER` lets an administrator bring a combat-tagged player without erasing that player's combat timer.
 
 ## Toggle your PvP preference
 

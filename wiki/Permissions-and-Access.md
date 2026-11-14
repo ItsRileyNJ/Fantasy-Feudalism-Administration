@@ -83,3 +83,5 @@ Use the real Mercenaries center coordinates, not arbitrary portal coordinates. `
 Balance send/request require both `ffa.command.balance` and `ffa.command.pay` for nonadministrators. Guided portal destination setting requires both `ffa.portal.manage` and `ffa.warp.manage`; administrator-only creation remains authoritative. `/ffa tp` requires full administrator authority.
 
 World-border management (`/ffa worldborder`) requires full administrator status and stays hidden from ordinary players. Region-editor grants do not unlock it. Physical world borders follow vanilla behavior: administrators in normal play still collide with them; Spectator mode can cross. See [world borders](World-Borders.md).
+
+`/ffa tphere PLAYER` requires full administrator status and is hidden from normal players. It grants temporary force-travel authority for that move; an ordinary `ffa.command.tphere` grant does not unlock it.

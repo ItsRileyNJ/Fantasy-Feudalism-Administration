@@ -17,3 +17,5 @@ The JAR bundles the animated colored portal resource pack and offers a standard 
 0.6.1: fixes cross-dimension `/execute ... run tp` validation, relative-coordinate validation and misleading native success feedback after FFA blocks a teleport. Existing configuration and world data remain compatible.
 
 0.7.0: configurable combat travel restriction and personal `/ffa pvp` on/off/status with a persistent five-minute change cooldown. See the Combat and PvP wiki page for configuration and administrator behavior.
+
+Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged player without clearing their combat timer.

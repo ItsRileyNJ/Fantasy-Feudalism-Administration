@@ -56,3 +56,5 @@ Version 0.6.0 adds [rectangular world borders](wiki/World-Borders.md): select `/
 Version 0.6.1 fixes vanilla `/execute in DIMENSION run tp` checks using the wrong world, relative-coordinate validation, and false teleport-success feedback after FFA rejects a move. Administrator bypass and destination safety remain enforced.
 
 Version 0.7.0 adds [combat travel restrictions and personal PvP](wiki/Combat-and-PvP.md): configurable travel blocking after player hits and `/ffa pvp` with a saved five-minute cooldown.
+
+Version 0.7.0 also adds administrator `/ffa tphere PLAYER` to bring another player immediately, with destination safety and jail protections retained.

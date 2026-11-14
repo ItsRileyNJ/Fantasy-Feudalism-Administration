@@ -34,6 +34,7 @@ public final class Teleports {
       long expiry,
       java.util.concurrent.CompletableFuture<Optional<net.minecraft.nbt.CompoundTag>> future) {}
 
+  private final Map<UUID, Point> staffMoves = new HashMap<>();
   final Map<UUID, Loading> loading = new HashMap<>();
   final Map<UUID, Request> requests = new HashMap<>();
   final Map<UUID, Waiting> waiting = new HashMap<>();
@@ -106,6 +107,7 @@ public final class Teleports {
         && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty())
       return "Destination has no safe support.";
     if (!app.compat.admin(p)
+        && !staffForcing(p)
         && !(app.moderation != null && app.moderation.permittedMove(p, dest))) {
       if (app.moderation != null && app.moderation.cellAt(level, pos))
         return "You cannot teleport into a jail cell.";
@@ -119,6 +121,32 @@ public final class Teleports {
     return null;
   }
 
+  boolean staffForcing(ServerPlayer player) {
+    return staffMoves.containsKey(player.getUUID());
+  }
+
+  public void bring(ServerPlayer admin, ServerPlayer target) throws Exception {
+    if (!app.compat.admin(admin)) throw new IllegalArgumentException("Administrator only.");
+    if (admin == target) throw new IllegalArgumentException("Choose another player.");
+    if (app.moderation != null && app.moderation.confined(target))
+      throw new IllegalArgumentException("Release this player from jail first.");
+    Point destination = point(admin);
+    cancel(target, false);
+    staffMoves.put(target.getUUID(), destination);
+    try {
+      teleport(target, destination, true);
+    } finally {
+      staffMoves.remove(target.getUUID());
+    }
+    app.storage.audit(
+        app.settings,
+        admin.getUUID().toString(),
+        "tphere " + target.getUUID(),
+        destination.describe(),
+        "SUCCESS");
+    tell(admin, "Player brought to you.");
+  }
+
   public void teleport(ServerPlayer p, Point destination, boolean instant) throws Exception {
     app.combat.requireTravel(p);
     if (waiting.containsKey(p.getUUID()) || loading.containsKey(p.getUUID()))
@@ -127,6 +155,7 @@ public final class Teleports {
       throw new IllegalArgumentException(
           "Resolve the pending shop transaction before teleporting.");
     if (!app.compat.admin(p)
+        && !staffForcing(p)
         && !(app.moderation != null && app.moderation.forcing(p))
         && cooldowns.getOrDefault(p.getUUID(), 0L) > now())
       throw new IllegalArgumentException("Teleport cooldown is active.");
@@ -167,7 +196,7 @@ public final class Teleports {
         || p.position().distanceToSqr(new Vec3(dest.x, dest.y, dest.z)) > 0.01)
       throw new IllegalArgumentException("Teleport was declined by another server rule.");
 
-    cooldowns.put(p.getUUID(), now() + app.settings.cooldown * 1000L);
+    if (!staffForcing(p)) cooldowns.put(p.getUUID(), now() + app.settings.cooldown * 1000L);
     portalCooldowns.put(p.getUUID(), now() + app.settings.portalCooldown * 1000L);
     app.protection.update(p);
     boolean forced = app.moderation != null && app.moderation.forcing(p);

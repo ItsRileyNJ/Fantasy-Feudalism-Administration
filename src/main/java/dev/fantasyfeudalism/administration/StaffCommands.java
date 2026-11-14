@@ -34,6 +34,19 @@ final class StaffCommands {
                                   app().teleports.teleport(actor, Teleports.point(target), true);
                                 }))));
     root.then(
+        literal("tphere")
+            .requires(StaffCommands::admin)
+            .then(
+                target()
+                    .executes(
+                        c ->
+                            run(
+                                c,
+                                () -> {
+                                  requireAdmin(c);
+                                  app().teleports.bring(playerSource(c), targetPlayer(c));
+                                }))));
+    root.then(
         literal("god")
             .requires(StaffCommands::admin)
             .executes(

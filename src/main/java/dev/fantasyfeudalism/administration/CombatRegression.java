@@ -241,6 +241,40 @@ final class CombatRegression {
       combat.clear(victim);
       combat.clear(attacker);
       hit(h, attacker, victim);
+      app.server
+          .getPlayerList()
+          .getOps()
+          .add(
+              new net.minecraft.server.players.ServerOpListEntry(
+                  attacker.getGameProfile(), 4, false));
+      app.teleports.cooldowns.put(victim.getUUID(), Teleports.now() + 60000);
+      h.assertTrue(
+          command(app, attacker, "ffa tphere " + victim.getGameProfile().getName()) == 1
+              && victim.position().equals(attacker.position()),
+          "Admin tphere moves a combat-tagged player immediately despite normal cooldown and"
+              + " warmup");
+      h.assertTrue(
+          combat.travelError(victim) != null && !app.teleports.staffForcing(victim),
+          "Forced arrival does not erase combat or leave a persistent bypass");
+      h.assertTrue(
+          clientCommands(victim, true).getChild("ffa").getChild("tphere") == null
+              && command(app, victim, "ffa tphere " + attacker.getGameProfile().getName()) == 0,
+          "Forced tphere is hidden from and unavailable to ordinary players");
+      var actorBlock = attacker.blockPosition();
+      var beforeBlock = attacker.serverLevel().getBlockState(actorBlock);
+      try {
+        attacker
+            .serverLevel()
+            .setBlock(
+                actorBlock, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+        h.assertTrue(
+            command(app, attacker, "ffa tphere " + victim.getGameProfile().getName()) == 0
+                && !app.teleports.staffForcing(victim),
+            "Unsafe tphere fails and cleans up its temporary authority");
+      } finally {
+        attacker.serverLevel().setBlock(actorBlock, beforeBlock, 3);
+      }
+      app.server.getPlayerList().deop(attacker.getGameProfile());
       victim.kill();
       h.assertTrue(combat.travelError(victim) == null, "Death clears the old life combat timer");
       var tree = clientCommands(attacker, true).getChild("ffa").getChild("pvp");
@@ -253,6 +287,7 @@ final class CombatRegression {
           "The PvP command respects the player-command permission fallback");
     } finally {
       app.server.getPlayerList().deop(victim.getGameProfile());
+      app.server.getPlayerList().deop(attacker.getGameProfile());
       app.server.getPlayerList().remove(victim);
       app.server.getPlayerList().remove(attacker);
       app.combat = previous;
