@@ -72,6 +72,11 @@ final class CombatRegression {
           "Safe-region PvP remains blocked");
       h.assertTrue(
           combat.travelError(victim) == null, "A region-cancelled hit creates no combat timer");
+      victim.addEffect(new MobEffectInstance(MobEffects.POISON, 100), attacker);
+      h.assertTrue(
+          combat.travelError(victim) == null,
+          "Harmful player effects cannot combat-lock a victim whose region blocks PvP damage");
+      victim.removeEffect(MobEffects.POISON);
       app.regions.edit(List.of(), app.server, app.settings, app.compat);
       hit(h, attacker, victim);
       h.assertTrue(

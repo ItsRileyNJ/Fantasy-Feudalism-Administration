@@ -496,7 +496,7 @@ public final class Protection {
   }
 
   /** Shared by projectile impacts and final damage; the victim's effective region wins. */
-  private boolean playerDamageDenied(Player target, Entity attacker) {
+  boolean playerDamageDenied(Player target, Entity attacker) {
     if (!(target.level() instanceof ServerLevel level)) return false;
     if (attacker instanceof ServerPlayer source && app.compat.admin(source)) return false;
     if (target instanceof ServerPlayer player) {

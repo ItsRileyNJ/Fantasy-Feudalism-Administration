@@ -159,7 +159,10 @@ public final class Combat {
   public void effectHit(LivingEntity target, Entity source) {
     if (target instanceof ServerPlayer victim) {
       var attacker = attacker(source);
-      if (attacker != null) hit(victim, attacker);
+      if (attacker != null
+          && !denied(victim, attacker)
+          && (app.protection == null || !app.protection.playerDamageDenied(victim, attacker)))
+        hit(victim, attacker);
     }
   }
 
