@@ -75,3 +75,13 @@ This teleports the administrator using it to the online player's current locatio
 ## World borders
 
 Use `/ffa worldborder pos1`, `/ffa worldborder pos2`, then `/ffa worldborder set` for an exact rectangle or square in the current dimension. `/ffa worldborder info` shows it; `/ffa worldborder clear` removes it. These commands require full administrator status and are hidden from normal players. See [world border setup and close-only visibility](World-Borders.md).
+
+## Bring a player to you
+
+```text
+/ffa tphere Alice
+```
+
+An administrator can immediately bring the named online player to their current location, including across dimensions. This command is hidden from normal players. It bypasses the target's combat travel lock, ordinary teleport cooldown/warmup and region arrival/access restrictions. It cancels the target's pending FFA travel, preserves their combat timer and existing ordinary cooldown, and records the move for `/ffa back`.
+
+Destination bounds, obstruction/hazard checks and pending transaction protection still apply. Release a jailed player before bringing them out of jail. A failed move clears the temporary staff authority and reports an error; it does not grant a lasting bypass.

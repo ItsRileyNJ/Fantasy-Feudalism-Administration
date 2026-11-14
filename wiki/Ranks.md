@@ -191,3 +191,5 @@ For `ffa.homes.maximum`, the value argument suggests whole-number examples (`0`,
 These lists show six nodes per page and describe the accepted value. Tab begins with common FFA nodes and nodes you have already saved; hover suggestions for their meanings. To explore the many vanilla/mod command nodes, begin typing `command.` in the permission argument. `/ffa ranks refresh_readme` writes the complete installed command tree to a file instead of flooding chat.
 
 Use `/ffa ranks node remove noble NODE` to undo a setting and return to inheritance/fallback. Use `false` only when you intend an explicit denial. Higher power wins between active ranks; inheritance makes another rank active rather than copying its settings. Existing explicit FTB Ranks decisions still take precedence, so inspect those too if a local change appears ineffective.
+
+The Boolean node `ffa.command.pvp` grants personal PvP controls. It does not bypass the five-minute change cooldown, active combat lock, protected-region rules or another player's disabled PvP preference. See [combat and PvP](Combat-and-PvP.md).

@@ -45,6 +45,7 @@ public final class PolicyTest {
     portalPack(root);
     spawnSettings(root);
     borders(root);
+    combatSettings(root);
     usability(root);
     ranks(root);
     chatStyles();
@@ -176,6 +177,54 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void combatSettings(Path root) throws Exception {
+    Path file = root.resolve("combat-settings.toml");
+    Files.writeString(file, Settings.TEMPLATE);
+    var defaults = Settings.load(file);
+    check(
+        defaults.combatTravel && defaults.combatSeconds == 30 && defaults.pvpDefault,
+        "Combat travel defaults to thirty seconds with PvP enabled");
+    Files.writeString(
+        file, Settings.TEMPLATE.replaceAll("(?s)\\[combat\\].*?(?=\\[teleport\\])", ""));
+    var legacy = Settings.load(file);
+    check(
+        legacy.combatTravel && legacy.combatSeconds == 30 && legacy.pvpDefault,
+        "Legacy config receives compatible combat/PvP defaults");
+    Files.writeString(
+        file,
+        Settings.TEMPLATE.replace("teleportBlockEnabled = true", "teleportBlockEnabled = false"));
+    check(!Settings.load(file).combatTravel, "Combat travel lock can be disabled");
+    Files.writeString(file, Settings.TEMPLATE.replace("tagSeconds = 30", "tagSeconds = 0"));
+    rejects(() -> Settings.load(file), "Zero combat duration rejected");
+    Files.writeString(file, Settings.TEMPLATE.replace("tagSeconds = 30", "tagSeconds = 3601"));
+    rejects(() -> Settings.load(file), "Excessive combat duration rejected");
+    Files.writeString(file, Settings.TEMPLATE.replace("tagSeconds = 30", "tagSeconds = 1.5"));
+    rejects(() -> Settings.load(file), "Combat duration uses whole seconds");
+    Files.writeString(
+        file, Settings.TEMPLATE.replace("enabledByDefault = true", "enabledByDefault = false"));
+    check(!Settings.load(file).pvpDefault, "PvP default can be configured off");
+    var old = Storage.JSON.fromJson("{\"balance\":5}", PlayerData.class);
+    check(
+        old.pvpEnabled == null && old.pvpToggleAfter == 0,
+        "Legacy players use configured PvP default without a cooldown");
+    var storage = new Storage(root.resolve("pvp-state"));
+    UUID id = UUID.randomUUID();
+    storage.ensure(id, defaults);
+    storage.update(
+        s -> {
+          var player = s.players.get(id.toString());
+          player.pvpEnabled = false;
+          player.pvpToggleAfter = 1700000300000L;
+        });
+    var saved = new Storage(storage.directory).player(id);
+    check(
+        Boolean.FALSE.equals(saved.pvpEnabled) && saved.pvpToggleAfter == 1700000300000L,
+        "PvP preference and real-time cooldown survive storage reload");
+    check(
+        PermissionCatalog.common().contains("ffa.command.pvp"),
+        "PvP command permission is documented in the node catalog");
   }
 
   private static void borders(Path root) throws Exception {

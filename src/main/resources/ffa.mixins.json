@@ -16,6 +16,7 @@
     "MobMixin",
     "TeleportMixin",
     "TeleportCommandMixin",
+    "PvpEffectsMixin",
     "FlightMixin",
     "InfoPacketAccess",
     "VisibilityPacketsMixin",

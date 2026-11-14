@@ -31,6 +31,12 @@ final class CommandTree {
 
   static void addTo(LiteralArgumentBuilder<CommandSourceStack> root) {
     root.then(node("help"));
+    root.then(
+        node("pvp")
+            .requires(s -> permitted(s, "pvp"))
+            .then(node("on"))
+            .then(node("off"))
+            .then(node("status")));
     root.then(RankCommands.tree());
     root.then(ChatCommands.tree());
     StaffCommands.addTo(root);

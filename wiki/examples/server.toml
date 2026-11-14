@@ -47,6 +47,14 @@ invulnerabilitySeconds = 8
 firstJoin = false
 # vanilla | bed_first | spawn_first
 respawnPolicy = "vanilla"
+[combat]
+# Block travel after receiving player damage. Administrators remain exempt.
+teleportBlockEnabled = true
+# Applies to the victim's travel lock and both participants' PvP-toggle combat lock.
+tagSeconds = 30
+[pvp]
+# Applies until a player explicitly chooses a PvP preference.
+enabledByDefault = true
 [teleport]
 cooldownSeconds = 3
 warmupSeconds = 0
