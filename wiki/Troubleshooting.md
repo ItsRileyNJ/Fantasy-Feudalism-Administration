@@ -84,3 +84,11 @@ A focused starting change is to replace `-XX:MaxRAMPercentage=95.0` with **`-Xmx
 The FFA spawn dimension has an empty generator and FFA does not automatically force-load its chunks. The construction guide's temporary `/forceload` should be removed after building. Player view/simulation distance, imported structures, NPCs, other mods and deliberate chunk loaders still consume memory. See [the spawn-dimension guide](Void-Spawn-Dimension.md).
 
 A local NeoForge 21.1.262 + FFA check started the enabled dimension under a 2 GB heap cap, generated a spawn chunk, built the sample platform and released its forced load. At the sampled point the process used about 0.8 GB resident memory and 0.4 GB Java heap. This small test excludes the production modpack and players, and is not a memory requirement estimate for a live server.
+
+## OP cannot teleport into the spawn dimension
+
+Versions through **0.6.0**, including **0.5.0**, can reject `/execute in ffa:spawn run tp ...` with **You cannot do that here.** and then still print Minecraft's **Teleported ...** line. An early NeoForge command event supplied coordinates without a destination dimension; FFA incorrectly tested them in the world being left. For example, a solid block in the source world could prevent arrival at clear air in the spawn dimension, even for an OP.
+
+Update to **0.6.1 or newer**, replacing the old FFA JAR while the server is stopped. Keep the existing configuration, `<world>/ffa/`, and dimension folders. No map re-import or permission reduction is needed. The fixed command validates the actual destination after coordinate-changing events. FFA rejections report their real reason without also printing native success feedback. Relative command coordinates are resolved once.
+
+Destination safety still applies. Load the imported build's chunk and choose unobstructed coordinates with a safe floor, or use Creative mode as an administrator for initial construction. `8.5 80 8.5` is the guide's sample platform location, not a relocation of imported chunks. Use the build's original X/Y/Z.

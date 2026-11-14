@@ -15,6 +15,7 @@
     "DispenserMixin",
     "MobMixin",
     "TeleportMixin",
+    "TeleportCommandMixin",
     "FlightMixin",
     "InfoPacketAccess",
     "VisibilityPacketsMixin",

@@ -194,9 +194,13 @@ public final class Protection {
   }
 
   private void notice(ServerPlayer p) {
+    notice(p, app.settings.denied);
+  }
+
+  private void notice(ServerPlayer p, String message) {
     long now = Teleports.now();
     if (notices.getOrDefault(p.getUUID(), 0L) <= now) {
-      Teleports.tell(p, app.settings.denied);
+      Teleports.tell(p, message);
       notices.put(p.getUUID(), now + 2000);
       app.storage.security(
           app.settings,
@@ -507,6 +511,9 @@ public final class Protection {
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void externalTeleport(EntityTeleportEvent e) {
+    // This event has no destination dimension. The command's actual move is checked
+    // in TeleportCommandMixin and ServerPlayer's teleport hooks instead.
+    if (e instanceof EntityTeleportEvent.TeleportCommand) return;
     if (!(e.getEntity() instanceof ServerPlayer p)) return;
     boolean pearl = e instanceof EntityTeleportEvent.EnderPearl;
     if (pearl
@@ -532,7 +539,7 @@ public final class Protection {
                 p.getXRot()));
     if (error != null) {
       e.setCanceled(true);
-      notice(p);
+      notice(p, error);
     }
   }
 

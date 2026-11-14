@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.6.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.6.1**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
