@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.5.1**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.6.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -210,3 +210,20 @@ There is no `/ffa economy give`, `/ffa portal resize`, `/ffa region select` wand
 ```
 
 Full administrator/operator only. Durations accept seconds or a suffix: `30s`, `5m`, `2h`, `1d`, `1w`. Omission uses the configured default. [Punishments and jail](Moderation.md) explains cell selection, offline timers, release and the scope of each ban.
+
+## World borders (administrators)
+
+See [world border setup and visibility](World-Borders.md). Applies only in the current dimension; both corner blocks are included. Rectangles and squares are supported.
+
+```text
+/ffa worldborder pos1
+/ffa worldborder pos2
+/ffa worldborder set
+/ffa worldborder create
+/ffa worldborder
+/ffa worldborder info
+/ffa worldborder clear
+/ffa worldborder remove
+```
+
+`pos1`/`pos2` reuse the region selection (`/ffa pos1` and `/ffa pos2`). `create` aliases `set`; `remove` aliases `clear`. Setting again replaces the dimension's previous FFA border. The wall appears only within `worldBorder.visibilityDistance` blocks, default 8, while enforcement remains active. Normal players cannot see or run these commands.

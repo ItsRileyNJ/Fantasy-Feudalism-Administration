@@ -16,6 +16,9 @@ defaultJailSeconds = 300
 defaultChatBanSeconds = 300
 defaultWarpBanSeconds = 300
 maximumDurationSeconds = 31536000
+[worldBorder]
+# The wall appears only within this many blocks; enforcement is always active.
+visibilityDistance = 8
 [portals]
 adminCreationOnly = true
 [portalPack]

@@ -23,6 +23,7 @@ public final class Administration {
   public volatile Settings settings;
   public Storage storage;
   public Regions regions;
+  public WorldBorders worldBorders;
   public RegionVisuals regionVisuals;
   public Compat compat;
   public Ranks ranks;
@@ -78,6 +79,9 @@ public final class Administration {
     server = e.getServer();
     try {
       storage = new Storage(server.getWorldPath(LevelResource.ROOT).resolve("ffa"));
+      worldBorders = new WorldBorders(this);
+      worldBorders.refresh();
+      NeoForge.EVENT_BUS.register(worldBorders);
       ranks = new Ranks(storage.directory.resolve("ranks.json"));
       compat = new Compat(settings, ranks);
       regions = new Regions(storage.directory.resolve("regions.toml"));
@@ -138,6 +142,10 @@ public final class Administration {
   }
 
   private void stop(ServerStoppedEvent e) {
+    if (worldBorders != null) {
+      NeoForge.EVENT_BUS.unregister(worldBorders);
+      worldBorders.close();
+    }
     if (regionVisuals != null) NeoForge.EVENT_BUS.unregister(regionVisuals);
     if (backHistory != null) NeoForge.EVENT_BUS.unregister(backHistory);
     if (moderation != null) NeoForge.EVENT_BUS.unregister(moderation);

@@ -107,6 +107,33 @@ public final class Commands {
           && !(cmd.equals("balance") && args.size() > 1)
           && !app.compat.decision(p, "ffa.command." + cmd).orElse(app.settings.publicCommands))
         throw new IllegalArgumentException("Permission denied.");
+      if (cmd.equals("worldborder")) {
+        if (!StaffCommands.admin(source)) throw new IllegalArgumentException("Administrator only.");
+        requirePlayer(p);
+        String action = args.size() == 1 ? "info" : arg(args, 1);
+        if (action.equals("pos1") || action.equals("pos2")) return execute(source, action);
+        if (action.equals("set") || action.equals("create")) {
+          app.worldBorders.set(p, selection(p));
+          feedback(
+              app,
+              source,
+              text,
+              p.serverLevel().dimension().location().toString(),
+              "SUCCESS persisted");
+        } else if (action.equals("clear") || action.equals("remove")) {
+          app.worldBorders.clear(p.serverLevel());
+          feedback(
+              app,
+              source,
+              text,
+              p.serverLevel().dimension().location().toString(),
+              "SUCCESS persisted");
+        } else if (action.equals("info"))
+          source.sendSuccess(
+              () -> Component.literal(app.worldBorders.describe(p.serverLevel())), false);
+        else throw new IllegalArgumentException("Use /ffa worldborder set, clear or info.");
+        return 1;
+      }
       switch (cmd) {
         case "spawn" -> {
           if (args.size() == 1) {
@@ -868,6 +895,10 @@ public final class Commands {
       if (!a.isEmpty() && a.getFirst().equals("ffa")) a.removeFirst();
       String command = a.getFirst(), operation = a.size() > 1 ? a.get(1) : "";
       return switch (command) {
+        case "worldborder" ->
+            Set.of("clear", "remove").contains(operation)
+                ? "World border removed."
+                : "World border set.";
         case "pos1" -> "First corner set.";
         case "pos2" -> "Second corner set.";
         case "spawn" -> operation.equals("create") ? "Spawn region created." : "Spawn point set.";

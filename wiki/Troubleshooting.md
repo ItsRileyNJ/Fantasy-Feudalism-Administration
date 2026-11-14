@@ -72,3 +72,15 @@ Fix the specific reported issue: duplicate IDs, reversed bounds, unsupported dim
 ## Ranks or chat changes are not applying
 
 Use `/ffa ranks check PLAYER NODE` and `/ffa ranks player PLAYER` as a manager. Check explicit FTB Ranks/LuckPerms decisions before local ranks, rank power, default/inherited memberships and personal chat overrides. Use `/ffa ranks reload` for external edits to `ranks.json`; general `/ffa reload` handles settings/regions. The [ranks](Ranks.md) and [chat](Chat-and-Nicknames.md) guides include examples. Hidden commands are expected when a player lacks their permission.
+
+## Hosting panel stays near the RAM limit
+
+The panel's process/container memory is not the same as Java's live heap usage. A heap can expand during startup and remain committed even after garbage collection. The graph alone cannot establish a leak or identify which mod caused it.
+
+For an **8 GB plan**, `-XX:MaxRAMPercentage=95.0` can permit roughly 7.6 GB of Java heap if Java detects the 8 GB limit. Java also needs memory outside the heap for classes, threads, networking and native allocations. `-XX:+AlwaysPreTouch` touches committed heap pages and can increase resident RAM shown by the host. With a small `-Xms`, it does not necessarily allocate the maximum heap immediately.
+
+A focused starting change is to replace `-XX:MaxRAMPercentage=95.0` with **`-Xmx6G`** and remove **`-XX:+AlwaysPreTouch`**, leaving the other launch flags intact. This leaves more room for native allocations. It does not guarantee better TPS: if the live object set actually needs more heap, a smaller maximum can increase garbage-collection frequency or pauses. Compare TPS, recurring lag messages and actual heap usage after startup. Do not use the hosting graph alone to judge the result.
+
+The FFA spawn dimension has an empty generator and FFA does not automatically force-load its chunks. The construction guide's temporary `/forceload` should be removed after building. Player view/simulation distance, imported structures, NPCs, other mods and deliberate chunk loaders still consume memory. See [the spawn-dimension guide](Void-Spawn-Dimension.md).
+
+A local NeoForge 21.1.262 + FFA check started the enabled dimension under a 2 GB heap cap, generated a spawn chunk, built the sample platform and released its forced load. At the sampled point the process used about 0.8 GB resident memory and 0.4 GB Java heap. This small test excludes the production modpack and players, and is not a memory requirement estimate for a live server.

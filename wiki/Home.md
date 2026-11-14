@@ -1,6 +1,6 @@
 # Fantasy Feudalism: Administration Wiki
 
-The operator and player manual for **development version 0.5.1**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
+The operator and player manual for **development version 0.6.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
 
 FFA manages protected spawn regions, configurable interactions, safe travel, dyeable portals, and virtual **Denar** shops. Install FFA on the server; players do not need the FFA JAR. Other mods can have their own client requirements.
 
@@ -44,3 +44,5 @@ FFA does not bundle an anti-X-ray engine, a schematic importer, or a Denar merch
 The pages are published in the repository so they are available alongside the source and can be reviewed and updated with it.
 
 - [Punishments and jail](Moderation.md)
+
+- [World borders](World-Borders.md): select two corners for a rectangular dimension boundary with a wall visible only nearby.

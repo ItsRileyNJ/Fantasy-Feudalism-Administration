@@ -28,6 +28,9 @@ defaultJailSeconds = 300
 defaultChatBanSeconds = 300
 defaultWarpBanSeconds = 300
 maximumDurationSeconds = 31536000
+[worldBorder]
+# The wall appears only within this many blocks; enforcement is always active.
+visibilityDistance = 8
 [portals]
 adminCreationOnly = true
 [portalPack]
@@ -145,6 +148,7 @@ shears = false
   public String portalPackUrl;
   public int operatorLevel,
       spawnInvulnerabilitySeconds,
+      borderVisibilityDistance,
       homeMax,
       cooldown,
       warmup,
@@ -240,6 +244,10 @@ shears = false
       s.spawnInvulnerabilitySeconds =
           c.contains("spawn.invulnerabilitySeconds")
               ? integer(c, "spawn.invulnerabilitySeconds", 0, 3600)
+              : 8;
+      s.borderVisibilityDistance =
+          c.contains("worldBorder.visibilityDistance")
+              ? integer(c, "worldBorder.visibilityDistance", 1, 64)
               : 8;
       s.firstJoin = bool(c, "spawn.firstJoin");
       s.respawn = scalar(c, "spawn.respawnPolicy", String.class);

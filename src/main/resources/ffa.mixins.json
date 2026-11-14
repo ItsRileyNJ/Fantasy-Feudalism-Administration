@@ -5,6 +5,8 @@
   "mixins": [
     "PlayerListAccess",
     "SpawnImmunityAccess",
+    "RectangularBorderMixin",
+    "BorderPacketsMixin",
     "BlockDisplayAccess",
     "FoodMixin",
     "FluidMixin",
