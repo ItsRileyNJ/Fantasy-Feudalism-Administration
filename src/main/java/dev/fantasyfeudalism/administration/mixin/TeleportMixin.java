@@ -55,10 +55,9 @@ public abstract class TeleportMixin {
       float pitch,
       CallbackInfoReturnable<Boolean> ci) {
     ServerPlayer p = (ServerPlayer) (Object) this;
-    double ax = relative.contains(RelativeMovement.X) ? p.getX() + x : x,
-        ay = relative.contains(RelativeMovement.Y) ? p.getY() + y : y,
-        az = relative.contains(RelativeMovement.Z) ? p.getZ() + z : z;
-    String error = ffa$validate(l, ax, ay, az, yaw, pitch);
+    // In 1.21.1 these are already absolute coordinates. Relative flags control
+    // client packet encoding, not the meaning of the ServerPlayer API arguments.
+    String error = ffa$validate(l, x, y, z, yaw, pitch);
     if (error != null) {
       Teleports.tell(p, error);
       ci.setReturnValue(false);

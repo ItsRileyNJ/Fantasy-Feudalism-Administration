@@ -1,4 +1,4 @@
-# Development build 0.6.0
+# Development build 0.6.1
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
@@ -13,3 +13,5 @@ The JAR bundles the animated colored portal resource pack and offers a standard 
 0.5.1: continuous tiled portal animation and configurable eight-second invincibility after login/death respawn. Set `spawn.invulnerabilitySeconds` in `config/ffa/server.toml`; 0 disables it. Accept the updated bundled resource pack for the new portal animation.
 
 0.6.0: rectangular, per-dimension world borders. Use `/ffa pos1`, `/ffa pos2`, `/ffa worldborder set`. The wall appears only within `worldBorder.visibilityDistance` blocks (default 8). See the world-border wiki page.
+
+0.6.1: fixes cross-dimension `/execute ... run tp` validation, relative-coordinate validation and misleading native success feedback after FFA blocks a teleport. Existing configuration and world data remain compatible.

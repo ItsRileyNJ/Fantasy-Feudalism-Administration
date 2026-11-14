@@ -1,6 +1,6 @@
 # Fantasy Feudalism: Administration Wiki
 
-The operator and player manual for **development version 0.6.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
+The operator and player manual for **development version 0.6.1**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
 
 FFA manages protected spawn regions, configurable interactions, safe travel, dyeable portals, and virtual **Denar** shops. Install FFA on the server; players do not need the FFA JAR. Other mods can have their own client requirements.
 

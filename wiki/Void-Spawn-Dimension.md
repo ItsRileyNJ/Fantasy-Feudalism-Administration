@@ -63,3 +63,19 @@ Before disabling, move players and important spawn/warp destinations elsewhere a
 ## Memory use
 
 Enabling the empty dimension does not reserve a fixed 8 GB or automatically force-load its chunks. Remove temporary construction force-loads when done. Hosting panels can include committed heap and native memory; see [RAM-limit diagnosis and JVM settings](Troubleshooting.md#hosting-panel-stays-near-the-ram-limit).
+
+## Importing an MCA Selector chunk export
+
+MCA Selector exports selected chunks rather than a full standalone world. The export does not need `level.dat` for a dimension import and does not move the build to new coordinates.
+
+Stop the server and back up the destination world. Put the exported `region`, `entities` and `poi` folders (where present) directly inside:
+
+```text
+<level-name>/dimensions/ffa/spawn/
+```
+
+For the usual `level-name=world`, the paths are `world/dimensions/ffa/spawn/region/`, `entities/`, and `poi/`. Do not nest the enclosing export folder under `spawn`, copy the source world's `level.dat`/`playerdata`, or bulk-replace the dimension's existing `data` folder. Keep the destination's existing `data` folder. Source maps and other saved-data objects can need separate migration; chunk import alone does not transfer every world-global feature.
+
+Restart after copying. Use the imported build's **original coordinates**. For initial construction as an operator in Creative mode, `/execute in ffa:spawn run forceload add X Z` loads the chunk containing those block coordinates; then `/execute in ffa:spawn run tp @s X Y Z` takes you there. Once standing on a safe floor, `/ffa spawn setpoint` sets the arrival point. Release the temporary load with `/execute in ffa:spawn run forceload remove X Z`.
+
+`forceload add` never replaces an existing chunk. It generates a chunk only if none exists; in this dimension, missing chunks use the empty generator. `forceload remove` releases the load without deleting anything. If version 0.5.0–0.6.0 reports a generic denial followed by success, see [the teleport fix](Troubleshooting.md#op-cannot-teleport-into-the-spawn-dimension).
