@@ -75,7 +75,18 @@ public final class Teleports {
 
   public String validate(ServerPlayer p, Point dest) {
     if (dest == null) return "Destination is not configured.";
+    boolean rulesMove = app.rules != null && app.rules.forcing(p);
+    if (app.rules != null
+        && app.rules.pending(p)
+        && !rulesMove
+        && !app.rules.inside(dest)
+        && !(app.moderation != null && app.moderation.permittedMove(p, dest))) {
+      app.rules.rejectExit(p);
+      app.rules.prompt(p, false);
+      return "Accept the server rules before leaving the rules room.";
+    }
     if (app.moderation != null
+        && !rulesMove
         && app.moderation.confined(p)
         && !app.moderation.permittedMove(p, dest)) return "You cannot teleport while jailed.";
     if (!Double.isFinite(dest.x)
@@ -107,6 +118,7 @@ public final class Teleports {
         && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty())
       return "Destination has no safe support.";
     if (!app.compat.admin(p)
+        && !rulesMove
         && !staffForcing(p)
         && !(app.moderation != null && app.moderation.permittedMove(p, dest))) {
       if (app.moderation != null && app.moderation.cellAt(level, pos))

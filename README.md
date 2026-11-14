@@ -4,11 +4,11 @@ A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do
 
 **[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, built-in ranks, chat styling, compatibility, recovery and IntelliJ guides.
 
-**Development release 0.7.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.8.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.7.0.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.8.0.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
@@ -58,3 +58,5 @@ Version 0.6.1 fixes vanilla `/execute in DIMENSION run tp` checks using the wron
 Version 0.7.0 adds [combat travel restrictions and personal PvP](wiki/Combat-and-PvP.md): configurable travel blocking after player hits and `/ffa pvp` with a saved five-minute cooldown.
 
 Version 0.7.0 also adds administrator `/ffa tphere PLAYER` to bring another player immediately, with destination safety and jail protections retained.
+
+Version 0.8.0 adds a [rules acceptance room](wiki/Rules-Room.md), `/ffa setfirstspawn`, and [Denar prices in Easy NPC trading menus](wiki/Easy-NPC-Trading.md). Pending players cannot use any command except Accept/Deny, send chat, or see nonadministrator chat. Existing players also accept once; administrators are exempt.

@@ -16,7 +16,11 @@ Supported NPC trading and charter/empty-hand bell-management interactions are en
 
 No Mercenaries patch was needed for the tested adapter. A future public settlement/membership API would make updates less fragile. If an unsupported version is installed, validation can refuse startup or region editing until compatibility is restored or the administrator explicitly reviews the affected region overrides. Simply disabling the integration is not a promise that settlement-overlap validation is bypassed safely.
 
-## Easy NPC 7.18.0: a Denar shop button
+## Easy NPC 7.18.0: native Denar trading
+
+Use [Easy NPC Denar Trading](Easy-NPC-Trading.md) to assign explicit Denar prices to selected native merchant offers. Prices are per NPC UUID and offer number; unconfigured NPCs retain their item trades. No Easy NPC or Mercenaries patch is required.
+
+### Optional command-action shop button
 
 1. Install the required Easy NPC core/UI components and their dependencies. The supplied small bundle file has no embedded core/UI JARs; do not rely on that file alone.
 2. Create an FFA offering:
@@ -41,7 +45,7 @@ No Mercenaries patch was needed for the tested adapter. A future public settleme
 
 UI labels can vary with the Easy NPC screen/version; the required behavior is its **player-command action**, not a server/operator command impersonation. If its security config needs an allowlist, allow the exact actions required. Do not give the NPC general elevated `/ffa` management authority to run a player shop.
 
-Both action and typed player command reach FFA's same validated transaction path. Easy NPC's native villager-style merchant screens retain their item trades; they are not automatically a Denar GUI. Use Easy NPC's own documentation for creating NPC entities and editing their dialogue/model.
+Both action and typed player command reach FFA's same validated transaction path. Native merchant offers can also use Denar when explicitly priced with `/ffa npctrade`. Use Easy NPC's own documentation for creating NPC entities and editing their dialogue/model.
 
 ## FTB Essentials
 

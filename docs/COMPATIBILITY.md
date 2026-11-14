@@ -34,7 +34,7 @@ ffa shop sell stone 1
 
 First create the shop using `/ffa shop set stone minecraft:stone 5 2`. Both the player command and the NPC action reach the same journaled inventory/Denar transaction. Do not elevate an NPC command to operator level or grant general administration permissions for this purpose. If Easy NPC command security requires an allowlist entry, allow only the exact shop actions needed by that NPC.
 
-Native Easy NPC merchant screens continue to use their own item trades. The administration mod does not pretend those screens automatically use Denar. The supported Denar bridge is its player-command action, which requires no custom client UI or changes to Easy NPC.
+Native Easy NPC merchant screens now support explicit Denar prices for selected offers through administrator `/ffa npctrade` commands. See [the native trading guide](../wiki/Easy-NPC-Trading.md). The optional adapter targets the exact uploaded Easy NPC 7.18.0; unconfigured NPCs retain their item trades. The existing player-command action remains available.
 
 ## FTB Ranks 2101.1.5 and LuckPerms
 

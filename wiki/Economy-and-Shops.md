@@ -136,3 +136,7 @@ Choose the configuration that suits each shop:
 A reset without a player clears all counters for that shop. A player argument resets only that UUID's counters on a per-player shop; use a full UUID for an offline player. Changing numeric limits or prices retains usage. Changing scope/reset policy starts a fresh set of counters. Legacy shops start unlimited.
 
 Commands and sign clicks share these limits, including administrator trades. An oversized trade is refused in full; it does not partially charge or consume items. Prepared transactions reserve capacity. Successful recovery commits the balance and usage counters once; unapplied recovery releases the reservation. A shop with unresolved journals cannot be reset, reconfigured or deleted until recovery, preventing limit bypass. Recover legacy prepared transactions before editing shop definitions.
+
+## Native Easy NPC menus
+
+Administrators can [price selected Easy NPC offers in Denar](Easy-NPC-Trading.md) with `/ffa npctrade`. These trades use the same durable inventory/wallet journal, preserve full item components, and honor native NPC stock and restocks.

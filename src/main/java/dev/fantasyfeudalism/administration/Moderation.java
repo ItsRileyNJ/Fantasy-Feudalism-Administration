@@ -399,6 +399,7 @@ public final class Moderation {
                     || Set.of(
                             "help",
                             "stats",
+                            "rules",
                             "whisper",
                             "whisperaccept",
                             "whisperdeny",

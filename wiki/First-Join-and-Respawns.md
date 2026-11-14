@@ -17,6 +17,12 @@ FFA uses its own joined record and the existence of the player's vanilla player-
 
 A new player's first arrival can be sent to the configured FFA spawn, including the optional void dimension. Inventory/XP are not rewritten. Safety and destination availability still apply. If the initial move is refused or cancelled, do not depend on repeated login redirects as a repair mechanism; fix the destination and use `/ffa spawn`.
 
+## Separate initial spawn and rules room
+
+Stand at a safe first-arrival position and run `/ffa setfirstspawn`. This separately saved point takes priority over `spawn.firstJoin` for genuinely new nonadministrator players, even when `spawn.firstJoin` is false. Returning accepted players keep their saved location. This point does not replace `/ffa spawn`, beds or the ordinary death policy.
+
+To require a one-time rules agreement for **existing and new** players, configure the [rules room](Rules-Room.md). While enabled, unaccepted players return there at login and cannot leave or use other commands. Acceptance is saved permanently per UUID. Administrators are exempt.
+
 ## Spawn invincibility
 
 Every player, including administrators, receives eight seconds of invincibility on joining the server and after respawning from death. This works at any arrival location, including beds and respawn anchors, regardless of the death policy or region flags.

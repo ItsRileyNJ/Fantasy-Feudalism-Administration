@@ -142,3 +142,7 @@ Use `entryUnderlined` / `exitUnderlined` in `regions.toml`, or `/ffa region titl
 ## Map boundaries
 
 Use [world borders](World-Borders.md) to limit the playable area with a rectangle or square. They reuse `/ffa pos1` and `/ffa pos2`, but have their own `/ffa worldborder` commands and do not change region flags or towns.
+
+## Rules acceptance child
+
+A child can be designated as the [rules room](Rules-Room.md). It retains normal child flags and inheritance. The additional acceptance requirement confines unaccepted players, blocks their commands and chat, and leaves accepted players free to visit normally.

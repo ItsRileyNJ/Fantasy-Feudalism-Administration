@@ -46,6 +46,7 @@ public final class PolicyTest {
     spawnSettings(root);
     borders(root);
     combatSettings(root);
+    rulesState(root);
     usability(root);
     ranks(root);
     chatStyles();
@@ -177,6 +178,46 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void rulesState(Path root) throws Exception {
+    var store = new Storage(root.resolve("rules-state"));
+    check(
+        !store.state().rulesRoom.enabled && store.state().firstSpawn == null,
+        "Rules onboarding starts disabled without changing existing arrival");
+    var legacy = Storage.JSON.fromJson("{\"version\":1,\"players\":{}}", State.class);
+    check(
+        legacy.rulesRoom != null && legacy.npcShops.isEmpty(),
+        "Older state initializes optional rules and NPC trading data");
+    var parent = region("Spawn", Kind.SPAWN, 0, 20);
+    var room = region("Rules", Kind.CHILD, 2, 8);
+    room.parent = parent.id;
+    var state = store.copy();
+    state.rulesRoom.enabled = true;
+    state.rulesRoom.region = room.id;
+    rejects(
+        () -> Rules.validate(state, List.of(parent, room)),
+        "Enabled rules need a first-join spawn");
+    state.firstSpawn = new Point("minecraft:overworld", 3.5, 65, 3.5, 0, 0);
+    Rules.validate(state, List.of(parent, room));
+    rejects(() -> Rules.validate(state, List.of(parent)), "Active rules region cannot be removed");
+    state.firstSpawn.x = 10;
+    rejects(
+        () -> Rules.validate(state, List.of(parent, room)),
+        "First spawn must be inside rules child");
+    state.firstSpawn.x = 3.5;
+    state.rulesRoom.region = parent.id;
+    rejects(
+        () -> Rules.validate(state, List.of(parent, room)), "Rules room must use child semantics");
+    state.rulesRoom.region = room.id;
+    var id = UUID.randomUUID();
+    var data = new PlayerData();
+    data.rulesAccepted = true;
+    state.players.put(id.toString(), data);
+    store.commit(state);
+    check(
+        new Storage(store.directory).player(id).rulesAccepted,
+        "Rule acceptance survives durable reload");
   }
 
   private static void combatSettings(Path root) throws Exception {

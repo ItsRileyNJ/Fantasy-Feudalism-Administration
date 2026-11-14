@@ -144,6 +144,7 @@ public final class Model {
   }
 
   public static final class PlayerData {
+    public boolean rulesAccepted;
     public long balance;
     public Boolean pvpEnabled;
     public long pvpToggleAfter;
@@ -202,11 +203,25 @@ public final class Model {
   }
 
   public static final class PendingTrade {
+    public String npc = "";
+    public int npcOffer;
+    public int npcBaseUses;
     public String id, player, before, after;
     public String shop = "", quotaKey = "";
     public int quantity;
     public boolean buy;
     public long oldBalance, newBalance;
+  }
+
+  public static final class NpcPrice {
+    public String fingerprint, revision;
+    public boolean buy;
+    public long price, reset;
+    public int used;
+  }
+
+  public static final class NpcShop {
+    public Map<Integer, NpcPrice> offers = new TreeMap<>();
   }
 
   public static final class Border {
@@ -227,6 +242,9 @@ public final class Model {
   public static final class State {
     public int version = 1;
     public Point spawn;
+    public Point firstSpawn;
+    public RulesRoom rulesRoom = new RulesRoom();
+    public Map<String, NpcShop> npcShops = new TreeMap<>();
     public Map<String, Border> worldBorders = new TreeMap<>();
     public Map<String, Warp> warps = new TreeMap<>();
     public Map<String, Portal> portals = new TreeMap<>();
@@ -235,5 +253,13 @@ public final class Model {
     public Map<String, PendingTrade> trades = new TreeMap<>();
     public Map<String, JailCell> jailCells = new TreeMap<>();
     public Map<String, ShopSign> shopSigns = new TreeMap<>();
+  }
+
+  public static final class RulesRoom {
+    public boolean enabled;
+    public String color = "white";
+    public boolean bold, italic, underlined;
+    public String region = "", revision = "";
+    public String message = "Please read the server rules, then accept to continue.";
   }
 }

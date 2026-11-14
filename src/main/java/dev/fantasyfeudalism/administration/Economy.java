@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.trading.*;
 import net.minecraft.world.level.storage.LevelResource;
 
 /** All operations run on the server thread. Durable prepare -> player save -> balance commit. */
@@ -48,7 +49,10 @@ public final class Economy {
 
   public boolean pendingShop(String id) {
     return app.storage.state().trades.values().stream()
-        .anyMatch(t -> t.shop == null || t.shop.isEmpty() || id.equals(t.shop));
+        .anyMatch(
+            t ->
+                (t.npc == null || t.npc.isEmpty())
+                    && (t.shop == null || t.shop.isEmpty() || id.equals(t.shop)));
   }
 
   public long remaining(String id, UUID player, boolean buy) {
@@ -225,6 +229,17 @@ public final class Economy {
     trade.after = simulated.save(new ListTag()).toString();
     trade.oldBalance = balance;
     trade.newBalance = buy ? balance - total : balance + total;
+    commitInventory(p, simulated, trade);
+    app.storage.audit(
+        app.settings,
+        p.getUUID().toString(),
+        (buy ? "buy " : "sell ") + shopId + " quantity=" + quantity + " transaction=" + trade.id,
+        Teleports.point(p).describe(),
+        "SUCCESS");
+  }
+
+  private void commitInventory(ServerPlayer p, Inventory simulated, PendingTrade trade)
+      throws Exception {
     app.storage.update(s -> s.trades.put(trade.player, trade));
     try {
       p.closeContainer();
@@ -243,11 +258,80 @@ public final class Economy {
               "Shop save interrupted. Reconnect to recover your pending transaction."));
       throw e;
     }
+  }
+
+  void npcTrade(ServerPlayer player, String npc, int index, NpcPrice price, MerchantOffer offer)
+      throws Exception {
+    enabled();
+    available(player.getUUID());
+    if (app.rules.pending(player) || app.moderation.confined(player))
+      throw new IllegalArgumentException("You cannot trade right now.");
+    if (!player.containerMenu.getCarried().isEmpty())
+      throw new IllegalArgumentException("Put the item on your cursor away before trading.");
+    InspectionMenu.closeFor(app, player);
+    long balance = app.storage.player(player.getUUID()).balance;
+    if (price.buy && balance < price.price
+        || !price.buy && price.price > app.settings.maxBalance - balance)
+      throw new IllegalArgumentException("Insufficient balance or maximum balance exceeded.");
+    var inventory = new Inventory(player);
+    inventory.load(player.getInventory().save(new ListTag()));
+    if (price.buy) {
+      ItemStack product = offer.getResult();
+      int left = product.getCount();
+      if (product.isEmpty()) throw new IllegalArgumentException("The NPC's item is unavailable.");
+      for (int slot = 0; slot < 36 && left > 0; slot++) {
+        var stack = inventory.getItem(slot);
+        if (stack.isEmpty() || ItemStack.isSameItemSameComponents(stack, product)) {
+          int count =
+              Math.min(
+                  left,
+                  Math.max(
+                      0, product.getMaxStackSize() - (stack.isEmpty() ? 0 : stack.getCount())));
+          if (count > 0) {
+            if (stack.isEmpty()) inventory.setItem(slot, product.copyWithCount(count));
+            else stack.grow(count);
+            left -= count;
+          }
+        }
+      }
+      if (left > 0) throw new IllegalArgumentException("Not enough inventory space.");
+    } else {
+      var costs = new ArrayList<ItemCost>();
+      costs.add(offer.getItemCostA());
+      offer.getItemCostB().ifPresent(costs::add);
+      int[] left = costs.stream().mapToInt(ItemCost::count).toArray();
+      // Consume exclusive matches before shared matches, preserving both component predicates.
+      for (int phase = 0; phase < 2; phase++)
+        for (int i = 0; i < costs.size(); i++)
+          for (int slot = 0; slot < 36 && left[i] > 0; slot++) {
+            var stack = inventory.getItem(slot);
+            if (stack.isEmpty() || !costs.get(i).test(stack)) continue;
+            boolean shared = costs.size() == 2 && costs.get(1 - i).test(stack);
+            if (phase == 0 && shared) continue;
+            int count = Math.min(left[i], stack.getCount());
+            stack.shrink(count);
+            left[i] -= count;
+          }
+      if (Arrays.stream(left).anyMatch(n -> n > 0))
+        throw new IllegalArgumentException("Not enough matching items.");
+    }
+    var trade = new PendingTrade();
+    trade.id = UUID.randomUUID().toString();
+    trade.player = player.getUUID().toString();
+    trade.npc = npc;
+    trade.npcOffer = index;
+    trade.npcBaseUses = offer.getUses();
+    trade.buy = price.buy;
+    trade.before = player.getInventory().save(new ListTag()).toString();
+    trade.after = inventory.save(new ListTag()).toString();
+    trade.oldBalance = balance;
+    trade.newBalance = price.buy ? balance - price.price : balance + price.price;
+    commitInventory(player, inventory, trade);
     app.storage.audit(
         app.settings,
-        p.getUUID().toString(),
-        (buy ? "buy " : "sell ") + shopId + " quantity=" + quantity + " transaction=" + trade.id,
-        Teleports.point(p).describe(),
+        trade.player,
+        "NPC trade " + npc + " offer=" + index + " transaction=" + trade.id,
+        Teleports.point(player).describe(),
         "SUCCESS");
   }
 
@@ -260,6 +344,14 @@ public final class Economy {
                 "Balance changed during prepared transaction; recovery required");
           if (applied) {
             data.balance = trade.newBalance;
+            if (trade.npc != null && !trade.npc.isEmpty()) {
+              var shop = s.npcShops.get(trade.npc);
+              var price = shop == null ? null : shop.offers.get(trade.npcOffer);
+              if (price == null)
+                throw new IllegalArgumentException(
+                    "Prepared NPC offer is missing; administrator recovery required.");
+              price.used = Math.addExact(Math.max(price.used, trade.npcBaseUses), 1);
+            }
             if (trade.shop != null && !trade.shop.isEmpty()) {
               var shop = s.shops.get(trade.shop);
               if (shop == null)

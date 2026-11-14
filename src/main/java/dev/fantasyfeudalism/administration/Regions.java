@@ -41,6 +41,7 @@ public final class Regions {
     if (!Files.exists(file)) Storage.atomic(file, header());
     var candidate = read(file);
     validate(candidate, server, settings, compat);
+    validateRules(candidate);
     install(candidate);
     loadedText = Files.readString(file);
   }
@@ -51,10 +52,17 @@ public final class Regions {
       throw new IllegalArgumentException(
           "regions.toml has external edits. Run /ffa reload before in-game changes.");
     validate(candidate, server, settings, compat);
+    validateRules(candidate);
     String text = write(candidate);
     Storage.atomic(file, text);
     install(candidate);
     loadedText = text;
+  }
+
+  private void validateRules(List<Region> candidate) {
+    var a = Administration.INSTANCE;
+    if (a != null && a.rules != null && a.storage != null && a.regions == this)
+      Rules.validate(a.storage.state(), candidate);
   }
 
   private void install(List<Region> candidate) {

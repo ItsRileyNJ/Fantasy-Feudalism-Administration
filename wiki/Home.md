@@ -1,6 +1,6 @@
 # Fantasy Feudalism: Administration Wiki
 
-The operator and player manual for **development version 0.7.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
+The operator and player manual for **development version 0.8.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
 
 FFA manages protected spawn regions, configurable interactions, safe travel, dyeable portals, and virtual **Denar** shops. Install FFA on the server; players do not need the FFA JAR. Other mods can have their own client requirements.
 
@@ -48,3 +48,6 @@ The pages are published in the repository so they are available alongside the so
 - [World borders](World-Borders.md): select two corners for a rectangular dimension boundary with a wall visible only nearby.
 
 - [Combat and personal PvP](Combat-and-PvP.md): configurable travel lock after player hits, PvP consent and the five-minute toggle cooldown.
+
+- [Rules room and initial spawn](Rules-Room.md): one-time acceptance for existing and new players, command lock, and filtered chat.
+- [Easy NPC Denar trading](Easy-NPC-Trading.md): set explicit wallet prices for selected native merchant offers.

@@ -28,6 +28,8 @@ public final class Storage {
     if (state == null
         || state.version != 1
         || state.worldBorders == null
+        || state.rulesRoom == null
+        || state.npcShops == null
         || state.players == null
         || state.warps == null
         || state.portals == null

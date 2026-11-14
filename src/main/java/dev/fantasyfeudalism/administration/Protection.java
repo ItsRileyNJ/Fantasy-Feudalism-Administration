@@ -151,8 +151,12 @@ public final class Protection {
       app.storage.ensure(p.getUUID(), app.settings);
       app.economy.recover(p);
       boolean first = !app.storage.player(p.getUUID()).joined;
+      boolean rulesArrival = app.rules.login(p, first && !returning);
       if (first) {
-        if (!returning && app.settings.firstJoin && app.storage.state().spawn != null)
+        if (!rulesArrival
+            && !returning
+            && app.settings.firstJoin
+            && app.storage.state().spawn != null)
           app.teleports.teleport(p, app.storage.state().spawn, true);
         app.storage.update(s -> s.players.get(p.getUUID().toString()).joined = true);
       }
