@@ -38,9 +38,11 @@ public final class Administration {
   public AdminPowers adminPowers;
   public SpawnProtection spawnProtection;
   public Combat combat;
+  public Rules rules;
   public Protection protection;
   public RegionActions regionActions;
   public Economy economy;
+  public NpcTrades npcTrades;
   public Payments payments;
   public PortalPack portalPack;
   public PortalEffects portalEffects;
@@ -93,11 +95,15 @@ public final class Administration {
       portalEffects = new PortalEffects(this);
       NeoForge.EVENT_BUS.register(portalEffects);
       economy = new Economy(this);
+      npcTrades = new NpcTrades(this);
       payments = new Payments(this);
       NeoForge.EVENT_BUS.register(payments);
       regionVisuals = new RegionVisuals(this);
       NeoForge.EVENT_BUS.register(regionVisuals);
       backHistory = new BackHistory(this);
+      rules = new Rules(this);
+      Rules.validate(storage.state(), regions.all());
+      NeoForge.EVENT_BUS.register(rules);
       moderation = new Moderation(this);
       signShops = new SignShops(this);
       adminPowers = new AdminPowers(this);
@@ -154,6 +160,7 @@ public final class Administration {
     if (moderation != null) NeoForge.EVENT_BUS.unregister(moderation);
     if (adminPowers != null) NeoForge.EVENT_BUS.unregister(adminPowers);
     if (combat != null) NeoForge.EVENT_BUS.unregister(combat);
+    if (rules != null) NeoForge.EVENT_BUS.unregister(rules);
     if (spawnProtection != null) NeoForge.EVENT_BUS.unregister(spawnProtection);
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
     if (payments != null) NeoForge.EVENT_BUS.unregister(payments);

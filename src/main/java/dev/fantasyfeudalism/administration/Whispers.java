@@ -55,6 +55,12 @@ public final class Whispers {
   }
 
   public void send(ServerPlayer from, ServerPlayer to, String body) throws Exception {
+    try (var ignored = Rules.from(from)) {
+      sendInternal(from, to, body);
+    }
+  }
+
+  private void sendInternal(ServerPlayer from, ServerPlayer to, String body) throws Exception {
     validate(body);
     if (app.moderation != null && app.moderation.banned(from, "chatban"))
       throw new IllegalArgumentException("You cannot send messages right now.");

@@ -85,3 +85,7 @@ Use `/ffa balance send PLAYER AMOUNT` to send Denar or `/ffa balance request PLA
 ## Combat and PvP
 
 Use `/ffa pvp` to toggle personal PvP, or `/ffa pvp status` to check it. Changes have a five-minute cooldown for normal players. A recent player hit also blocks travel commands for the configured combat duration (default 30 seconds). See [combat rules, configuration and exceptions](Combat-and-PvP.md).
+
+## First-join rules
+
+When the server enables its [rules room](Rules-Room.md), read the posted rules and click the bold green **ACCEPT** button. **DENY** keeps you in the room and lets you accept later. Existing players also accept once. Until then, other commands and outgoing chat are blocked, and only administrator messages appear. After acceptance, chat and normal permitted commands return immediately; you may revisit the room freely.

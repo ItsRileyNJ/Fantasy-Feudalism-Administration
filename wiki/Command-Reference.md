@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.7.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.8.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -242,3 +242,34 @@ Player permission: `ffa.command.pvp`. Normal players wait five minutes between c
 ## Force bring (administrators)
 
 `/ffa tphere PLAYER` immediately brings the online player to you. Combat, normal timing and region travel restrictions are bypassed for this move. Destination safety, jail and transaction checks remain. Hidden from ordinary players; see [staff tools](Staff-Tools.md#bring-a-player-to-you).
+
+## Rules acceptance and initial spawn
+
+```text
+/ffa setfirstspawn
+/ffa rules region <child_region>
+/ffa rules message <plain text reminder>
+/ffa rules style color <color>
+/ffa rules style <bold|italic|underline> <true|false>
+/ffa rules enable
+/ffa rules disable
+/ffa rules status
+/ffa rules accept
+/ffa rules deny
+```
+
+Setup commands are administrator-only. Until acceptance, players can run only `ffa rules accept` and `ffa rules deny` (buttons include an internal request token). This blocks every other command, including other mods' commands, regardless of ordinary rank grants. See [Rules Room](Rules-Room.md).
+
+## Easy NPC Denar offers
+
+Look at an Easy NPC within eight blocks:
+
+```text
+/ffa npctrade list
+/ffa npctrade price <offer_number> buy <whole_price>
+/ffa npctrade price <offer_number> sell <whole_price>
+/ffa npctrade clear <offer_number>
+/ffa npctrade clear all
+```
+
+Administrator-only. Offer numbers start at 1. Buy pays Denar for the original result stack; sell consumes the original input items and credits Denar. See [Easy NPC trading](Easy-NPC-Trading.md) for previews, stock and recovery.

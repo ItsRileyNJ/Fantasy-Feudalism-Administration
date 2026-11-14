@@ -41,7 +41,14 @@
     "PlayerFireMixin",
     "PortalPackChannelMixin",
     "PortalPackHandshakeMixin",
-    "PortalPackStatusMixin"
+    "PortalPackStatusMixin",
+    "RulesChatMixin",
+    "RulesCommandsMixin",
+    "RulesBroadcastMixin",
+    "RulesWhisperMixin",
+    "MerchantMenuAccess",
+    "MerchantOfferAccess",
+    "NpcMenuMixin"
   ],
   "injectors": {
     "defaultRequire": 1

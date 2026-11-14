@@ -1,5 +1,6 @@
 package dev.fantasyfeudalism.administration.mixin;
 
+import dev.fantasyfeudalism.administration.Rules;
 import dev.fantasyfeudalism.administration.Vanish;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
@@ -20,6 +21,10 @@ public abstract class VisibilityPacketsMixin {
       cancellable = true)
   private void ffa$filter(Packet<?> packet, PacketSendListener listener, CallbackInfo ci) {
     if ((Object) this instanceof ServerGamePacketListenerImpl play) {
+      if (!Rules.systemAllowed(play.player, packet)) {
+        ci.cancel();
+        return;
+      }
       Packet<?> filtered = Vanish.filter(play.player, packet);
       if (filtered != packet) {
         if (filtered != null) send(filtered, listener);
