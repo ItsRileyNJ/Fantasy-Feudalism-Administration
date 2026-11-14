@@ -59,3 +59,7 @@ Update existing warps from their new locations with `/ffa setwarp NAME`; linked 
 Use compatible structure/schematic/world-editing tools for imports, following their version and backup instructions. FFA provides the void dimension and protection; it does not include a destructive world importer or support every schematic format itself.
 
 Before disabling, move players and important spawn/warp destinations elsewhere and plan for saved homes. Preserve the world/dimension backup. Change the config and restart only after testing the migration. FFA does not automatically delete dimension files, convert world chunks, or promise that removing a dimension is harmless to every saved reference.
+
+## Memory use
+
+Enabling the empty dimension does not reserve a fixed 8 GB or automatically force-load its chunks. Remove temporary construction force-loads when done. Hosting panels can include committed heap and native memory; see [RAM-limit diagnosis and JVM settings](Troubleshooting.md#hosting-panel-stays-near-the-ram-limit).

@@ -138,3 +138,7 @@ For example, bounds X 0..20 and Z 0..20 become X 2..18 and Z 2..18 after `/ffa r
 Use `entry` or `exit` with each style command. Colors accept Minecraft color names or `#RRGGBB`. Text, color, bold, italic and underline can also be edited in `regions.toml`; existing custom messages are preserved on upgrade.
 
 Use `entryUnderlined` / `exitUnderlined` in `regions.toml`, or `/ffa region title REGION entry underline true` and the matching `exit` command. Missing underline fields default to false in existing files. See [action flags](Flags-and-Interactions.md) for farms and workshops that work without general building permission.
+
+## Map boundaries
+
+Use [world borders](World-Borders.md) to limit the playable area with a rectangle or square. They reuse `/ffa pos1` and `/ffa pos2`, but have their own `/ffa worldborder` commands and do not change region flags or towns.

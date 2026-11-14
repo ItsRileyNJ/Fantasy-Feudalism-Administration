@@ -3,7 +3,7 @@ loaderVersion="[4,)"
 license="All Rights Reserved"
 [[mods]]
 modId="ffa"
-version="0.5.1"
+version="0.6.0"
 displayName="Fantasy Feudalism: Administration"
 description='''Server-side regions, travel, ranks, chat, staff tools and Denar economy.'''
 [[dependencies.ffa]]

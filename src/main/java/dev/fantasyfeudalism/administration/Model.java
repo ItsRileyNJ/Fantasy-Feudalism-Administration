@@ -207,9 +207,25 @@ public final class Model {
     public long oldBalance, newBalance;
   }
 
+  public static final class Border {
+    public int minX, minZ, maxX, maxZ;
+
+    public void validate(int limit) {
+      if (minX > maxX
+          || minZ > maxZ
+          || minX < -limit
+          || minZ < -limit
+          || (long) maxX + 1 > limit
+          || (long) maxZ + 1 > limit)
+        throw new IllegalArgumentException(
+            "World border corners are outside the world's coordinate limits.");
+    }
+  }
+
   public static final class State {
     public int version = 1;
     public Point spawn;
+    public Map<String, Border> worldBorders = new TreeMap<>();
     public Map<String, Warp> warps = new TreeMap<>();
     public Map<String, Portal> portals = new TreeMap<>();
     public Map<String, PlayerData> players = new TreeMap<>();

@@ -93,5 +93,7 @@ public abstract class TeleportMixin {
     var a = Administration.INSTANCE;
     if (a != null && a.protection != null && a.server != null)
       a.protection.update((ServerPlayer) (Object) this);
+    if (a != null && a.worldBorders != null && a.server != null)
+      a.worldBorders.update((ServerPlayer) (Object) this);
   }
 }

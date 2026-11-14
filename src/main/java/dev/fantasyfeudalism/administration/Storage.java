@@ -27,6 +27,7 @@ public final class Storage {
     state = Files.exists(p) ? JSON.fromJson(Files.readString(p), State.class) : new State();
     if (state == null
         || state.version != 1
+        || state.worldBorders == null
         || state.players == null
         || state.warps == null
         || state.portals == null
@@ -35,6 +36,11 @@ public final class Storage {
         || state.jailCells == null)
       throw new IOException(
           "Invalid state.json; restore an offline backup. File was not modified.");
+    for (var entry : state.worldBorders.entrySet()) {
+      if (entry.getKey() == null || entry.getValue() == null)
+        throw new IOException("Invalid world border in state.json.");
+      entry.getValue().validate(29999984);
+    }
   }
 
   public State state() {

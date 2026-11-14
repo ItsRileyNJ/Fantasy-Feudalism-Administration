@@ -44,6 +44,11 @@ final class CommandTree {
     for (String position : List.of("pos1", "pos2"))
       root.then(node(position).requires(s -> manages(s, "ffa.region.edit")));
 
+    var border = node("worldborder").requires(StaffCommands::admin);
+    for (String action : List.of("pos1", "pos2", "set", "create", "clear", "remove", "info"))
+      border.then(node(action));
+    root.then(border);
+
     var region = node("region").requires(s -> manages(s, "ffa.region.edit"));
     region.then(node("list"));
     region.then(

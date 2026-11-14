@@ -44,6 +44,7 @@ public final class PolicyTest {
     actionDefaults(root);
     portalPack(root);
     spawnSettings(root);
+    borders(root);
     usability(root);
     ranks(root);
     chatStyles();
@@ -175,6 +176,67 @@ public final class PolicyTest {
     portal.maxX = portal.maxY = portal.maxZ = Integer.MAX_VALUE;
     rejects(() -> Portals.volume(portal), "Oversized portal cannot overflow volume validation");
     System.out.println("PASS " + count + " policy, persistence and config checks");
+  }
+
+  private static void borders(Path root) throws Exception {
+    Path config = root.resolve("border-settings.toml");
+    Files.writeString(config, Settings.TEMPLATE);
+    check(
+        Settings.load(config).borderVisibilityDistance == 8,
+        "Border wall visible within eight blocks by default");
+    Files.writeString(
+        config, Settings.TEMPLATE.replaceAll("(?s)\\[worldBorder\\].*?(?=\\[portals\\])", ""));
+    check(
+        Settings.load(config).borderVisibilityDistance == 8,
+        "Legacy config gets close-only border visibility");
+    Files.writeString(
+        config, Settings.TEMPLATE.replace("visibilityDistance = 8", "visibilityDistance = 0"));
+    rejects(() -> Settings.load(config), "Zero visibility distance rejected");
+    Files.writeString(
+        config, Settings.TEMPLATE.replace("visibilityDistance = 8", "visibilityDistance = 65"));
+    rejects(() -> Settings.load(config), "Excessive border visibility rejected");
+    Border rectangle = new Border();
+    rectangle.minX = -40;
+    rectangle.maxX = 59;
+    rectangle.minZ = -100;
+    rectangle.maxZ = 99;
+    rectangle.validate(29999984);
+    check(
+        WorldBorders.view(rectangle, 0, 0, 8).equals(new WorldBorders.View(0, 0)),
+        "Rectangle walls hidden at a distance");
+    check(
+        WorldBorders.view(rectangle, -32, 0, 8).centerX() - WorldBorders.VIEW_SIZE / 2 == -40,
+        "West wall visible at threshold");
+    check(
+        WorldBorders.view(rectangle, -31.99, 0, 8).centerX() == 0,
+        "West wall hidden beyond threshold");
+    check(
+        WorldBorders.view(rectangle, 59, 0, 8).centerX() + WorldBorders.VIEW_SIZE / 2 == 60,
+        "East wall aligned to outer corner edge");
+    check(
+        WorldBorders.view(rectangle, 0, -98, 8).centerZ() - WorldBorders.VIEW_SIZE / 2 == -100,
+        "North wall aligned");
+    check(
+        WorldBorders.view(rectangle, 0, 99, 8).centerZ() + WorldBorders.VIEW_SIZE / 2 == 100,
+        "South wall aligned");
+    var corner = WorldBorders.view(rectangle, -39, -99, 8);
+    check(corner.centerX() != 0 && corner.centerZ() != 0, "Both nearby corner edges are visible");
+    rectangle.maxX = Integer.MAX_VALUE;
+    rejects(() -> rectangle.validate(29999984), "Border upper-edge overflow rejected");
+    rectangle.maxX = -41;
+    rejects(() -> rectangle.validate(29999984), "Reversed persisted bounds rejected");
+    Path legacyDir = root.resolve("legacy-border-state");
+    Files.createDirectories(legacyDir);
+    Files.writeString(legacyDir.resolve("state.json"), "{\"version\":1}");
+    check(
+        new Storage(legacyDir).state().worldBorders.isEmpty(),
+        "Legacy state starts without custom borders");
+    var store = new Storage(root.resolve("border-state"));
+    rectangle.maxX = 59;
+    store.update(s -> s.worldBorders.put("minecraft:overworld", rectangle));
+    check(
+        new Storage(store.directory).state().worldBorders.get("minecraft:overworld").maxZ == 99,
+        "Rectangle border round trips through storage");
   }
 
   private static void spawnSettings(Path root) throws Exception {

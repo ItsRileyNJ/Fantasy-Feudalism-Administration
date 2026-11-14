@@ -23,7 +23,7 @@
 
 Reload is refused while teleport jobs or prepared trades are pending. Do not change dimension registration live. In-game region edits refuse to overwrite unreloaded external edits.
 
-The [full default server.toml](examples/server.toml) is extracted from 0.3.0's actual template. Use it for comparison; replacing your existing settings with the whole template resets your custom general rules. Config/state schema versions remain 1. Unknown versions are refused; do not manually increment version fields.
+The [full default server.toml](examples/server.toml) is extracted from the current release's actual template. Use it for comparison; replacing your existing settings with the whole template resets your custom general rules. Config/state schema versions remain 1. Unknown versions are refused; do not manually increment version fields.
 
 ## Every general setting
 
@@ -44,6 +44,7 @@ The [full default server.toml](examples/server.toml) is extracted from 0.3.0's a
 | `modules.pay` | `false` | Boolean | Restart | Enable the legacy `/ffa pay` alias; balance send/request use the economy and payment permissions. |
 | `modules.leaderboard` | `false` | Boolean | Restart | Enable stored UUID/balance leaderboard visibility. |
 | `modules.privacy` | `false` | Boolean | Restart | Enable native request toggle/ignore controls; overlapping FTB mode disables them. |
+| `worldBorder.visibilityDistance` | `8` | 1–64 whole blocks | Reload | Show world-border walls only this close to an edge; enforcement is always active. See [world borders](World-Borders.md). |
 | `spawn.firstJoin` | `false` | Boolean | Reload | Redirect genuinely new players to a valid configured FFA spawn. |
 | `spawn.invulnerabilitySeconds` | `8` | 0–3600 whole seconds; 0 disables | Reload; next login/death respawn | Invincibility for all players, including admins; see [spawn protection](First-Join-and-Respawns.md#spawn-invincibility). |
 | `spawn.respawnPolicy` | `"vanilla"` | vanilla / bed_first / spawn_first | Reload | Death arrival policy; see the respawn guide. |

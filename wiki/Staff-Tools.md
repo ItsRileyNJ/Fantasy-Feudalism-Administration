@@ -71,3 +71,7 @@ Commands and edit results use private feedback. The FFA audit identifies the edi
 ```
 
 This teleports the administrator using it to the online player's current location, without a TPA request, warmup or ordinary cooldown. It cancels the administrator's pending command teleport. It does not bring the target to the administrator. Existing world/destination-safety checks and other mods' protection decisions still apply. The command is hidden from nonadministrators.
+
+## World borders
+
+Use `/ffa worldborder pos1`, `/ffa worldborder pos2`, then `/ffa worldborder set` for an exact rectangle or square in the current dimension. `/ffa worldborder info` shows it; `/ffa worldborder clear` removes it. These commands require full administrator status and are hidden from normal players. See [world border setup and close-only visibility](World-Borders.md).

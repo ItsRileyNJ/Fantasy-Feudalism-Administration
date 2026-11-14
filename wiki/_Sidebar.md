@@ -3,6 +3,7 @@
 - [Home](Home.md)
 - [Getting Started](Getting-Started.md)
 - [Regions](Regions.md)
+- [World Borders](World-Borders.md)
 - [Flags and Interactions](Flags-and-Interactions.md)
 - [Configuration](Configuration.md)
 - [Warps and Portals](Warps-and-Portals.md)
