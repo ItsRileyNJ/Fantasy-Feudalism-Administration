@@ -52,8 +52,8 @@ The [full default server.toml](examples/server.toml) is extracted from the curre
 | `combat.tagSeconds` | `30` | 1–3600 whole seconds | Reload; new hits | Victim travel lock and both participants' PvP-toggle combat timer. |
 | `pvp.enabledByDefault` | `true` | Boolean | Reload | Personal PvP default until a player saves an explicit choice. |
 | `teleport.cooldownSeconds` | `3` | 0..86400 seconds | Reload | Ordinary command teleport cooldown. |
-| `teleport.warmupSeconds` | `0` | 0..300 seconds | Reload | Delay before ordinary player travel; zero is immediate. |
-| `teleport.cancelOnMovement` | `true` | Boolean | Reload | Cancel warmups/prepared chunk loads when the player moves. |
+| `teleport.warmupSeconds` | `0` | 0..300 seconds | Reload | Delay before ordinary command travel; portals skip this warmup. Zero is immediate. |
+| `teleport.cancelOnMovement` | `true` | Boolean | Reload | Cancel command warmups/prepared command loads when the player moves. Portal loads allow walking. |
 | `teleport.requestExpirySeconds` | `60` | 1..3600 seconds | Reload | Time before an incoming TPA/first-contact whisper request expires. |
 | `teleport.requestCooldownSeconds` | `10` | 0..3600 seconds | Reload | Minimum interval between normal-player TPA or first-contact whisper requests. |
 | `teleport.portalCooldownSeconds` | `5` | 1..3600 seconds | Reload | Portal loop/repeat protection, including administrators. |

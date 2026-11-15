@@ -27,17 +27,30 @@ public final class Teleports {
 
   record Waiting(Point point, Point origin, long due) {}
 
+  record PortalTransit(String id, String warp, Point origin, Point point) {}
+
   record Loading(
       Point point,
       Point origin,
       boolean instant,
       long expiry,
-      java.util.concurrent.CompletableFuture<Optional<net.minecraft.nbt.CompoundTag>> future) {}
+      java.util.concurrent.CompletableFuture<Optional<net.minecraft.nbt.CompoundTag>> future,
+      PortalTransit portal) {
+    Loading(
+        Point point,
+        Point origin,
+        boolean instant,
+        long expiry,
+        java.util.concurrent.CompletableFuture<Optional<net.minecraft.nbt.CompoundTag>> future) {
+      this(point, origin, instant, expiry, future, null);
+    }
+  }
 
   private final Map<UUID, Point> staffMoves = new HashMap<>();
   final Map<UUID, Loading> loading = new HashMap<>();
   final Map<UUID, Request> requests = new HashMap<>();
   final Map<UUID, Waiting> waiting = new HashMap<>();
+  final Map<UUID, Set<String>> portalContacts = new HashMap<>();
   final Map<UUID, Long> cooldowns = new HashMap<>(),
       requestCooldowns = new HashMap<>(),
       portalCooldowns = new HashMap<>();
@@ -160,7 +173,13 @@ public final class Teleports {
   }
 
   public void teleport(ServerPlayer p, Point destination, boolean instant) throws Exception {
+    teleport(p, destination, instant, null);
+  }
+
+  private void teleport(ServerPlayer p, Point destination, boolean instant, PortalTransit portal)
+      throws Exception {
     app.combat.requireTravel(p);
+    if (portal != null) validatePortal(p, portal);
     if (waiting.containsKey(p.getUUID()) || loading.containsKey(p.getUUID()))
       throw new IllegalArgumentException("A teleport is already pending.");
     if (app.storage.state().trades.containsKey(p.getUUID().toString()))
@@ -183,7 +202,12 @@ public final class Teleports {
       loading.put(
           p.getUUID(),
           new Loading(
-              destination, point(p), instant, now() + app.settings.loadTimeout * 1000L, future));
+              destination,
+              point(p),
+              instant,
+              now() + app.settings.loadTimeout * 1000L,
+              future,
+              portal));
       tell(p, "Loading saved destination...");
       return;
     }
@@ -194,11 +218,16 @@ public final class Teleports {
       tell(p, "Teleporting in " + app.settings.warmup + " seconds.");
       return;
     }
-    execute(p, destination);
+    execute(p, destination, portal);
   }
 
   private void execute(ServerPlayer p, Point dest) throws Exception {
+    execute(p, dest, null);
+  }
+
+  private void execute(ServerPlayer p, Point dest, PortalTransit portal) throws Exception {
     app.combat.requireTravel(p);
+    if (portal != null) validatePortal(p, portal);
     String error = validate(p, dest);
     if (error != null) throw new IllegalArgumentException(error);
     p.closeContainer();
@@ -217,6 +246,38 @@ public final class Teleports {
   }
 
   public void warp(ServerPlayer p, String name) throws Exception {
+    teleport(p, accessibleWarp(p, name).point, false);
+  }
+
+  public void portal(ServerPlayer p, Model.Portal portal) throws Exception {
+    if (portal.warp == null || portal.warp.isEmpty())
+      throw new IllegalArgumentException("Portal destination is not set.");
+    Warp warp = accessibleWarp(p, portal.warp);
+    teleport(p, warp.point, true, new PortalTransit(portal.id, portal.warp, point(p), warp.point));
+  }
+
+  private void validatePortal(ServerPlayer p, PortalTransit transit) {
+    Model.Portal portal = app.storage.state().portals.get(transit.id);
+    if (!app.settings.portals
+        || portal == null
+        || !transit.warp.equals(portal.warp)
+        || !transit.origin.dimension.equals(portal.dimension))
+      throw new IllegalArgumentException("Portal changed. Enter it again.");
+    if (!point(p).dimension.equals(transit.origin.dimension))
+      throw new IllegalArgumentException("Portal travel cancelled because you changed dimension.");
+    ServerLevel source = level(transit.origin);
+    BlockPos pos = BlockPos.containing(transit.origin.x, transit.origin.y, transit.origin.z);
+    if (source == null
+        || !app.compat.access(p, portal.access, source, pos)
+        || !app.compat.admin(p)
+            && !app.regions.allowed(source, pos, Flag.TELEPORT_OUT, app.settings))
+      throw new IllegalArgumentException(app.settings.portalDenied);
+    Warp warp = accessibleWarp(p, transit.warp);
+    if (BackHistory.different(warp.point, transit.point))
+      throw new IllegalArgumentException("Portal destination changed. Enter it again.");
+  }
+
+  private Warp accessibleWarp(ServerPlayer p, String name) {
     if (app.moderation != null && app.moderation.banned(p, "warpban"))
       throw new IllegalArgumentException("You cannot use warps right now.");
     Warp w = app.storage.state().warps.get(name);
@@ -225,7 +286,7 @@ public final class Teleports {
     if (l == null
         || !app.compat.access(p, w.access, l, BlockPos.containing(w.point.x, w.point.y, w.point.z)))
       throw new IllegalArgumentException(app.settings.denied);
-    teleport(p, w.point, false);
+    return w;
   }
 
   public void request(ServerPlayer from, ServerPlayer to, boolean here) {
@@ -407,7 +468,9 @@ public final class Teleports {
       if (!task.future.isDone()) continue;
       loading.remove(entry.getKey());
       try {
-        if (app.settings.cancelMove
+        if (task.portal != null) validatePortal(player, task.portal);
+        if (task.portal == null
+            && app.settings.cancelMove
             && (!point(player).dimension.equals(task.origin.dimension)
                 || player
                         .position()
@@ -423,7 +486,7 @@ public final class Teleports {
         if (target == null)
           throw new IllegalArgumentException("Destination dimension no longer exists.");
         target.getChunk(BlockPos.containing(task.point.x, task.point.y, task.point.z));
-        teleport(player, task.point, task.instant);
+        teleport(player, task.point, task.instant, task.portal);
       } catch (Exception ex) {
         tell(player, ex.getMessage());
       }
@@ -466,6 +529,7 @@ public final class Teleports {
     cooldowns.remove(id);
     requestCooldowns.remove(id);
     portalCooldowns.remove(id);
+    portalContacts.remove(id);
   }
 
   @SubscribeEvent

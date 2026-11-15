@@ -94,7 +94,11 @@ Both portal and warp access must pass, along with region and destination-safety 
 
 `team` access uses the supported Mercenaries settlement context at the portal and destination respectively. Named-warp bans also block portal routes using those warps. Normal home/TPA/back routes remain separate.
 
-Normal teleport cooldown defaults to three seconds; portal loop cooldown defaults to five seconds, including for administrators. Put destinations outside portal trigger volumes. Travel uses saved safe terrain; unknown terrain is not generated.
+Walk into the selected portal volume normally. FFA checks contact with your full player body every tick, including at chunk edges; your feet do not have to reach a particular block or angle. Portals skip ordinary command warmups. If a saved cross-dimension destination needs loading, keep walking: movement does not cancel that portal transfer. Homes, typed warps and other command teleports still follow configured warmups and movement cancellation.
+
+Normal teleport cooldown defaults to three seconds; portal loop cooldown defaults to five seconds, including for administrators. A portal triggers once per entry. If you arrive inside another portal, standing there after the cooldown will not bounce you back: step fully outside its volume and enter again to use it. Put destinations outside portal trigger volumes for the clearest route. Entering during a cooldown or another pending teleport also requires stepping out and re-entering afterward.
+
+Travel uses saved safe terrain; unknown terrain is not generated. Portal/warp access, combat locks, warp bans, jail/rules restrictions and safe landing checks still apply. Pending portal travel rechecks portal links, warp access and the original source region before loading/arrival; if the destination changes, enter again.
 
 ```text
 /ffa portal delete town_gate

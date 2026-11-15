@@ -1,4 +1,4 @@
-# Development build 0.8.0
+# Development build 0.8.1
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
@@ -21,3 +21,5 @@ The JAR bundles the animated colored portal resource pack and offers a standard 
 Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged player without clearing their combat timer.
 
 0.8.0: rules acceptance child room and separate first-join spawn, plus explicit Denar prices in Easy NPC 7.18.0 native trading menus. See the new wiki guides for setup. Both features start inactive until configured.
+
+0.8.1: walk naturally into FFA portals from either side or at an angle. Full-body contact is checked every tick and portal chunk loading tolerates movement. Landing inside another portal does not bounce you back when the cooldown expires. Command warmups, movement cancellation, access restrictions and destination safety remain enforced.

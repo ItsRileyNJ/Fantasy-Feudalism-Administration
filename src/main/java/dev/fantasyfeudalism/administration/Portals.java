@@ -10,6 +10,7 @@ import net.minecraft.resources.*;
 import net.minecraft.server.level.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.*;
+import net.minecraft.world.phys.AABB;
 
 public final class Portals {
   private Portals() {}
@@ -40,22 +41,49 @@ public final class Portals {
   }
 
   private static List<Portal> nearby(Administration app, ServerPlayer p) {
-    var chunk = p.chunkPosition();
-    return index
-        .getOrDefault(p.level().dimension().location().toString(), Map.of())
-        .getOrDefault(chunk.toLong(), List.of())
-        .stream()
+    var dimension = index.getOrDefault(p.level().dimension().location().toString(), Map.of());
+    AABB body = p.getBoundingBox();
+    Set<String> ids = new LinkedHashSet<>();
+    for (int x = net.minecraft.util.Mth.floor(body.minX) >> 4;
+        x <= net.minecraft.util.Mth.floor(body.maxX) >> 4;
+        x++)
+      for (int z = net.minecraft.util.Mth.floor(body.minZ) >> 4;
+          z <= net.minecraft.util.Mth.floor(body.maxZ) >> 4;
+          z++)
+        ids.addAll(
+            dimension.getOrDefault(net.minecraft.world.level.ChunkPos.asLong(x, z), List.of()));
+    return ids.stream()
         .map(id -> app.storage.state().portals.get(id))
         .filter(Objects::nonNull)
         .toList();
   }
 
   public static void check(Administration app, ServerPlayer p) {
-    if (!app.settings.portals
+    if (!app.settings.portals || index.isEmpty()) {
+      app.teleports.portalContacts.remove(p.getUUID());
+      return;
+    }
+    var touching =
+        nearby(app, p).stream()
+            .filter(
+                portal ->
+                    p.getBoundingBox()
+                        .intersects(
+                            new AABB(
+                                portal.minX,
+                                portal.minY,
+                                portal.minZ,
+                                portal.maxX + 1.0,
+                                portal.maxY + 1.0,
+                                portal.maxZ + 1.0)))
+            .toList();
+    Set<String> current = new HashSet<>();
+    touching.forEach(portal -> current.add(portal.id));
+    Set<String> previous = app.teleports.portalContacts.put(p.getUUID(), current);
+    if (app.teleports.busyFor(p)
         || app.teleports.portalCooldowns.getOrDefault(p.getUUID(), 0L) > Teleports.now()) return;
-    for (Portal portal : nearby(app, p))
-      if (portal.dimension.equals(p.level().dimension().location().toString())
-          && portal.contains(p.getX(), p.getY(), p.getZ())) {
+    for (Portal portal : touching)
+      if (previous == null || !previous.contains(portal.id)) {
         app.teleports.portalCooldowns.put(
             p.getUUID(), Teleports.now() + app.settings.portalCooldown * 1000L);
         if (!app.compat.access(p, portal.access, p.blockPosition())) {
@@ -63,9 +91,7 @@ public final class Portals {
           return;
         }
         try {
-          if (portal.warp == null || portal.warp.isEmpty())
-            throw new IllegalArgumentException("Portal destination is not set.");
-          app.teleports.warp(p, portal.warp);
+          app.teleports.portal(p, portal);
         } catch (Exception e) {
           Teleports.tell(p, e.getMessage());
         }

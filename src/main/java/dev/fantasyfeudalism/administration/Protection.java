@@ -192,9 +192,8 @@ public final class Protection {
         || !p.level().dimension().location().toString().equals(dim)
         || p.tickCount % 20 == 0) {
       update(p);
-      if (!p.blockPosition().equals(old)
-          || !p.level().dimension().location().toString().equals(dim)) Portals.check(app, p);
     }
+    Portals.check(app, p);
   }
 
   private void notice(ServerPlayer p) {
