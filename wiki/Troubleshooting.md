@@ -92,3 +92,15 @@ Versions through **0.6.0**, including **0.5.0**, can reject `/execute in ffa:spa
 Update to **0.6.1 or newer**, replacing the old FFA JAR while the server is stopped. Keep the existing configuration, `<world>/ffa/`, and dimension folders. No map re-import or permission reduction is needed. The fixed command validates the actual destination after coordinate-changing events. FFA rejections report their real reason without also printing native success feedback. Relative command coordinates are resolved once.
 
 Destination safety still applies. Load the imported build's chunk and choose unobstructed coordinates with a safe floor, or use Creative mode as an administrator for initial construction. `8.5 80 8.5` is the guide's sample platform location, not a relocation of imported chunks. Use the build's original X/Y/Z.
+
+## Some players still see night after setting day
+
+Check the server clock as an operator:
+
+```text
+/execute in ffa:spawn run time query daytime
+```
+
+A value around `1000` (for example, `1063` shortly after `/time set day`) is daytime. FFA's bundled spawn dimension uses the normal Overworld dimension type and has no fixed-time override. All players in that dimension should receive the same server time.
+
+For an affected shader user, temporarily disable the shader pack, then run `/time set day` again while shaders remain disabled. In the reported Mellow Shaders case, disabling shaders alone retained the night view; setting day again refreshed it. Re-enable the pack afterward. If night returns, check the shader pack/loader versions and any time or sky overrides. This workaround does not require replacing world chunks, recreating spawn, or changing its dimension definition.
