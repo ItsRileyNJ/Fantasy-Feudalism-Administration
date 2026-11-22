@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [Economy](Economy-and-Shops.md) · [Compatibility](Mod-Compatibility.md)
 
-FFA can price selected offers in **Easy NPC 7.18.0's existing merchant menus** using the player's Denar wallet. Prices are explicit whole numbers, per NPC UUID and original offer number. No Mercenaries or Easy NPC patch is required. Easy NPC remains a separate optional mod, with its own client requirements; players do not need FFA installed.
+FFA can price selected offers in the existing merchant menus in **Easy NPC 7.18.0 and 7.20.0** using the player's Denar wallet. Prices are explicit whole numbers, per NPC UUID and original offer number. No Mercenaries or Easy NPC patch is required. Easy NPC remains a separate optional mod, with its own client requirements; players do not need FFA installed.
 
 ## Price an offer
 
@@ -50,4 +50,13 @@ Removing the last price restores the NPC's original item-trading menu. Clearing 
 
 Bindings, prices and used-stock records are in `<world>/ffa/state.json`. Transactions use FFA's durable prepare → player inventory save → wallet/stock commit journal. Reconnecting settles a prepared transaction once. An NPC with an unresolved transaction cannot trade or have its prices edited until recovery finishes. Keep world/player data and FFA state together in backups.
 
-After a crash, financial recovery does **not replay NPC scripts or XP callbacks**, since external effects cannot safely be duplicated. A callback failure after financial commit is logged; the completed item/money exchange is not retried. The adapter targets the exact supplied Easy NPC **7.18.0** API. The older dialogue/player-command shop bridge remains available as described in [compatibility](Mod-Compatibility.md).
+After a crash, financial recovery does **not replay NPC scripts or XP callbacks**, since external effects cannot safely be duplicated. A callback failure after financial commit is logged; the completed item/money exchange is not retried. The adapter supports the inspected Easy NPC **7.18.0 and 7.20.0** APIs; other versions require compatibility verification. The older dialogue/player-command shop bridge remains available as described in [compatibility](Mod-Compatibility.md).
+
+
+## Updating to Easy NPC 7.20.0
+
+Use FFA **0.8.2 or later**, with `easy_npc-neoforge-1.21.1-7.20.0.jar` and `easy_npc_config_ui-neoforge-1.21.1-7.20.0.jar`. Replace the previous versions rather than keeping two core or UI versions in `mods`. Stop and restart the server after updating.
+
+The supplied `easy_npc_bundle-neoforge-1.21.1-7.20.0.jar` contains dependency metadata but **no embedded core or UI JARs**. It can accompany the matching core/UI files, but that uploaded bundle alone does not install them. Config UI is needed for Easy NPC's editing interface; FFA's Denar adapter accesses the core trading API.
+
+The 7.20.0 trading API used by FFA matches 7.18.0. FFA's previous strict version check rejected 7.20.0; version 0.8.2 explicitly supports both inspected versions. NPC UUIDs, configured offers, Denar prices and used-stock records keep their existing format. No FFA shop recreation or state conversion is required. Keep matching Easy NPC versions on the server and clients as required by Easy NPC; FFA itself remains server-only.

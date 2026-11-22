@@ -16,13 +16,13 @@ Supported NPC trading and charter/empty-hand bell-management interactions are en
 
 No Mercenaries patch was needed for the tested adapter. A future public settlement/membership API would make updates less fragile. If an unsupported version is installed, validation can refuse startup or region editing until compatibility is restored or the administrator explicitly reviews the affected region overrides. Simply disabling the integration is not a promise that settlement-overlap validation is bypassed safely.
 
-## Easy NPC 7.18.0: native Denar trading
+## Easy NPC 7.18.0 and 7.20.0: native Denar trading
 
 Use [Easy NPC Denar Trading](Easy-NPC-Trading.md) to assign explicit Denar prices to selected native merchant offers. Prices are per NPC UUID and offer number; unconfigured NPCs retain their item trades. No Easy NPC or Mercenaries patch is required.
 
 ### Optional command-action shop button
 
-1. Install the required Easy NPC core/UI components and their dependencies. The supplied small bundle file has no embedded core/UI JARs; do not rely on that file alone.
+1. Install the required Easy NPC core/UI components and their dependencies. The supplied 7.18.0 and 7.20.0 small bundle files have no embedded core/UI JARs; install the matching separate core and UI files.
 2. Create an FFA offering:
 
    ```text
