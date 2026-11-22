@@ -1,10 +1,10 @@
-# Development build 0.8.1
+# Development build 0.8.2
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
 Download the JAR using GitHub's Download raw file button, and place it in the server mods directory. See the root README for setup and docs/VALIDATION.md for the staging acceptance checklist. This is a development build.
 
-210 policy/persistence/rank/chat/parser checks and the headless regression suite passed with the supplied Mercenaries 1.20.4, Easy NPC 7.18.0 and Easy NPC Config UI 7.18.0 installed together. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
+210 policy/persistence/rank/chat/parser checks and the headless regression suite passed with Mercenaries 1.20.4 and matching Easy NPC core/Config UI 7.18.0 or 7.20.0. The supplied 7.20.0 bundle was also included in its integration run. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
 
 SHA-256 is listed in SHA256SUMS. Third-party mods are not bundled.
 
@@ -23,3 +23,5 @@ Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged play
 0.8.0: rules acceptance child room and separate first-join spawn, plus explicit Denar prices in Easy NPC 7.18.0 native trading menus. See the new wiki guides for setup. Both features start inactive until configured.
 
 0.8.1: walk naturally into FFA portals from either side or at an angle. Full-body contact is checked every tick and portal chunk loading tolerates movement. Landing inside another portal does not bounce you back when the cooldown expires. Command warmups, movement cancellation, access restrictions and destination safety remain enforced.
+
+0.8.2: supports Easy NPC 7.20.0 core, Config UI and the supplied bundle, while retaining 7.18.0 support. Install the separate core and Config UI JARs: the supplied small bundle contains no embedded copies of either. Existing Denar prices and stock records require no FFA migration.

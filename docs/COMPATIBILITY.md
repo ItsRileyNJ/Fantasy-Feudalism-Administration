@@ -21,9 +21,9 @@ The adapter is optional and checks class/method availability during startup/relo
 
 Currently these details are package-private. The adapter uses reflection against the supplied version; a future public API would remove that dependency without changing town functionality.
 
-## Easy NPC 7.18.0
+## Easy NPC 7.18.0 and 7.20.0
 
-The supplied core and Config UI JARs load alongside this mod in headless runtime tests. The supplied 25 KB bundle JAR describes the core/UI dependencies but contains no embedded core/UI JARs, so do not rely on that particular file alone to install both components.
+The supplied 7.18.0 and 7.20.0 core/Config UI combinations load alongside FFA in headless runtime tests. The 7.20.0 combination was tested with its bundle and Mercenaries 1.20.4. Both supplied small bundle JARs describe the core/UI dependencies but contain no embedded core/UI JARs; install the matching separate core and UI files.
 
 Easy NPC already supports player command actions. To link a dialogue/button to an administrator shop, configure its action to execute **as the interacting player at normal player permission**, for example:
 
@@ -34,7 +34,7 @@ ffa shop sell stone 1
 
 First create the shop using `/ffa shop set stone minecraft:stone 5 2`. Both the player command and the NPC action reach the same journaled inventory/Denar transaction. Do not elevate an NPC command to operator level or grant general administration permissions for this purpose. If Easy NPC command security requires an allowlist entry, allow only the exact shop actions needed by that NPC.
 
-Native Easy NPC merchant screens now support explicit Denar prices for selected offers through administrator `/ffa npctrade` commands. See [the native trading guide](../wiki/Easy-NPC-Trading.md). The optional adapter targets the exact uploaded Easy NPC 7.18.0; unconfigured NPCs retain their item trades. The existing player-command action remains available.
+Native Easy NPC merchant screens now support explicit Denar prices for selected offers through administrator `/ffa npctrade` commands. See [the native trading guide](../wiki/Easy-NPC-Trading.md). The optional adapter supports the inspected Easy NPC 7.18.0 and 7.20.0 APIs; unconfigured NPCs retain their item trades. The existing player-command action remains available.
 
 ## FTB Ranks 2101.1.5 and LuckPerms
 

@@ -17,13 +17,13 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.neoforged.fml.ModList;
 
-/** Optional Easy NPC 7.18.0 adapter. No Easy NPC classes are linked or shipped. */
+/** Optional Easy NPC 7.18.0/7.20.0 adapter. No Easy NPC classes are linked or shipped. */
 public final class NpcTrades {
   final Administration app;
   private Class<?> tradingType, safeType;
   private Field tradingField;
   private Method entityMethod, dataMethod, resetMethod, offersMethod;
-  private String unavailable = "Easy NPC 7.18.0 is not installed.";
+  private String unavailable = "Easy NPC is not installed.";
 
   public NpcTrades(Administration app) {
     this.app = app;
@@ -36,8 +36,9 @@ public final class NpcTrades {
               .getModInfo()
               .getVersion()
               .toString();
-      if (!version.equals("7.18.0")) {
-        unavailable = "This adapter supports Easy NPC 7.18.0; installed: " + version + ".";
+      if (!version.equals("7.18.0") && !version.equals("7.20.0")) {
+        unavailable =
+            "This adapter supports Easy NPC 7.18.0 and 7.20.0; installed: " + version + ".";
         return;
       }
       tradingType =
