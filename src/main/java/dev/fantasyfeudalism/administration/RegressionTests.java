@@ -979,7 +979,57 @@ public final class RegressionTests {
     h.getLevel()
         .getDataStorage()
         .set("ffm_village_bells", (net.minecraft.world.level.saveddata.SavedData) test);
+    net.neoforged.neoforge.common.ModConfigSpec.BooleanValue housing = null;
+    boolean previousHousing = true;
     try {
+      Region candidate = app.regions.copy().getFirst();
+      candidate.settlementOverride = false;
+      Regions.validate(List.of(candidate), app.server, app.settings, app.compat);
+      h.assertFalse(
+          app.compat.overlaps(app.server, candidate),
+          "Supported Mercenaries does not reject ordinary regions before any town is claimed");
+      try {
+        housing =
+            (net.neoforged.neoforge.common.ModConfigSpec.BooleanValue)
+                Class.forName("dev.villagerscontract.CaravanConfig")
+                    .getField("REQUIRE_HOUSING_FOR_RESTOCKING")
+                    .get(null);
+      } catch (NoSuchFieldException legacyVersion) {
+        h.assertTrue(
+            net.neoforged.fml.ModList.get()
+                .getModContainerById("villagerscontract")
+                .orElseThrow()
+                .getModInfo()
+                .getVersion()
+                .toString()
+                .equals("1.20.4"),
+            "Only the legacy Mercenaries version lacks the optional housing-restock setting");
+      }
+      if (housing != null) {
+        previousHousing = housing.get();
+        var resident = EntityType.VILLAGER.create(h.getLevel());
+        var offer =
+            new net.minecraft.world.item.trading.MerchantOffer(
+                new net.minecraft.world.item.trading.ItemCost(Items.EMERALD),
+                new ItemStack(Items.BREAD),
+                1,
+                0,
+                0);
+        offer.increaseUses();
+        resident.getOffers().clear();
+        resident.getOffers().add(offer);
+        housing.set(true);
+        resident.restock();
+        h.assertTrue(
+            offer.getUses() == 1,
+            "Mercenaries still blocks restocking without a valid home when its housing check is"
+                + " enabled");
+        housing.set(false);
+        resident.restock();
+        h.assertTrue(
+            offer.getUses() == 0 && !housing.get(),
+            "Disabling Mercenaries housing checks allows native restocking with FFA installed");
+      }
       BlockPos bell = h.absolutePos(new BlockPos(3, 1, 3));
       h.getLevel().setBlock(bell, Blocks.BELL.defaultBlockState(), 3);
       var placed = cls.getDeclaredMethod("placed", BlockPos.class);
@@ -993,21 +1043,21 @@ public final class RegressionTests {
       h.assertTrue(
           app.compat.settlementNames(player).contains("Integration Town"),
           "Stats adapter reads actual Mercenaries settlement name");
-      Region candidate = app.regions.copy().getFirst();
-      candidate.settlementOverride = false;
       boolean rejected = false;
       try {
         Regions.validate(List.of(candidate), app.server, app.settings, app.compat);
       } catch (IllegalArgumentException expected) {
         rejected = expected.getMessage().contains("settlement");
       }
-      h.assertTrue(rejected, "Settlement overlap rejected without override");
+      h.assertTrue(
+          rejected, "Settlement overlap still requires override with housing checks disabled");
       candidate.settlementOverride = true;
       Regions.validate(List.of(candidate), app.server, app.settings, app.compat);
       h.assertTrue(
           app.compat.inSettlement(h.getLevel(), bell),
           "RTP recognizes settlement regardless of membership");
     } finally {
+      if (housing != null) housing.set(previousHousing);
       h.getLevel()
           .getDataStorage()
           .set("ffm_village_bells", (net.minecraft.world.level.saveddata.SavedData) original);

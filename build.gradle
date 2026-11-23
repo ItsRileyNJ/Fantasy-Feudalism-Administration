@@ -1,5 +1,5 @@
 plugins { id 'java-library'; id 'net.neoforged.moddev' version '2.0.148' }
-version = '0.8.2'
+version = '0.8.3'
 group = 'dev.fantasyfeudalism'
 base { archivesName = 'fantasy-feudalism-administration' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
