@@ -36,7 +36,7 @@ public final class Compat {
                 .getModInfo()
                 .getVersion()
                 .toString();
-        if (!version.equals("1.20.4"))
+        if (!version.equals("1.20.4") && !version.equals("1.20.5"))
           throw new ReflectiveOperationException("Unverified Mercenaries version: " + version);
         villageClass = Class.forName("dev.villagerscontract.VillageBells");
         Class<?> v = Class.forName("dev.villagerscontract.VillageBells$Village");

@@ -4,7 +4,7 @@
 
 ## Mercenaries
 
-The supplied `fantasyfeudalism-mercenaries-1.20.4.jar` declares Minecraft **1.21.1**, NeoForge **[21.1.262,21.2)** and mod ID `villagerscontract`. The filename is its mod version, not its target Minecraft version.
+FFA supports the inspected `fantasyfeudalism-mercenaries-1.20.4.jar` and `fantasyfeudalism-mercenaries-1.20.5.jar`, targeting Minecraft **1.21.1**, NeoForge **[21.1.262,21.2)** and mod ID `villagerscontract`. The filename is the mod version, not the Minecraft version. The settlement classes used by FFA are identical in these supplied versions.
 
 The adapter reads Mercenaries' own bell groups, claimed settlement owner and member set. It does not create teams, change town claims, rewrite membership, replace bells, modify town inventories, or register town-management commands. Settlement boundary checks use the mod's 64-block horizontal bell radius, including groups with multiple bells; unclaimed natural villages are not treated as player settlements.
 
@@ -20,6 +20,19 @@ The adapter is optional and checks class/method availability during startup/relo
 - A permission query for specific town-management actions.
 
 Currently these details are package-private. The adapter uses reflection against the supplied version; a future public API would remove that dependency without changing town functionality.
+
+### Mercenaries 1.20.5 housing/restock toggle
+
+In the effective `ffm-caravans-server.toml` (`config/` or the world's `serverconfig/` override), use:
+
+```toml
+[settlement]
+requireHousingForRestocking = false
+```
+
+Restart after editing. This restores vanilla restocking requirements, including access to workstations, for ordinary villagers and recruited settlers. Traveling caravan merchants retain their own behavior. It does not remove towns, owners, members, bell management, or FFA's claimed-settlement overlap checks. FFA neither rewrites nor overrides this Mercenaries setting.
+
+The `Unverified Mercenaries version: 1.20.5` crash in FFA 0.8.2 is a separate adapter-version rejection. Upgrade FFA to **0.8.3 or later**. Disabling housing checks or the FFA Mercenaries module does not fix an unavailable settlement adapter; explicitly overriding every region is not required merely to upgrade to 1.20.5.
 
 ## Easy NPC 7.18.0 and 7.20.0
 

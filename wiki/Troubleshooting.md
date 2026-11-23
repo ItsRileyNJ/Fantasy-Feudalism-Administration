@@ -104,3 +104,10 @@ Check the server clock as an operator:
 A value around `1000` (for example, `1063` shortly after `/time set day`) is daytime. FFA's bundled spawn dimension uses the normal Overworld dimension type and has no fixed-time override. All players in that dimension should receive the same server time.
 
 For an affected shader user, temporarily disable the shader pack, then run `/time set day` again while shaders remain disabled. In the reported Mellow Shaders case, disabling shaders alone retained the night view; setting day again refreshed it. Re-enable the pack afterward. If night returns, check the shader pack/loader versions and any time or sky overrides. This workaround does not require replacing world chunks, recreating spawn, or changing its dimension definition.
+
+
+## Startup fails after updating Mercenaries to 1.20.5
+
+`Unverified Mercenaries version: 1.20.5`, followed by `FFA startup refused: ... settlement adapter is unavailable`, means FFA's old adapter version check rejected the installed Mercenaries version. Use **FFA 0.8.3 or later**, which verifies and supports the supplied 1.20.5 settlement API while retaining 1.20.4 support.
+
+Mercenaries' `settlement.requireHousingForRestocking` option controls villager restocking and does not repair an unavailable FFA adapter. Existing towns and region definitions do not need conversion. See [compatibility](Mod-Compatibility.md) for the setting and its distinction from claimed-town overlap protection.

@@ -1,10 +1,10 @@
-# Development build 0.8.2
+# Development build 0.8.3
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
 Download the JAR using GitHub's Download raw file button, and place it in the server mods directory. See the root README for setup and docs/VALIDATION.md for the staging acceptance checklist. This is a development build.
 
-210 policy/persistence/rank/chat/parser checks and the headless regression suite passed with Mercenaries 1.20.4 and matching Easy NPC core/Config UI 7.18.0 or 7.20.0. The supplied 7.20.0 bundle was also included in its integration run. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
+210 policy/persistence/rank/chat/parser checks and the headless regression suite passed with the supplied Mercenaries 1.20.4 and 1.20.5 alongside Easy NPC core/UI/bundle 7.20.0. Easy NPC 7.18.0 compatibility was also verified in 0.8.2. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
 
 SHA-256 is listed in SHA256SUMS. Third-party mods are not bundled.
 
@@ -25,3 +25,5 @@ Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged play
 0.8.1: walk naturally into FFA portals from either side or at an angle. Full-body contact is checked every tick and portal chunk loading tolerates movement. Landing inside another portal does not bounce you back when the cooldown expires. Command warmups, movement cancellation, access restrictions and destination safety remain enforced.
 
 0.8.2: supports Easy NPC 7.20.0 core, Config UI and the supplied bundle, while retaining 7.18.0 support. Install the separate core and Config UI JARs: the supplied small bundle contains no embedded copies of either. Existing Denar prices and stock records require no FFA migration.
+
+0.8.3: accepts the verified Mercenaries 1.20.5 settlement API and retains 1.20.4 support. Fixes the “Unverified Mercenaries version: 1.20.5” startup failure. Its housing-restock toggle stays under Mercenaries’ control; claimed-town region checks remain active. No region override or town migration is needed merely for the version upgrade.

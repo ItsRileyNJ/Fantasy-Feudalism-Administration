@@ -4,7 +4,7 @@
 
 ## Fantasy Feudalism: Mercenaries
 
-The supplied `fantasyfeudalism-mercenaries-1.20.4.jar` declares **Minecraft 1.21.1 / NeoForge 21.1.262**; `1.20.4` is its mod version. FFA's current adapter is pinned to that version.
+The supplied Mercenaries **1.20.4 and 1.20.5** versions target **Minecraft 1.21.1 / NeoForge 21.1.262 or a supported later 21.1 patch**. FFA **0.8.3** supports both inspected settlement APIs. These are Mercenaries version numbers, not Minecraft versions.
 
 Mercenaries retains its town system, commands, bell groups, owners, members, enemies and item-based payments. FFA reads its settlement data for overlap and membership checks; it does not replace the system or automatically convert its payment items to Denar.
 
@@ -15,6 +15,12 @@ Supported NPC trading and charter/empty-hand bell-management interactions are en
 **Vanilla residents need attention:** an operation that spawns ordinary vanilla villagers can still encounter `mob_spawning = false`. For a deliberately overlapped town, test recruitment/breeding/settlement workflows. A child region with `mob_spawning = true` and `hostile_spawning = false` can allow ordinary residents while keeping hostile spawning blocked. This is a configurable regional exception, not a universal resident-detection adapter.
 
 No Mercenaries patch was needed for the tested adapter. A future public settlement/membership API would make updates less fragile. If an unsupported version is installed, validation can refuse startup or region editing until compatibility is restored or the administrator explicitly reviews the affected region overrides. Simply disabling the integration is not a promise that settlement-overlap validation is bypassed safely.
+
+### Optional housing checks for villager restocking
+
+Mercenaries 1.20.5 lets you set `requireHousingForRestocking = false` under `[settlement]` in its `ffm-caravans-server.toml`. Edit the effective file in `config/` or the world `serverconfig/` override, then restart. Villagers use vanilla restocking requirements, including workstation access. This setting controls housing validation for restocking; town ownership, bell groups, management and FFA's region-overlap checks remain active.
+
+If FFA 0.8.2 reports **“Unverified Mercenaries version: 1.20.5”**, update to FFA **0.8.3 or later**. That crash is a version check in the adapter and is independent of this Mercenaries config option. Existing FFA region definitions and Mercenaries towns need no conversion for this compatibility update. An actual claimed-town overlap still needs the normal explicit region override.
 
 ## Easy NPC 7.18.0 and 7.20.0: native Denar trading
 
