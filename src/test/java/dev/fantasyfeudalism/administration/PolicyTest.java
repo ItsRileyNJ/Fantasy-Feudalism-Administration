@@ -40,6 +40,7 @@ public final class PolicyTest {
 
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
+    audio(root);
     atomicWrites(root);
     actionDefaults(root);
     portalPack(root);
@@ -743,5 +744,125 @@ public final class PolicyTest {
           paths.noneMatch(p -> p.getFileName().toString().startsWith(".ffa-")),
           "Failed saves remove temporary files");
     }
+  }
+
+  private static void audio(Path root) throws Exception {
+    var fade = new AudioEnvelope();
+    long start = 1_000_000_000L;
+    fade.to(1, 40, start);
+    check(fade.value(start) == 0 && fade.value(start + 1_000_000_000L) == .5f, "Linear entry gain");
+    fade.to(0, 20, start + 1_000_000_000L);
+    check(
+        fade.value(start + 1_000_000_000L) == .5f && fade.value(start + 1_500_000_000L) == .25f,
+        "Reversed fade preserves its current gain");
+    check(fade.silent(start + 2_000_000_000L), "Exit reaches silence at the exact deadline");
+    fade.to(.6f, 0, start);
+    check(fade.value(start) == .6f, "Zero-duration audio fade");
+    rejects(() -> fade.to(Float.NaN, 20, start), "Nonfinite audio gain rejected");
+    rejects(() -> fade.to(1, 601, start), "Unbounded audio fade rejected");
+    byte[] ogg;
+    try (var source = PolicyTest.class.getResourceAsStream("/data/ffa/testing/ambience.ogg")) {
+      ogg = source.readAllBytes();
+    }
+    var info = OggInfo.read(ogg);
+    check(
+        info.channels() == 1 && info.sampleRate() == 22050 && info.samples() == 44100,
+        "Real Vorbis identification and final granule yield exact mono duration");
+    rejects(() -> OggInfo.read(Arrays.copyOf(ogg, ogg.length - 1)), "Truncated Ogg rejected");
+    byte[] corrupt = ogg.clone();
+    corrupt[corrupt.length - 3] ^= 4;
+    rejects(() -> OggInfo.read(corrupt), "Invalid Ogg page checksum rejected");
+    byte[] stereo = ogg.clone();
+    int segments = Byte.toUnsignedInt(stereo[26]);
+    int length = 27 + segments;
+    for (int j = 0; j < segments; j++) length += Byte.toUnsignedInt(stereo[27 + j]);
+    stereo[27 + segments + 11] = 2;
+    int crc = 0;
+    for (int j = 0; j < length; j++) {
+      int value = j >= 22 && j < 26 ? 0 : Byte.toUnsignedInt(stereo[j]);
+      crc ^= value << 24;
+      for (int bit = 0; bit < 8; bit++)
+        crc = (crc << 1) ^ ((crc & 0x80000000) != 0 ? 0x04c11db7 : 0);
+    }
+    java.nio.ByteBuffer.wrap(stereo).order(java.nio.ByteOrder.LITTLE_ENDIAN).putInt(22, crc);
+    check(OggInfo.read(stereo).channels() == 2, "Stereo identification is recognized");
+    rejects(
+        () -> SoundPack.build(Map.of("stereo", stereo)),
+        "Stereo is refused for native positional fades");
+    var pack = SoundPack.build(Map.of("village", ogg));
+    check(
+        Arrays.equals(pack.bytes(), SoundPack.build(Map.of("village", ogg)).bytes()),
+        "Identical audio produces a stable ZIP and content hash");
+    var entries = new TreeMap<String, byte[]>();
+    try (var zip =
+        new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(pack.bytes()))) {
+      java.util.zip.ZipEntry entry;
+      while ((entry = zip.getNextEntry()) != null) entries.put(entry.getName(), zip.readAllBytes());
+    }
+    check(
+        entries.size() == 3
+            && entries.keySet().stream()
+                .allMatch(
+                    name ->
+                        name.endsWith(".ogg")
+                            || name.endsWith(".json")
+                            || name.equals("pack.mcmeta")),
+        "Resource pack distributes only audio and metadata, never client code");
+    String json =
+        new String(entries.get("assets/ffa/sounds.json"), java.nio.charset.StandardCharsets.UTF_8);
+    check(
+        json.contains("\"stream\":true") && json.contains("\"attenuation_distance\":16"),
+        "Streaming sound declares native fade attenuation range");
+    var region = new SoundRegion();
+    region.id = "Village";
+    region.dimension = "minecraft:overworld";
+    region.track = "village";
+    region.minX = region.minZ = 0;
+    region.maxX = region.maxZ = 100;
+    var child = new SoundRegion();
+    child.id = "Inn";
+    child.dimension = region.dimension;
+    child.track = region.track;
+    child.minX = child.minZ = 20;
+    child.maxX = child.maxZ = 30;
+    check(
+        SoundRegions.select(List.of(region, child), region.dimension, 25, 25) == child,
+        "Smaller sound overlays win equal priorities");
+    region.priority = 2;
+    check(
+        SoundRegions.select(List.of(child, region), region.dimension, 25, 25) == region,
+        "Explicit sound priority wins over size");
+    check(
+        SoundRegions.select(List.of(region), "ffa:spawn", 25, 25) == null
+            && !region.contains(region.dimension, 101, 25),
+        "Sound selection respects dimension and inclusive block edges");
+    var store = new Storage(root.resolve("audio-world"));
+    store.update(state -> state.soundRegions.put(region.id, region));
+    check(
+        new Storage(root.resolve("audio-world"))
+            .state()
+            .soundRegions
+            .get("Village")
+            .track
+            .equals("village"),
+        "Sound regions survive state restart");
+    region.volume = Float.NaN;
+    rejects(region::validate, "Invalid persisted sound settings refused");
+    Path config = root.resolve("audio.toml");
+    var settings = Settings.load(config);
+    check(
+        settings.audioEnabled && settings.audioPackUrl.isEmpty(),
+        "Server-only audio defaults use built-in pack hosting");
+    String legacy =
+        Files.readString(config).replace("[soundRegions]\nenabled = true\npackUrl = \"\"\n", "");
+    Files.writeString(config, legacy);
+    check(
+        Settings.load(config).audioEnabled, "Existing configuration needs no migration for audio");
+    Files.writeString(
+        config,
+        Settings.TEMPLATE.replace(
+            "[soundRegions]\nenabled = true\npackUrl = \"\"",
+            "[soundRegions]\nenabled = true\npackUrl = \"file:///secret\""));
+    rejects(() -> Settings.load(config), "Audio hosting URL cannot use file scheme");
   }
 }

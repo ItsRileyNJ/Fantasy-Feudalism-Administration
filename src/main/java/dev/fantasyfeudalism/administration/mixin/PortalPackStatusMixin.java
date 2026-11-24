@@ -13,5 +13,7 @@ public abstract class PortalPackStatusMixin {
   @Inject(method = "handleResourcePackResponse", at = @At("RETURN"))
   private void ffa$status(ServerboundResourcePackPacket packet, CallbackInfo callback) {
     PortalPack.response((ServerCommonPacketListenerImpl) (Object) this, packet);
+    dev.fantasyfeudalism.administration.SoundPack.response(
+        (ServerCommonPacketListenerImpl) (Object) this, packet);
   }
 }

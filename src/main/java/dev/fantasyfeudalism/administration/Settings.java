@@ -53,6 +53,9 @@ rtp = false
 pay = false
 leaderboard = false
 privacy = false
+[soundRegions]
+enabled = true
+packUrl = ""
 [spawn]
 # Seconds of invincibility after login and death respawn; 0 disables it.
 invulnerabilitySeconds = 8
@@ -155,6 +158,8 @@ shears = false
       maximumDurationSeconds;
   public boolean adminPortalCreationOnly;
   public boolean portalPack;
+  public boolean audioEnabled;
+  public String audioPackUrl;
   public String portalPackUrl;
   public int operatorLevel,
       spawnInvulnerabilitySeconds,
@@ -200,6 +205,19 @@ shears = false
     try (var c = CommentedFileConfig.of(file)) {
       c.load();
       Settings s = new Settings();
+      s.audioEnabled = !c.contains("soundRegions.enabled") || bool(c, "soundRegions.enabled");
+      s.audioPackUrl =
+          c.contains("soundRegions.packUrl") ? scalar(c, "soundRegions.packUrl", String.class) : "";
+      if (!s.audioPackUrl.isEmpty()) {
+        var url = java.net.URI.create(s.audioPackUrl);
+        if (s.audioPackUrl.length() > 2048
+            || !("http".equalsIgnoreCase(url.getScheme())
+                || "https".equalsIgnoreCase(url.getScheme()))
+            || url.getHost() == null
+            || url.getUserInfo() != null)
+          throw new IllegalArgumentException(
+              "soundRegions.packUrl must be an HTTP(S) URL without credentials.");
+      }
       s.portalPack = c.contains("portalPack.enabled") ? bool(c, "portalPack.enabled") : true;
       s.portalPackUrl =
           c.contains("portalPack.url") ? scalar(c, "portalPack.url", String.class) : "";

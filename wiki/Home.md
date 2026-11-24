@@ -1,6 +1,6 @@
 # Fantasy Feudalism: Administration Wiki
 
-The operator and player manual for **development version 0.8.3**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
+The operator and player manual for **development version 0.9.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
 
 FFA manages protected spawn regions, configurable interactions, safe travel, dyeable portals, and virtual **Denar** shops. Install FFA on the server; players do not need the FFA JAR. Other mods can have their own client requirements.
 
@@ -16,6 +16,7 @@ FFA manages protected spawn regions, configurable interactions, safe travel, dye
 | Edit every server setting or change region boundaries in a file | [Configuration](Configuration.md) |
 | Set up warps and colored physical portals | [Warps and portals](Warps-and-Portals.md) |
 | Use homes, teleport requests, privacy, back, or random teleport | [Player guide](Player-Guide.md) |
+| Add village ambience or music with entry/exit fades | [Sound regions](Sound-Regions.md) |
 | Create Denar shops, fund players, or enable transfers | [Economy and shops](Economy-and-Shops.md) |
 | Create and assign ranks, inherit permissions, or control other mods' commands | [Built-in ranks](Ranks.md) |
 | Vanish or edit an online player's inventory | [Staff tools](Staff-Tools.md) |
@@ -39,7 +40,7 @@ FFA manages protected spawn regions, configurable interactions, safe travel, dye
 
 This manual describes implemented behavior, not every proposed feature in the original design. The [validation record](../docs/VALIDATION.md) distinguishes tested behavior from staging work still required, including real-client workflows, the exact FTB Ranks binary, dedicated void-dimension travel, automation compatibility, and crash/load testing.
 
-FFA does not bundle an anti-X-ray engine, a schematic importer, or a Denar merchant GUI. Other mods' direct world writes may require additional adapters. Backups made by FFA do not include world blocks or vanilla player inventories.
+FFA does not bundle an anti-X-ray engine or a schematic importer. Other mods' direct world writes may require additional adapters. Backups made by FFA do not include world blocks or vanilla player inventories.
 
 The pages are published in the repository so they are available alongside the source and can be reviewed and updated with it.
 
@@ -51,3 +52,5 @@ The pages are published in the repository so they are available alongside the so
 
 - [Rules room and initial spawn](Rules-Room.md): one-time acceptance for existing and new players, command lock, and filtered chat.
 - [Easy NPC Denar trading](Easy-NPC-Trading.md): set explicit wallet prices for selected native merchant offers.
+
+- [Region ambience](Sound-Regions.md): server-stored sounds, audio-only downloads, entry/exit fades and automatic repeats.

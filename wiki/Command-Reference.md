@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.8.3**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.9.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -273,3 +273,20 @@ Look at an Easy NPC within eight blocks:
 ```
 
 Administrator-only. Offer numbers start at 1. Buy pays Denar for the original result stack; sell consumes the original input items and credits Denar. See [Easy NPC trading](Easy-NPC-Trading.md) for previews, stock and recovery.
+
+## Region ambience (administrators)
+
+```text
+/ffa sound reload
+/ffa sound list
+/ffa soundregion create <name> <track>
+/ffa soundregion list
+/ffa soundregion info <region>
+/ffa soundregion track <region> <track>
+/ffa soundregion volume <region> <0..1>
+/ffa soundregion fade <region> <0..30_seconds>
+/ffa soundregion priority <region> <-1000000..1000000>
+/ffa soundregion delete <region>
+```
+
+Creation uses `/ffa pos1` and `/ffa pos2` in the same dimension. Upload mono Ogg Vorbis files to `config/ffa/sounds/`, then reload sounds. The audio pack works without an FFA client mod. See the [village setup example and download configuration](Sound-Regions.md).

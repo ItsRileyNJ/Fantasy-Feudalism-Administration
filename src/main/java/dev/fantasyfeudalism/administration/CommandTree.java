@@ -30,6 +30,7 @@ final class CommandTree {
   }
 
   static void addTo(LiteralArgumentBuilder<CommandSourceStack> root) {
+    SoundCommands.addTo(root);
     RulesCommands.addTo(root);
     NpcTradeCommands.addTo(root);
     root.then(node("help"));

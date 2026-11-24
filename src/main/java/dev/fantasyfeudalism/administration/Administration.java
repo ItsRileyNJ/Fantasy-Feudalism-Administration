@@ -46,6 +46,8 @@ public final class Administration {
   public Payments payments;
   public PortalPack portalPack;
   public PortalEffects portalEffects;
+  public SoundPack soundPack;
+  public SoundRegions soundRegions;
   public MinecraftServer server;
   public final Path settingsFile = FMLPaths.CONFIGDIR.get().resolve("ffa/server.toml");
 
@@ -91,6 +93,9 @@ public final class Administration {
       regions.reload(server, settings, compat);
       teleports = new Teleports(this);
       portalPack = new PortalPack(this);
+      soundRegions = new SoundRegions(this);
+      soundPack = new SoundPack(this);
+      NeoForge.EVENT_BUS.register(soundRegions);
       NeoForge.EVENT_BUS.register(portalPack);
       portalEffects = new PortalEffects(this);
       NeoForge.EVENT_BUS.register(portalEffects);
@@ -165,6 +170,8 @@ public final class Administration {
     if (teleports != null) NeoForge.EVENT_BUS.unregister(teleports);
     if (payments != null) NeoForge.EVENT_BUS.unregister(payments);
     if (portalEffects != null) NeoForge.EVENT_BUS.unregister(portalEffects);
+    if (soundRegions != null) NeoForge.EVENT_BUS.unregister(soundRegions);
+    if (soundPack != null) soundPack.close();
     if (portalPack != null) {
       NeoForge.EVENT_BUS.unregister(portalPack);
       portalPack.close();
@@ -198,8 +205,18 @@ public final class Administration {
         settings.portalPack != candidate.portalPack
             || settings.portals != candidate.portals
             || !settings.portalPackUrl.equals(candidate.portalPackUrl);
+    boolean audioChanged =
+        settings.audioEnabled != candidate.audioEnabled
+            || !settings.audioPackUrl.equals(candidate.audioPackUrl);
     settings = candidate;
     compat = next;
+    if (audioChanged) {
+      for (var player : server.getPlayerList().getPlayers()) {
+        soundRegions.stop(player);
+        soundPack.remove(player);
+        if (settings.audioEnabled) soundPack.offer(player);
+      }
+    }
     portalEffects.refreshAll();
     if (packChanged) {
       for (var player : server.getPlayerList().getPlayers()) {
