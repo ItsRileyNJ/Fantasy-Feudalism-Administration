@@ -40,6 +40,7 @@ public final class PolicyTest {
 
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
+    quests(root);
     audio(root);
     atomicWrites(root);
     actionDefaults(root);
@@ -864,5 +865,53 @@ public final class PolicyTest {
             "[soundRegions]\nenabled = true\npackUrl = \"\"",
             "[soundRegions]\nenabled = true\npackUrl = \"file:///secret\""));
     rejects(() -> Settings.load(config), "Audio hosting URL cannot use file scheme");
+  }
+
+  private static void quests(Path root) throws Exception {
+    check(
+        QuestDenar.parse(List.of("village", "ffa_denar_reward_1000"), true).amount() == 1000,
+        "Quest editor reward tag uses whole Denar");
+    check(!QuestDenar.parse(List.of("ffa_denar_pay_25"), false).reward(), "Quest task payment tag");
+    for (String invalid :
+        List.of(
+            "ffa_denar_pay_0",
+            "ffa_denar_pay_-1",
+            "ffa_denar_pay_1.5",
+            "ffa_denar_pay_01",
+            "ffa_denar_pay_9000000000000001",
+            "ffa_denar_reward_25"))
+      rejects(
+          () -> QuestDenar.parse(List.of(invalid), false),
+          "Invalid payment tag refused: " + invalid);
+    rejects(
+        () -> QuestDenar.parse(List.of("ffa_denar_pay_1", "ffa_denar_pay_2"), false),
+        "Ambiguous quest amounts refused");
+    rejects(
+        () -> QuestDenar.parse(List.of("ffa_denar_unknown_1"), false),
+        "Unknown reserved quest tag refused");
+    check(
+        !QuestDenar.tagged(List.of("other_mod_task")),
+        "Unrelated custom quest tags stay independent");
+    var receipt = new QuestReceipt();
+    receipt.player = UUID.randomUUID().toString();
+    receipt.amount = 1000;
+    receipt.cycle = 2;
+    receipt.reward = true;
+    var directory = root.resolve("quest-wallet");
+    var store = new Storage(directory);
+    store.update(state -> state.questReceipts.put("test", receipt));
+    var loaded = new Storage(directory).state().questReceipts.get("test");
+    check(
+        loaded.amount == 1000 && loaded.cycle == 2 && loaded.reward,
+        "Quest retry receipts persist beside wallet state");
+    Path file = directory.resolve("state.json");
+    Files.writeString(file, Files.readString(file).replace("\"amount\": 1000", "\"amount\": -1"));
+    rejects(() -> new Storage(directory), "Corrupt quest payment receipts fail closed");
+    var legacy = root.resolve("legacy-quest-state");
+    Files.createDirectories(legacy);
+    Files.writeString(legacy.resolve("state.json"), "{\"version\":1}");
+    check(
+        new Storage(legacy).state().questReceipts.isEmpty(),
+        "Existing worlds need no quest-receipt conversion");
   }
 }

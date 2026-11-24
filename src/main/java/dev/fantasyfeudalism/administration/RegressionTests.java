@@ -231,6 +231,7 @@ public final class RegressionTests {
       RulesRegression.verify(h, app);
       NpcTradeRegression.verify(h, app);
       SoundRegression.verify(h, app);
+      QuestRegression.verify(h, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");

@@ -54,3 +54,5 @@ The pages are published in the repository so they are available alongside the so
 - [Easy NPC Denar trading](Easy-NPC-Trading.md): set explicit wallet prices for selected native merchant offers.
 
 - [Region ambience](Sound-Regions.md): server-stored sounds, audio-only downloads, entry/exit fades and automatic repeats.
+
+- [FTB Quests and Denar (feature preview)](FTB-Quests.md): configure wallet rewards and payment tasks in FTB’s built-in quest editor. Runtime verification is pending the required dependency JARs.

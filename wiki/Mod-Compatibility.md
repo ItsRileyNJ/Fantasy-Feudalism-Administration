@@ -72,3 +72,7 @@ Protection covers supported NeoForge events and included vanilla hooks. A machin
 ## Staff visibility and inventory tools
 
 [FFA vanish](Staff-Tools.md) filters supported vanilla/FFA player-facing presence paths, including status/query responses. Other mods' web maps, custom online lists and direct APIs require verified adapters; server operators/logs retain real presence. Staff inventory editing closes before FFA item trades and does not replace another mod's inventory rules. [Public Stats](Whispers-and-Stats.md) reads Mercenaries owner/member settlement names and active local/FTB ranks without changing their data.
+
+## FTB Quests Denar integration (feature preview)
+
+See [FTB Quests and Denar](FTB-Quests.md) for the in-progress 2101.1.39 adapter, built-in Custom Task/Reward tags, team payout rules, dependencies and validation status. This is separate from FTB Ranks and is not in the published 0.9.0 release.

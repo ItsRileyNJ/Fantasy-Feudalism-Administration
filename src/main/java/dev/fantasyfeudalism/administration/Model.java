@@ -240,6 +240,7 @@ public final class Model {
   }
 
   public static final class State {
+    public Map<String, QuestReceipt> questReceipts = new TreeMap<>();
     public Map<String, SoundRegion> soundRegions = new TreeMap<>();
     public int version = 1;
     public Point spawn;
@@ -254,6 +255,18 @@ public final class Model {
     public Map<String, PendingTrade> trades = new TreeMap<>();
     public Map<String, JailCell> jailCells = new TreeMap<>();
     public Map<String, ShopSign> shopSigns = new TreeMap<>();
+  }
+
+  public static final class QuestReceipt {
+    public String player;
+    public long cycle, amount;
+    public boolean reward;
+
+    public void validate() {
+      java.util.UUID.fromString(player);
+      if (cycle < 0 || amount <= 0 || amount > 9_000_000_000_000_000L)
+        throw new IllegalArgumentException("Invalid quest transaction receipt.");
+    }
   }
 
   public static final class SoundRegion {
