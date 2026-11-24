@@ -9,7 +9,7 @@
 | `config/ffa/server.toml` | General server rules, modules, limits, integration and logging settings |
 | `<world>/ffa/regions.toml` | The one authoritative, human-editable region definition file |
 | `<world>/ffa/ranks.json` | Built-in ranks, typed permission nodes, default/inherited membership and UUID assignments; use `/ffa ranks reload` after edits |
-| `<world>/ffa/state.json` | Saved FFA points, objects, accounts, personal chat styles, vanish state, whisper approvals/monitor preferences and transaction state, managed through commands |
+| `<world>/ffa/state.json` | Saved FFA points, objects, [player displays](Mannequins-and-Holograms.md), accounts, personal chat styles, vanish state, whisper approvals/monitor preferences and transaction state, managed through commands |
 | `config/ffa/sounds/` | Original mono Ogg Vorbis recordings for [region ambience](Sound-Regions.md) |
 | `<world>/ffa/sound-pack/ffa-sounds.zip` | Generated audio-only resource pack; automatically served or copied to your HTTP(S) host |
 | `<world>/ffa/backups/` | Administrator-created snapshots |

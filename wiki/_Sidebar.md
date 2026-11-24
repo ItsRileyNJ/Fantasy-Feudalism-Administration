@@ -17,6 +17,7 @@
 - [Built-in Ranks](Ranks.md)
 - [Chat and Nicknames](Chat-and-Nicknames.md)
 - [Staff Tools](Staff-Tools.md)
+- [Mannequins and Holograms](Mannequins-and-Holograms.md)
 - [Whispers and Stats](Whispers-and-Stats.md)
 - [Permissions and Access](Permissions-and-Access.md)
 - [Mod Compatibility](Mod-Compatibility.md)

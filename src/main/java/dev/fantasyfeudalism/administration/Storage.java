@@ -31,6 +31,7 @@ public final class Storage {
         || state.rulesRoom == null
         || state.questReceipts == null
         || state.soundRegions == null
+        || state.mannequins == null
         || state.npcShops == null
         || state.players == null
         || state.warps == null
@@ -48,6 +49,15 @@ public final class Storage {
     for (var entry : state.questReceipts.entrySet()) {
       if (entry.getValue() == null || entry.getKey().length() > 160)
         throw new IOException("Invalid quest receipt in state.json.");
+      entry.getValue().validate();
+    }
+    if (state.mannequins.size() > 128) throw new IOException("Too many mannequins in state.json.");
+    var mannequinNames = new java.util.HashSet<String>();
+    for (var entry : state.mannequins.entrySet()) {
+      if (entry.getValue() == null
+          || !entry.getKey().equals(entry.getValue().id)
+          || !mannequinNames.add(entry.getKey().toLowerCase(java.util.Locale.ROOT)))
+        throw new IOException("Invalid or duplicate mannequin in state.json.");
       entry.getValue().validate();
     }
     for (var entry : state.soundRegions.entrySet()) {

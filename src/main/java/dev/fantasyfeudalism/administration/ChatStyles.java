@@ -177,7 +177,7 @@ public final class ChatStyles {
     return result;
   }
 
-  private static Style style(Map<String, String> values, String part) {
+  static Style style(Map<String, String> values, String part) {
     return Style.EMPTY
         .withColor(ChatFormatting.getByName(values.getOrDefault(part + "_color", "white")))
         .withBold(Boolean.parseBoolean(values.getOrDefault(part + "_bold", "false")))

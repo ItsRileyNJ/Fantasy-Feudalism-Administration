@@ -2,7 +2,7 @@
 
 [Wiki home](Home.md) · [First setup](Getting-Started.md)
 
-This reference covers **0.10.2**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
+This reference covers **0.11.0**. Commands are lowercase, under `/ffa`, and accept Tab completion. `<value>` means replace the placeholder; `[value]` means optional. Do not type the brackets. Most player arguments use online player names. Rank/chat management also accepts full lowercase offline UUIDs. Arbitrary selectors are not supported.
 
 Examples containing a message or a team center must quote strings with spaces. Administrative changes must validate and persist before they report success; responses are private to the initiating source.
 
@@ -290,3 +290,22 @@ Administrator-only. Offer numbers start at 1. Buy pays Denar for the original re
 ```
 
 Creation uses `/ffa pos1` and `/ffa pos2` in the same dimension. Upload mono Ogg Vorbis files to `config/ffa/sounds/`, then reload sounds. The audio pack works without an FFA client mod. See the [village setup example and download configuration](Sound-Regions.md).
+
+## Player mannequins / holograms
+
+```text
+/ffa mannequin [list]
+/ffa mannequin create <name> [player]
+/ffa mannequin delete <display>
+/ffa mannequin move <display>
+/ffa mannequin face <display>
+/ffa mannequin skin <display> <player>
+/ffa mannequin equipment <display> <player|clear>
+/ffa mannequin label <display> <true|false>
+/ffa mannequin text <display> <property> <value>
+/ffa mannequin text <display> reset
+/ffa mannequin info <display>
+/ffa hologram <same actions and arguments>
+```
+
+Full administrators only; both roots are hidden from ordinary players. Create/move/face use the executing player's location or look direction. Equipment copying needs an online source player and never moves real items. Text values containing spaces need quotes. See [all text properties, skin lookup behavior, and a founder example](Mannequins-and-Holograms.md).

@@ -92,3 +92,7 @@ No Items update or FFA client installation is needed for this adapter. It is opt
 FFA **0.10.2** protects equipment on **Supplementaries 1.21.1-4.1.4** hat stands using the same `entity_interact` and `containers` checks as vanilla armor stands. Both flags must allow access at the player and stand. Attacks/projectiles use `hanging_damage`. See [setup and a child wardrobe example](Flags-and-Interactions.md#protect-armor-stands-and-hat-stands).
 
 The runtime suite uses the supplied **Moonlight 1.21.1-3.8.5** with that Supplementaries build (which requires Moonlight 3.8.3 or later). FFA stays server-only; these other mods retain their own installation requirements. No third-party JAR is bundled. The optional private equipment hook is gated to the inspected Supplementaries version, and servers without Supplementaries load normally.
+
+## Player display compatibility
+
+FFA 0.11.0 [mannequins/holograms](Mannequins-and-Holograms.md) use native player/text/equipment packets. They need no NPC mod, custom client entity or FFA client JAR. These are visual displays with separate UUIDs, not connected players or settlement/quest members. Equipment from installed mods uses normal item components; clients still need any dependencies required by those items themselves.
