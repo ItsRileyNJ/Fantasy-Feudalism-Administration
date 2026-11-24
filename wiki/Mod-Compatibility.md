@@ -79,4 +79,4 @@ FFA **0.10.0 or later** supports the uploaded FTB Quests **2101.1.39**, tested w
 
 Use the built-in Custom Reward and Custom Task editor with `ffa_denar_reward_AMOUNT` or `ffa_denar_pay_AMOUNT` tags. Native individual/team rewards and repeat cycles apply; a shared payment task charges only its submitter. Denar stays in FFA's individual wallets. See the [complete quest-editor examples and team budgeting](FTB-Quests.md).
 
-FFA does not register a new client task type or replace FTB Library's global currency provider. FFA stays server-only; FTB Quests and its dependencies keep their own client installation requirements. Easy NPC's existing Denar trade setup is unchanged.
+FFA does not register a new client task type or replace FTB Library's global currency provider. FFA stays server-only. Install FTB Quests, FTB Teams, FTB Library and Architectury on the server and players’ clients. Easy NPC's existing Denar trade setup is unchanged.

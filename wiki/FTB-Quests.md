@@ -4,7 +4,7 @@
 
 FFA **0.10.0 or later** connects FTB Quests to the server’s Denar wallets. Install FFA only on the server.
 
-Use FTB Quests' existing **Custom Reward** and **Custom Task** entries. An administrator puts the Denar amount in their built-in **Tags** field. There is no coin item, additional FFA client mod, script, permission-elevated command reward, or shared Denar account. FTB Quests and its own dependencies still need to be installed wherever those mods require them.
+Use FTB Quests' existing **Custom Reward** and **Custom Task** entries. An administrator puts the Denar amount in their built-in **Tags** field. There is no coin item, additional FFA client mod, script, permission-elevated command reward, or shared Denar account. Install **FTB Quests, FTB Teams, FTB Library, and Architectury on both the server and every player’s client**. Install the **FFA JAR only on the server**.
 
 ## Versions and prerequisites
 
