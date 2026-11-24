@@ -43,6 +43,7 @@ public final class Administration {
   public RegionActions regionActions;
   public Economy economy;
   public NpcTrades npcTrades;
+  public FtbQuests quests;
   public Payments payments;
   public PortalPack portalPack;
   public PortalEffects portalEffects;
@@ -125,6 +126,7 @@ public final class Administration {
       NeoForge.EVENT_BUS.register(vanish);
       chatStyles = new ChatStyles(this);
       NeoForge.EVENT_BUS.register(chatStyles);
+      quests = new FtbQuests(this);
       commandPermissions = new CommandPermissions(this);
       Portals.reindex(this);
       NeoForge.EVENT_BUS.register(teleports);

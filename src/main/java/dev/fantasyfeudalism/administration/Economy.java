@@ -160,6 +160,62 @@ public final class Economy {
         "SUCCESS");
   }
 
+  /** Wallet and retry receipt commit in the same atomic FFA state replacement. */
+  boolean quest(ServerPlayer player, String scope, long cycle, QuestDenar operation)
+      throws Exception {
+    enabled();
+    if (cycle < 0 || scope.length() > 160 || operation.amount() <= 0)
+      throw new IllegalArgumentException("Invalid quest transaction.");
+    var previous = app.storage.state().questReceipts.get(scope);
+    if (previous != null) {
+      if (previous.cycle > cycle)
+        throw new IllegalArgumentException(
+            "Quest progress is older than its Denar history. Contact an admin.");
+      if (previous.cycle == cycle) {
+        if (previous.amount != operation.amount() || previous.reward != operation.reward())
+          throw new IllegalArgumentException(
+              "This quest's Denar amount changed after payment. Contact an admin.");
+        return false;
+      }
+    }
+    available(player.getUUID());
+    long amount = operation.amount();
+    if (amount > app.settings.maxBalance)
+      throw new IllegalArgumentException("Quest amount exceeds the configured wallet limit.");
+    app.storage.update(
+        state -> {
+          var account = state.players.get(player.getUUID().toString());
+          if (account == null)
+            throw new IllegalArgumentException("Wallet is not ready. Rejoin the server.");
+          if (operation.reward()
+              ? account.balance > app.settings.maxBalance - amount
+              : account.balance < amount)
+            throw new IllegalArgumentException(
+                operation.reward()
+                    ? "Your wallet cannot hold this reward yet."
+                    : "You need " + amount + " Denar.");
+          account.balance += operation.reward() ? amount : -amount;
+          var receipt = new QuestReceipt();
+          receipt.player = player.getUUID().toString();
+          receipt.cycle = cycle;
+          receipt.amount = amount;
+          receipt.reward = operation.reward();
+          state.questReceipts.put(scope, receipt);
+        });
+    app.storage.audit(
+        app.settings,
+        player.getUUID().toString(),
+        "quest "
+            + scope
+            + " cycle="
+            + cycle
+            + (operation.reward() ? " credit=" : " debit=")
+            + amount,
+        Teleports.point(player).describe(),
+        "SUCCESS");
+    return true;
+  }
+
   public void trade(ServerPlayer p, String shopId, int quantity, boolean buy) throws Exception {
     enabled();
     if (app.moderation != null && app.moderation.confined(p))

@@ -42,8 +42,8 @@ public final class RegressionTests {
             cookie.clientInformation());
     var c = new Connection(PacketFlow.SERVERBOUND);
     new EmbeddedChannel(c);
-    h.getLevel().getServer().getPlayerList().placeNewPlayer(c, p, cookie);
     net.neoforged.neoforge.network.registration.NetworkRegistry.configureMockConnection(c);
+    h.getLevel().getServer().getPlayerList().placeNewPlayer(c, p, cookie);
     if (!keepSpawnProtection) Administration.INSTANCE.spawnProtection.clear(p);
     return p;
   }
@@ -231,6 +231,8 @@ public final class RegressionTests {
       RulesRegression.verify(h, app);
       NpcTradeRegression.verify(h, app);
       SoundRegression.verify(h, app);
+      QuestRegression.verify(h, app);
+      NativeQuestRegression.verify(h, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");

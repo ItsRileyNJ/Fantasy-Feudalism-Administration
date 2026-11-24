@@ -72,3 +72,11 @@ Protection covers supported NeoForge events and included vanilla hooks. A machin
 ## Staff visibility and inventory tools
 
 [FFA vanish](Staff-Tools.md) filters supported vanilla/FFA player-facing presence paths, including status/query responses. Other mods' web maps, custom online lists and direct APIs require verified adapters; server operators/logs retain real presence. Staff inventory editing closes before FFA item trades and does not replace another mod's inventory rules. [Public Stats](Whispers-and-Stats.md) reads Mercenaries owner/member settlement names and active local/FTB ranks without changing their data.
+
+## FTB Quests Denar integration
+
+FFA **0.10.0 or later** supports the uploaded FTB Quests **2101.1.39**, tested with FTB Library **2101.1.40**, FTB Teams **2101.1.12** and Architectury **13.0.12**. Teams is a required Quests dependency even when players only use solo quests; creating a party is optional.
+
+Use the built-in Custom Reward and Custom Task editor with `ffa_denar_reward_AMOUNT` or `ffa_denar_pay_AMOUNT` tags. Native individual/team rewards and repeat cycles apply; a shared payment task charges only its submitter. Denar stays in FFA's individual wallets. See the [complete quest-editor examples and team budgeting](FTB-Quests.md).
+
+FFA does not register a new client task type or replace FTB Library's global currency provider. FFA stays server-only. Install FTB Quests, FTB Teams, FTB Library and Architectury on the server and players’ clients. Easy NPC's existing Denar trade setup is unchanged.

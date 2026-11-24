@@ -48,7 +48,9 @@
     "RulesWhisperMixin",
     "MerchantMenuAccess",
     "MerchantOfferAccess",
-    "NpcMenuMixin"
+    "NpcMenuMixin",
+    "FtbDenarRewardMixin",
+    "FtbDenarTaskMixin"
   ],
   "injectors": {
     "defaultRequire": 1
