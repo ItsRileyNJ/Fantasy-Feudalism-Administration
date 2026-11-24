@@ -86,3 +86,9 @@ FFA does not register a new client task type or replace FTB Library's global cur
 FFA **0.10.1** supports the uploaded **Items 0.1.7** lantern fuel/weather handlers. Protected areas pause placed-lantern fuel and weather extinguishing by default. The `lantern_burnout` region flag supports child overrides; [configuration and examples](Flags-and-Interactions.md#keep-spawn-lanterns-lit) explain manual switches, previously burnt-out lanterns, and the placed-light scope.
 
 No Items update or FFA client installation is needed for this adapter. It is optional: servers without Items retain vanilla lantern behavior. The private Items fuel layout is patched only for verified 0.1.7; this does not claim support for other Items versions.
+
+## Supplementaries display stands
+
+FFA **0.10.2** protects equipment on **Supplementaries 1.21.1-4.1.4** hat stands using the same `entity_interact` and `containers` checks as vanilla armor stands. Both flags must allow access at the player and stand. Attacks/projectiles use `hanging_damage`. See [setup and a child wardrobe example](Flags-and-Interactions.md#protect-armor-stands-and-hat-stands).
+
+The runtime suite uses the supplied **Moonlight 1.21.1-3.8.5** with that Supplementaries build (which requires Moonlight 3.8.3 or later). FFA stays server-only; these other mods retain their own installation requirements. No third-party JAR is bundled. The optional private equipment hook is gated to the inspected Supplementaries version, and servers without Supplementaries load normally.

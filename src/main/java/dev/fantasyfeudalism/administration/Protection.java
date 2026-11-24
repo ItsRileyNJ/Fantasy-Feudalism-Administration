@@ -362,7 +362,8 @@ public final class Protection {
       return;
     }
     if (e.getRayTraceResult() instanceof net.minecraft.world.phys.EntityHitResult hit
-        && (hit.getEntity() instanceof HangingEntity || hit.getEntity() instanceof ArmorStand)
+        && (hit.getEntity() instanceof HangingEntity
+            || StandProtection.displayStand(hit.getEntity()))
         && !allowed(
             hit.getEntity().level(), hit.getEntity().blockPosition(), Flag.HANGING_DAMAGE)) {
       if (e.getProjectile().getOwner() instanceof ServerPlayer p && app.compat.admin(p)) return;
@@ -424,7 +425,20 @@ public final class Protection {
     return Flag.ENTITY_INTERACT;
   }
 
+  /** Enforced at the actual equipment swap as well as normal interaction events. */
+  public boolean standEquipmentDenied(ServerPlayer player, LivingEntity stand) {
+    if (player.level() != stand.level()) return true;
+    for (Flag flag : List.of(Flag.ENTITY_INTERACT, Flag.CONTAINERS))
+      if (denied(player, player.serverLevel(), player.blockPosition(), flag)
+          || denied(player, player.serverLevel(), stand.blockPosition(), flag)) return true;
+    return false;
+  }
+
   private boolean entityDenied(ServerPlayer player, Entity target, ItemStack held) {
+    if (StandProtection.displayStand(target)
+        && target instanceof LivingEntity living
+        && !app.compat.npc(target)
+        && standEquipmentDenied(player, living)) return true;
     Flag flag = entityFlag(target, held);
     return denied(player, player.serverLevel(), player.blockPosition(), flag)
         || denied(player, player.serverLevel(), target.blockPosition(), flag)
@@ -475,7 +489,8 @@ public final class Protection {
       Flag f =
           e.getTarget() instanceof Player
               ? Flag.PVP
-              : e.getTarget() instanceof HangingEntity || e.getTarget() instanceof ArmorStand
+              : e.getTarget() instanceof HangingEntity
+                      || StandProtection.displayStand(e.getTarget())
                   ? Flag.HANGING_DAMAGE
                   : Flag.ANIMAL_DAMAGE;
       if (denied(p, p.serverLevel(), e.getTarget().blockPosition(), f)) e.setCanceled(true);

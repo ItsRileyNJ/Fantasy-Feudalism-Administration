@@ -1,10 +1,10 @@
-# Development build 0.8.3
+# Development build 0.10.2
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
 Download the JAR using GitHub's Download raw file button, and place it in the server mods directory. See the root README for setup and docs/VALIDATION.md for the staging acceptance checklist. This is a development build.
 
-210 policy/persistence/rank/chat/parser checks and the headless regression suite passed with the supplied Mercenaries 1.20.4 and 1.20.5 alongside Easy NPC core/UI/bundle 7.20.0. Easy NPC 7.18.0 compatibility was also verified in 0.8.2. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
+247 policy/persistence/rank/chat/parser checks and the headless regression suite passed with the supplied Mercenaries 1.20.4 and 1.20.5 alongside Easy NPC core/UI/bundle 7.20.0. Easy NPC 7.18.0 compatibility was also verified in 0.8.2. FTB Ranks 2101.1.5 was checked against its public source API; the exact binary was not supplied for runtime testing.
 
 SHA-256 is listed in SHA256SUMS. Third-party mods are not bundled.
 
@@ -27,3 +27,11 @@ Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged play
 0.8.2: supports Easy NPC 7.20.0 core, Config UI and the supplied bundle, while retaining 7.18.0 support. Install the separate core and Config UI JARs: the supplied small bundle contains no embedded copies of either. Existing Denar prices and stock records require no FFA migration.
 
 0.8.3: accepts the verified Mercenaries 1.20.5 settlement API and retains 1.20.4 support. Fixes the “Unverified Mercenaries version: 1.20.5” startup failure. Its housing-restock toggle stays under Mercenaries’ control; claimed-town region checks remain active. No region override or town migration is needed merely for the version upgrade.
+
+0.9.0: server-only sound-region ambience with resource-pack audio, fades and automatic repetition. See the Sound Regions wiki guide.
+
+0.10.0: native FTB Quests Denar Custom Tasks/Rewards, with individual or single-team claims and durable wallet receipts. See the FTB Quests wiki guide for the exact supported dependency versions.
+
+0.10.1: Items 0.1.7 placed lantern fuel/weather protection, controlled by `lantern_burnout` (false by default).
+
+0.10.2: locks armor-stand and Supplementaries hat-stand equipment behind both `entity_interact` and `containers` at the player and target. `hanging_damage` also covers hat-stand attacks/projectiles. Default spawn flags protect both stands; administrators remain exempt. Verified with Supplementaries 1.21.1-4.1.4 and Moonlight 1.21.1-3.8.5, separately and alongside the supplied Items/FTB/Easy NPC/Mercenaries mods. Replace the old FFA JAR with this version and restart; no new region flag or data migration is needed. See the Flags and Interactions wiki guide for a child wardrobe example.

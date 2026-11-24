@@ -52,7 +52,9 @@
     "FtbDenarRewardMixin",
     "FtbDenarTaskMixin",
     "ItemsLanternFuelMixin",
-    "ItemsLanternWeatherMixin"
+    "ItemsLanternWeatherMixin",
+    "ArmorStandEquipmentMixin",
+    "HatStandEquipmentMixin"
   ],
   "injectors": {
     "defaultRequire": 1

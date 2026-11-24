@@ -222,6 +222,7 @@ public final class RegressionTests {
       ProjectileRegression.verify(h, p, app);
       app.combat.clear(p);
       ActionRegression.verify(h, p, app);
+      StandRegression.verify(h, app);
       CommerceRegression.verify(h, p, app);
       SpawnRegression.verify(h, app);
       BorderRegression.verify(h, app);
