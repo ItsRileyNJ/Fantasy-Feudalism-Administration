@@ -3,6 +3,7 @@
 - [Home](Home.md)
 - [Getting Started](Getting-Started.md)
 - [Regions](Regions.md)
+- [Sound Regions](Sound-Regions.md)
 - [Rules Room](Rules-Room.md)
 - [World Borders](World-Borders.md)
 - [Flags and Interactions](Flags-and-Interactions.md)

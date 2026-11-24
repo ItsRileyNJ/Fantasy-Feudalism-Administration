@@ -29,6 +29,7 @@ public final class Storage {
         || state.version != 1
         || state.worldBorders == null
         || state.rulesRoom == null
+        || state.soundRegions == null
         || state.npcShops == null
         || state.players == null
         || state.warps == null
@@ -42,6 +43,11 @@ public final class Storage {
       if (entry.getKey() == null || entry.getValue() == null)
         throw new IOException("Invalid world border in state.json.");
       entry.getValue().validate(29999984);
+    }
+    for (var entry : state.soundRegions.entrySet()) {
+      if (entry.getValue() == null || !entry.getKey().equals(entry.getValue().id))
+        throw new IOException("Invalid sound region in state.json.");
+      entry.getValue().validate();
     }
   }
 

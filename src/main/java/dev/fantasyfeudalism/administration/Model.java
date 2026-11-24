@@ -240,6 +240,7 @@ public final class Model {
   }
 
   public static final class State {
+    public Map<String, SoundRegion> soundRegions = new TreeMap<>();
     public int version = 1;
     public Point spawn;
     public Point firstSpawn;
@@ -253,6 +254,41 @@ public final class Model {
     public Map<String, PendingTrade> trades = new TreeMap<>();
     public Map<String, JailCell> jailCells = new TreeMap<>();
     public Map<String, ShopSign> shopSigns = new TreeMap<>();
+  }
+
+  public static final class SoundRegion {
+    public String id, dimension, track;
+    public int minX, minZ, maxX, maxZ, priority;
+    public float volume = .6f;
+    public int fadeTicks = 60;
+
+    public boolean contains(String dimension, double x, double z) {
+      return this.dimension.equals(dimension)
+          && x >= minX
+          && x < maxX + 1.0
+          && z >= minZ
+          && z < maxZ + 1.0;
+    }
+
+    public void validate() {
+      Regions.checkName(id);
+      Regions.checkId(track);
+      if (dimension == null
+          || net.minecraft.resources.ResourceLocation.tryParse(dimension) == null
+          || priority < -1000000
+          || priority > 1000000
+          || minX > maxX
+          || minZ > maxZ
+          || minX < -29999984
+          || minZ < -29999984
+          || maxX >= 29999984
+          || maxZ >= 29999984
+          || !Float.isFinite(volume)
+          || volume < 0
+          || volume > 1
+          || fadeTicks < 0
+          || fadeTicks > 600) throw new IllegalArgumentException("Invalid sound region: " + id);
+    }
   }
 
   public static final class RulesRoom {

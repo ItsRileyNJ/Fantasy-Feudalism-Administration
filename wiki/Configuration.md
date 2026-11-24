@@ -10,6 +10,8 @@
 | `<world>/ffa/regions.toml` | The one authoritative, human-editable region definition file |
 | `<world>/ffa/ranks.json` | Built-in ranks, typed permission nodes, default/inherited membership and UUID assignments; use `/ffa ranks reload` after edits |
 | `<world>/ffa/state.json` | Saved FFA points, objects, accounts, personal chat styles, vanish state, whisper approvals/monitor preferences and transaction state, managed through commands |
+| `config/ffa/sounds/` | Original mono Ogg Vorbis recordings for [region ambience](Sound-Regions.md) |
+| `<world>/ffa/sound-pack/ffa-sounds.zip` | Generated audio-only resource pack; automatically served or copied to your HTTP(S) host |
 | `<world>/ffa/backups/` | Administrator-created snapshots |
 
 `<world>` means the active world directory, usually the server's `level-name`, not a literal folder with angle brackets. For IntelliJ's default development run these paths are usually under `<project>/run/`; inspect its working directory if customized. These general settings are not stored in `<world>/serverconfig/ffa/`.
@@ -44,6 +46,8 @@ The [full default server.toml](examples/server.toml) is extracted from the curre
 | `modules.pay` | `false` | Boolean | Restart | Enable the legacy `/ffa pay` alias; balance send/request use the economy and payment permissions. |
 | `modules.leaderboard` | `false` | Boolean | Restart | Enable stored UUID/balance leaderboard visibility. |
 | `modules.privacy` | `false` | Boolean | Restart | Enable native request toggle/ignore controls; overlapping FTB mode disables them. |
+| `soundRegions.enabled` | `true` | Boolean | Reload | Play configured region ambience; no audio is offered until valid tracks exist. |
+| `soundRegions.packUrl` | `""` | Empty or public HTTP(S) URL without credentials | Reload | Empty serves audio on the Minecraft TCP port; otherwise host the exact generated ZIP at this URL. See [sound regions](Sound-Regions.md). |
 | `worldBorder.visibilityDistance` | `8` | 1–64 whole blocks | Reload | Show world-border walls only this close to an edge; enforcement is always active. See [world borders](World-Borders.md). |
 | `spawn.firstJoin` | `false` | Boolean | Reload | Redirect genuinely new players to a valid configured FFA spawn. |
 | `spawn.invulnerabilitySeconds` | `8` | 0–3600 whole seconds; 0 disables | Reload; next login/death respawn | Invincibility for all players, including admins; see [spawn protection](First-Join-and-Respawns.md#spawn-invincibility). |

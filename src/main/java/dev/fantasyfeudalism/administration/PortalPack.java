@@ -69,6 +69,10 @@ public final class PortalPack {
     }
   }
 
+  static String base(Connection connection) {
+    return ADDRESSES.get(connection);
+  }
+
   public void close() {
     if (active == this) active = null;
     ADDRESSES.clear();
@@ -185,6 +189,12 @@ public final class PortalPack {
           || !Set.of("GET", "HEAD").contains(words[0])
           || !Set.of("HTTP/1.0", "HTTP/1.1").contains(words[2])) {
         reply(context, 400, head, null);
+        return;
+      }
+      var audio = SoundPack.active;
+      var snapshot = audio == null ? null : audio.snapshot;
+      if (snapshot != null && audio.enabled() && words[1].equals(snapshot.path())) {
+        reply(context, 200, head, snapshot.bytes());
         return;
       }
       if (pack == null || !pack.enabled() || !words[1].equals(pack.path)) {

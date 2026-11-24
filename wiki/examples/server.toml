@@ -41,6 +41,9 @@ rtp = false
 pay = false
 leaderboard = false
 privacy = false
+[soundRegions]
+enabled = true
+packUrl = ""
 [spawn]
 # Seconds of invincibility after login and death respawn; 0 disables it.
 invulnerabilitySeconds = 8
