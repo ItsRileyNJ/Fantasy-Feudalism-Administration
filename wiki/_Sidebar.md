@@ -13,7 +13,7 @@
 - [Combat and PvP](Combat-and-PvP.md)
 - [Economy and Shops](Economy-and-Shops.md)
 - [Easy NPC Denar Trading](Easy-NPC-Trading.md)
-- [FTB Quests and Denar (preview)](FTB-Quests.md)
+- [FTB Quests and Denar](FTB-Quests.md)
 - [Built-in Ranks](Ranks.md)
 - [Chat and Nicknames](Chat-and-Nicknames.md)
 - [Staff Tools](Staff-Tools.md)

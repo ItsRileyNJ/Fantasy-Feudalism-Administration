@@ -1,6 +1,6 @@
 # Fantasy Feudalism: Administration Wiki
 
-The operator and player manual for **development version 0.9.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
+The operator and player manual for **development version 0.10.0**, Minecraft **1.21.1**, NeoForge **21.1.262**, and **Java 21**.
 
 FFA manages protected spawn regions, configurable interactions, safe travel, dyeable portals, and virtual **Denar** shops. Install FFA on the server; players do not need the FFA JAR. Other mods can have their own client requirements.
 
@@ -55,4 +55,4 @@ The pages are published in the repository so they are available alongside the so
 
 - [Region ambience](Sound-Regions.md): server-stored sounds, audio-only downloads, entry/exit fades and automatic repeats.
 
-- [FTB Quests and Denar (feature preview)](FTB-Quests.md): configure wallet rewards and payment tasks in FTB’s built-in quest editor. Runtime verification is pending the required dependency JARs.
+- [FTB Quests and Denar](FTB-Quests.md): configure wallet rewards and payment tasks in FTB’s built-in quest editor, with individual or team claims.

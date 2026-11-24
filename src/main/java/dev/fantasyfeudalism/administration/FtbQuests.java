@@ -128,10 +128,11 @@ public final class FtbQuests {
       check(player);
       QuestDenar operation = QuestDenar.parse(tags(reward), true);
       Object team = team(reward, player);
-      if ((boolean) teamType.getMethod("isLocked").invoke(team)
+      Object quest = getRewardQuest.invoke(reward);
+      if (!(boolean) completed.invoke(team, quest)
+          || (boolean) teamType.getMethod("isLocked").invoke(team)
           || !(boolean) ready.invoke(team, player.getUUID(), reward))
         throw new IllegalArgumentException("This quest reward is not ready to claim.");
-      Object quest = getRewardQuest.invoke(reward);
       long count = ((Number) cycle.invoke(team, quest)).longValue();
       boolean shared = (boolean) rewardType.getMethod("isTeamReward").invoke(reward);
       String scope =

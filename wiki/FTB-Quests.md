@@ -2,13 +2,15 @@
 
 [Wiki home](Home.md) · [Denar economy](Economy-and-Shops.md) · [Compatibility](Mod-Compatibility.md)
 
-**Feature-branch preview:** this integration is being prepared for the next FFA release. It is not included in the published 0.9.0 JAR. The uploaded FTB Quests API has been inspected; full runtime verification is pending its required dependency JARs. Use a staging world before enabling these quests for players.
+FFA **0.10.0 or later** connects FTB Quests to the server’s Denar wallets. Install FFA only on the server.
 
 Use FTB Quests' existing **Custom Reward** and **Custom Task** entries. An administrator puts the Denar amount in their built-in **Tags** field. There is no coin item, additional FFA client mod, script, permission-elevated command reward, or shared Denar account. FTB Quests and its own dependencies still need to be installed wherever those mods require them.
 
 ## Versions and prerequisites
 
-The adapter targets the uploaded **`ftb-quests-neoforge-2101.1.39.jar`** for Minecraft 1.21.1. That JAR requires **FTB Library 2101.1.40 or later**, **FTB Teams 2101.1.9 or later**, and **Architectury 13.0.11 or later**. Use their matching Minecraft 1.21.1 NeoForge versions. No third-party JARs are bundled with FFA.
+The adapter targets the uploaded **`ftb-quests-neoforge-2101.1.39.jar`** for Minecraft 1.21.1. That JAR requires **FTB Library 2101.1.40 or later**, **FTB Teams 2101.1.9 or later**, and **Architectury 13.0.11 or later**. Use their matching Minecraft 1.21.1 NeoForge versions. The runtime suite used the uploaded **FTB Library 2101.1.40**, **FTB Teams 2101.1.12**, and **Architectury 13.0.12** alongside Quests 2101.1.39. No third-party JARs are bundled with FFA.
+
+**FTB Teams is required even for solo quests.** It provides personal progress groups automatically; players do not need to create or join a party. Party quests are optional.
 
 Leave `modules.economy = true` in `config/ffa/server.toml`. Players use the same Denar wallet as `/ffa balance`, Easy NPC Denar offers, and FFA shops. All amounts are positive whole numbers and must fit the configured maximum balance.
 
