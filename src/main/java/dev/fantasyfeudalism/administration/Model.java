@@ -44,7 +44,8 @@ public final class Model {
     CATCH_FIRE(false),
     VEHICLE_ENTER(false),
     FLINT_AND_STEEL(false),
-    SHEARS(false);
+    SHEARS(false),
+    LANTERN_BURNOUT(false);
 
     public final Boolean upgradeDefault;
 

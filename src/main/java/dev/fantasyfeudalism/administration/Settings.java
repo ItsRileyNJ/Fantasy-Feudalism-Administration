@@ -148,6 +148,8 @@ catch_fire = false
 vehicle_enter = false
 flint_and_steel = false
 shears = false
+# Pause placed lantern fuel use and storm extinguishing with Items 0.1.7.
+lantern_burnout = false
 """;
   public int queuedLoads, loadTimeout;
   public int combatSeconds;

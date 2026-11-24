@@ -80,3 +80,9 @@ FFA **0.10.0 or later** supports the uploaded FTB Quests **2101.1.39**, tested w
 Use the built-in Custom Reward and Custom Task editor with `ffa_denar_reward_AMOUNT` or `ffa_denar_pay_AMOUNT` tags. Native individual/team rewards and repeat cycles apply; a shared payment task charges only its submitter. Denar stays in FFA's individual wallets. See the [complete quest-editor examples and team budgeting](FTB-Quests.md).
 
 FFA does not register a new client task type or replace FTB Library's global currency provider. FFA stays server-only. Install FTB Quests, FTB Teams, FTB Library and Architectury on the server and players’ clients. Easy NPC's existing Denar trade setup is unchanged.
+
+## Fantasy Feudalism Items lanterns
+
+FFA **0.10.1** supports the uploaded **Items 0.1.7** lantern fuel/weather handlers. Protected areas pause placed-lantern fuel and weather extinguishing by default. The `lantern_burnout` region flag supports child overrides; [configuration and examples](Flags-and-Interactions.md#keep-spawn-lanterns-lit) explain manual switches, previously burnt-out lanterns, and the placed-light scope.
+
+No Items update or FFA client installation is needed for this adapter. It is optional: servers without Items retain vanilla lantern behavior. The private Items fuel layout is patched only for verified 0.1.7; this does not claim support for other Items versions.

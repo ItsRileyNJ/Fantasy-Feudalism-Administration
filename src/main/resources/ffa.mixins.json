@@ -50,9 +50,12 @@
     "MerchantOfferAccess",
     "NpcMenuMixin",
     "FtbDenarRewardMixin",
-    "FtbDenarTaskMixin"
+    "FtbDenarTaskMixin",
+    "ItemsLanternFuelMixin",
+    "ItemsLanternWeatherMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "plugin": "dev.fantasyfeudalism.administration.mixin.FfaMixinPlugin"
 }
