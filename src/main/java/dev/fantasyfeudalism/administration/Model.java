@@ -45,7 +45,8 @@ public final class Model {
     VEHICLE_ENTER(false),
     FLINT_AND_STEEL(false),
     SHEARS(false),
-    LANTERN_BURNOUT(false);
+    LANTERN_BURNOUT(false),
+    WEATHER(false);
 
     public final Boolean upgradeDefault;
 
@@ -240,7 +241,54 @@ public final class Model {
     }
   }
 
+  public static final class Mannequin {
+    public String id, accountId, accountName;
+    public Point point;
+    public String texture = "", signature = "";
+    public boolean label = true;
+    public Map<String, String> text = new TreeMap<>();
+    public Map<String, String> equipment = new TreeMap<>();
+
+    public void validate() {
+      if (id == null
+          || !id.matches("[A-Za-z0-9_-]{1,32}")
+          || accountName == null
+          || !accountName.matches("[A-Za-z0-9_]{1,16}"))
+        throw new IllegalArgumentException("Invalid mannequin name or player account.");
+      UUID.fromString(accountId);
+      if (point == null
+          || point.dimension == null
+          || !point.dimension.matches("[a-z0-9_.-]+:[a-z0-9_./-]+")
+          || !Double.isFinite(point.x)
+          || !Double.isFinite(point.y)
+          || !Double.isFinite(point.z)
+          || Math.abs(point.x) >= 29999984
+          || Math.abs(point.z) >= 29999984
+          || Math.abs(point.y) > 2048
+          || !Float.isFinite(point.yaw)
+          || !Float.isFinite(point.pitch)
+          || Math.abs(point.pitch) > 90)
+        throw new IllegalArgumentException("Invalid mannequin location.");
+      if (texture == null
+          || signature == null
+          || texture.length() > 32768
+          || signature.length() > 2048
+          || text == null
+          || equipment == null) throw new IllegalArgumentException("Invalid mannequin appearance.");
+      text.forEach(ChatStyles::validate);
+      equipment.forEach(
+          (slot, stack) -> {
+            if (!Set.of("mainhand", "offhand", "head", "chest", "legs", "feet").contains(slot)
+                || stack == null
+                || stack.isBlank()
+                || stack.length() > 65536)
+              throw new IllegalArgumentException("Invalid mannequin equipment.");
+          });
+    }
+  }
+
   public static final class State {
+    public Map<String, Mannequin> mannequins = new TreeMap<>();
     public Map<String, QuestReceipt> questReceipts = new TreeMap<>();
     public Map<String, SoundRegion> soundRegions = new TreeMap<>();
     public int version = 1;

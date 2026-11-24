@@ -28,6 +28,7 @@
 | `pearls` | `false` | Ender-pearl use and supported pearl travel at protected endpoints. |
 | `totems` | `false` | Totem of Undying activation. |
 | `fire` | `false` | Supported fire placement, ticking, burning and spreading. |
+| `weather` | `false` | Natural snow accumulation, water freezing, precipitation block callbacks (such as filling cauldrons), and naturally generated lightning. Visible rain/snow remains unchanged. |
 | `lantern_burnout` | `false` | With Items 0.1.7, allow placed lanterns to consume fuel and go out from weather. False pauses these effects. Manual switches retain ordinary interaction permissions. |
 | `mob_spawning` | `false` | Ordinary new mob spawning, with supported NPC/admin-origin exceptions. |
 | `hostile_spawning` | `false` | Hostile spawning; mob_spawning must also allow the spawn. |
@@ -211,3 +212,29 @@ To let players use a wardrobe inside spawn, create a child named `Wardrobe` arou
 Leave `hanging_damage = false` to keep the stand safe from attacks. Allowing only `containers` or only `entity_interact` is insufficient. Block/item allowlists do not unlock a display stand. Outside protected areas, normal equipment interactions continue.
 
 The verified hat-stand adapter uses **Supplementaries 1.21.1-4.1.4** with **Moonlight 1.21.1-3.8.5**; Supplementaries requires Moonlight 3.8.3 or later. No FFA client installation is required. The direct private equipment hook is enabled only for that inspected Supplementaries version; other releases require verification.
+
+## Stop snow and ice in spawn
+
+From **FFA 0.11.0**, protected regions default to `weather = false`. This stops new snow layers, additional snow accumulation, weather-created ice, rain/snow block callbacks such as filling cauldrons, and natural lightning at the affected position. It applies to existing regions and the enabled spawn dimension without adding new keys manually. Children inherit the parent setting.
+
+```text
+/ffa region flag Spawn weather false
+```
+
+To allow normal natural weather effects in a child called `SnowGarden`:
+
+```text
+/ffa region flag SnowGarden weather true
+/ffa region flag SnowGarden weather inherit
+```
+
+The second command removes that explicit allowance and restores the parent's rule. Spawn and standalone region baselines can be configured under the **existing** `[defaults]` section in `config/ffa/server.toml`:
+
+```toml
+[defaults]
+weather = false
+```
+
+Rain and snow remain visible and the dimension's weather cycle is unchanged. The flag does not remove snow or ice already present; clean those up separately if needed. It does not block deliberate player/admin placement of snow or ice, or administrator lightning commands such as smite. Those actions retain their separate permissions. Naturally generated effects have no administrator actor to exempt, so weather protection applies even when an administrator stands nearby.
+
+Wilderness continues normal weather behavior. Other dimensions are unaffected unless covered by a protected region or their applicable default protection. This guards vanilla precipitation/lightning paths; a mod's independent weather system may need its own adapter. Items 0.1.7 lantern fuel/weather behavior still uses the separate `lantern_burnout` flag.

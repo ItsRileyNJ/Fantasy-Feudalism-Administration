@@ -223,6 +223,8 @@ public final class RegressionTests {
       app.combat.clear(p);
       ActionRegression.verify(h, p, app);
       StandRegression.verify(h, app);
+      MannequinRegression.verify(h, app);
+      WeatherRegression.verify(h, app);
       CommerceRegression.verify(h, p, app);
       SpawnRegression.verify(h, app);
       BorderRegression.verify(h, app);

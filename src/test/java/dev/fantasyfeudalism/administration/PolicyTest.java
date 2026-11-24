@@ -40,6 +40,7 @@ public final class PolicyTest {
 
   public static void main(String[] args) throws Exception {
     Path root = Files.createTempDirectory("ffa-tests-");
+    mannequins(root);
     quests(root);
     audio(root);
     atomicWrites(root);
@@ -913,5 +914,50 @@ public final class PolicyTest {
     check(
         new Storage(legacy).state().questReceipts.isEmpty(),
         "Existing worlds need no quest-receipt conversion");
+  }
+
+  private static void mannequins(Path root) throws Exception {
+    var dir = root.resolve("mannequin-state");
+    Files.createDirectories(dir);
+    Files.writeString(dir.resolve("state.json"), "{\"version\":1}");
+    var store = new Storage(dir);
+    check(store.state().mannequins.isEmpty(), "Legacy state starts with no mannequins");
+    var m = new Mannequin();
+    m.id = "ServerFounder";
+    m.accountId = java.util.UUID.randomUUID().toString();
+    m.accountName = "Founder";
+    m.point = new Point("ffa:spawn", 8.5, 80, 8.5, 90, 0);
+    m.text.put("nickname", "Our Founder");
+    m.text.put("title_underlined", "true");
+    m.validate();
+    store.update(s -> s.mannequins.put(m.id, m));
+    check(
+        new Storage(dir).state().mannequins.get(m.id).text.get("title_underlined").equals("true"),
+        "Mannequin style survives atomic state reload");
+    var copied = store.copy().mannequins.get(m.id);
+    copied.point.x = Double.NaN;
+    rejects(copied::validate, "Nonfinite mannequin coordinates rejected");
+    copied = store.copy().mannequins.get(m.id);
+    copied.text.put("name_color", "rainbow");
+    rejects(copied::validate, "Invalid mannequin color rejected");
+    copied = store.copy().mannequins.get(m.id);
+    copied.text.put("title_underlined", "yes");
+    rejects(copied::validate, "Non-Boolean mannequin style rejected");
+    copied = store.copy().mannequins.get(m.id);
+    copied.equipment.put("invalid_slot", "{}");
+    rejects(copied::validate, "Unknown display equipment slot rejected");
+    store.update(
+        s -> {
+          var duplicate = Storage.JSON.fromJson(Storage.JSON.toJson(m), Mannequin.class);
+          duplicate.id = "serverfounder";
+          s.mannequins.put(duplicate.id, duplicate);
+        });
+    boolean duplicateRejected = false;
+    try {
+      new Storage(dir);
+    } catch (java.io.IOException expected) {
+      duplicateRejected = true;
+    }
+    check(duplicateRejected, "Case-insensitive persisted mannequin duplicates rejected");
   }
 }

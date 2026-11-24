@@ -10,7 +10,7 @@
 
 The snapshot is stored under `<world>/ffa/backups/<timestamp>/`; chat gives a short confirmation. It includes:
 
-- `state.json`: FFA account, shop, spawn, warp, portal, home, personal chat styles, vanish flags/prior modes, whisper approvals/monitor preferences and related state.
+- `state.json`: FFA saved mannequin skins/labels/equipment, account, shop, spawn, warp, portal, home, personal chat styles, vanish flags/prior modes, whisper approvals/monitor preferences and related state.
 - `server.toml`: general FFA settings.
 - `regions.toml`: authoritative protected-region definitions.
 - `ranks.json`: built-in rank definitions and UUID memberships.

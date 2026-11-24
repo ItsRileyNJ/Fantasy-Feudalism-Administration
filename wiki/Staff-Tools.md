@@ -85,3 +85,7 @@ Use `/ffa worldborder pos1`, `/ffa worldborder pos2`, then `/ffa worldborder set
 An administrator can immediately bring the named online player to their current location, including across dimensions. This command is hidden from normal players. It bypasses the target's combat travel lock, ordinary teleport cooldown/warmup and region arrival/access restrictions. It cancels the target's pending FFA travel, preserves their combat timer and existing ordinary cooldown, and records the move for `/ffa back`.
 
 Destination bounds, obstruction/hazard checks and pending transaction protection still apply. Release a jailed player before bringing them out of jail. A failed move clears the temporary staff authority and reports an error; it does not grant a lasting bypass.
+
+## Player mannequins and holograms
+
+Use `/ffa mannequin create DISPLAY [PLAYER]` at the intended position to recognize a notable player. `/ffa hologram` is an alias. These persistent visual displays support saved skins, copied equipment and styled names/titles without becoming online players. See the [complete setup and examples](Mannequins-and-Holograms.md).

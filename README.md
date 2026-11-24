@@ -4,11 +4,11 @@ A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do
 
 **[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, built-in ranks, chat styling, compatibility, recovery and IntelliJ guides.
 
-**Development release 0.10.2.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.11.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.10.2.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.11.0.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
@@ -74,3 +74,5 @@ Version 0.10.0 adds [Denar rewards and payment tasks in FTB Quests](wiki/FTB-Que
 Version 0.10.1 keeps placed spawn lanterns lit with Fantasy Feudalism Items 0.1.7. The new `lantern_burnout = false` default pauses their fuel use and weather extinguishing in protected regions; children can override it. See [lantern protection](wiki/Flags-and-Interactions.md#keep-spawn-lanterns-lit).
 
 Version 0.10.2 protects armor-stand and Supplementaries hat-stand equipment. Both `entity_interact` and `containers` must allow access at the player and stand; `hanging_damage` separately controls attacks/projectiles. Default spawn settings block all three, and administrators remain exempt. See [display stand protection](wiki/Flags-and-Interactions.md#protect-armor-stands-and-hat-stands).
+
+Version 0.11.0 adds [persistent player mannequins/holograms](wiki/Mannequins-and-Holograms.md) with saved skins, copied display equipment and styled name/title labels. They are server-only visual displays and never count as online players. The new [`weather` region flag](wiki/Flags-and-Interactions.md#stop-snow-and-ice-in-spawn) defaults to false in protected areas, preventing natural snow/ice, precipitation block changes and natural lightning while retaining visible weather and child overrides.

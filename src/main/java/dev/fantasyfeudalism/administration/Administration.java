@@ -49,6 +49,7 @@ public final class Administration {
   public PortalEffects portalEffects;
   public SoundPack soundPack;
   public SoundRegions soundRegions;
+  public Mannequins mannequins;
   public MinecraftServer server;
   public final Path settingsFile = FMLPaths.CONFIGDIR.get().resolve("ffa/server.toml");
 
@@ -126,6 +127,8 @@ public final class Administration {
       NeoForge.EVENT_BUS.register(vanish);
       chatStyles = new ChatStyles(this);
       NeoForge.EVENT_BUS.register(chatStyles);
+      mannequins = new Mannequins(this);
+      NeoForge.EVENT_BUS.register(mannequins);
       quests = new FtbQuests(this);
       commandPermissions = new CommandPermissions(this);
       Portals.reindex(this);
@@ -161,6 +164,10 @@ public final class Administration {
     if (worldBorders != null) {
       NeoForge.EVENT_BUS.unregister(worldBorders);
       worldBorders.close();
+    }
+    if (mannequins != null) {
+      NeoForge.EVENT_BUS.unregister(mannequins);
+      mannequins.close();
     }
     if (regionVisuals != null) NeoForge.EVENT_BUS.unregister(regionVisuals);
     if (backHistory != null) NeoForge.EVENT_BUS.unregister(backHistory);
