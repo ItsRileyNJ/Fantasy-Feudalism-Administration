@@ -6,7 +6,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.*;
 
-/** Items' private fuel layout is inspected for 0.1.7; other versions remain untouched. */
+/** Optional private layouts are patched only for inspected mod versions. */
 public final class FfaMixinPlugin implements IMixinConfigPlugin {
   @Override
   public void onLoad(String mixinPackage) {}
@@ -18,9 +18,16 @@ public final class FfaMixinPlugin implements IMixinConfigPlugin {
 
   @Override
   public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+    var mods = FMLLoader.getLoadingModList();
+    if (mixinClassName.endsWith("HatStandEquipmentMixin"))
+      return mods != null
+          && mods.getMods().stream()
+              .anyMatch(
+                  mod ->
+                      mod.getModId().equals("supplementaries")
+                          && mod.getVersion().toString().equals("1.21.1-4.1.4"));
     if (!mixinClassName.endsWith("ItemsLanternFuelMixin")
         && !mixinClassName.endsWith("ItemsLanternWeatherMixin")) return true;
-    var mods = FMLLoader.getLoadingModList();
     return mods != null
         && mods.getMods().stream()
             .anyMatch(

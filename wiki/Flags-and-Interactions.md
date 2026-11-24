@@ -17,8 +17,8 @@
 | `build` | `false` | Player block placement; children that enable this restore the prior game mode. |
 | `break` | `false` | Player block destruction; children that enable this restore the prior game mode. |
 | `interact` | `false` | Ordinary block interaction, subject to explicit allowlists and other checks. |
-| `containers` | `false` | Inventory/menu and supported item-handler block access. |
-| `entity_interact` | `false` | Ordinary non-trading entity interaction. |
+| `containers` | `false` | Inventory/menu and supported item-handler block access, including armor-stand and supported hat-stand equipment. |
+| `entity_interact` | `false` | Ordinary non-trading entity interaction. Display stand equipment also requires `containers`. |
 | `npc_trading` | `true` | Supported NPC and villager trading interactions. |
 | `settlement_management` | `true` | Supported Mercenaries charter/empty-hand bell management, with its own ownership checks. |
 | `hunger` | `false` | Allow hunger/saturation decrease; false freezes their decrease. |
@@ -37,7 +37,7 @@
 | `fluids` | `false` | Supported fluid flow/placement effects across boundaries. |
 | `automation` | `false` | Supported fake-player/nonplayer automation checks, alongside build/break rules. |
 | `dispensers` | `false` | Supported dispenser actions at source/adjacent target. |
-| `hanging_damage` | `false` | Protected hanging/entity decorations and armor-stand attack/projectile paths. |
+| `hanging_damage` | `false` | Protected hanging/entity decorations, armor stands and supported Supplementaries hat stands: attacks/projectiles, separate from equipment access. |
 | `animal_damage` | `false` | Supported damage to animals; applies beyond only owned animals. |
 | `flight` | `false` | Player flight and elytra flight; false disables them for nonadministrators. |
 | `teleport_in` | `true` | Supported arrivals into the region. |
@@ -182,3 +182,32 @@ lantern_burnout = false
 ```
 
 Existing files missing this new key use `false` automatically. This controls **placed lanterns**, including soul lanterns; torches and carried/dropped lights keep their normal Items behavior. FFA's `fire` flag remains separate. The adapter is enabled only for the inspected Items **0.1.7** layout; other Items versions need verification. The Items JAR and clients need no FFA-specific changes. The protection reuses existing checks on loaded lights and does not scan or force-load chunks.
+
+## Protect armor stands and hat stands
+
+From **FFA 0.10.2**, vanilla armor stands and **Supplementaries 1.21.1-4.1.4** hat stands share the same protection:
+
+- `entity_interact = false` blocks using the stand.
+- `containers = false` independently blocks removing, equipping or swapping its gear, even if ordinary entity interaction is allowed.
+- `hanging_damage = false` blocks player attacks and projectile impacts. It does not authorize or replace equipment-access checks.
+
+Both equipment flags must allow access at **the player's position and the stand's position**. Reaching across a region boundary cannot bypass a locked display. The defaults already protect spawn and standalone regions, and children inherit them. Nonadministrator Creative players are also restricted; administrators retain their exemption. This does not change Easy NPC dialogue/trading permissions.
+
+To explicitly lock existing displays in a region named `Spawn`:
+
+```text
+/ffa region flag Spawn entity_interact false
+/ffa region flag Spawn containers false
+/ffa region flag Spawn hanging_damage false
+```
+
+To let players use a wardrobe inside spawn, create a child named `Wardrobe` around the stand and enough space for the player, then:
+
+```text
+/ffa region flag Wardrobe entity_interact true
+/ffa region flag Wardrobe containers true
+```
+
+Leave `hanging_damage = false` to keep the stand safe from attacks. Allowing only `containers` or only `entity_interact` is insufficient. Block/item allowlists do not unlock a display stand. Outside protected areas, normal equipment interactions continue.
+
+The verified hat-stand adapter uses **Supplementaries 1.21.1-4.1.4** with **Moonlight 1.21.1-3.8.5**; Supplementaries requires Moonlight 3.8.3 or later. No FFA client installation is required. The direct private equipment hook is enabled only for that inspected Supplementaries version; other releases require verification.
