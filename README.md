@@ -4,11 +4,11 @@ A server-side NeoForge 21.1.262 mod for Minecraft 1.21.1 and Java 21. Players do
 
 **[Open the complete mod wiki](wiki/Home.md)** — installation, every command, configuration, regions, portals, shops, built-in ranks, chat styling, compatibility, recovery and IntelliJ guides.
 
-**Development release 0.10.0.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
+**Development release 0.10.1.** Read [validation and limits](docs/VALIDATION.md) before deployment. Use a copy of your server world for the first installation.
 
 ## Installation
 
-1. Put the built `fantasy-feudalism-administration-0.10.0.jar` in the **server's** `mods` directory.
+1. Put the built `fantasy-feudalism-administration-0.10.1.jar` in the **server's** `mods` directory.
 2. Start the server. General settings are created in `config/ffa/server.toml`. World data is stored in `<world>/ffa/`.
 3. As an operator, stand at one corner of spawn and run `/ffa pos1`. Stand at the opposite corner and run `/ffa pos2`. Run `/ffa spawn create`.
 4. Stand at a safe arrival location with solid ground and run `/ffa spawn setpoint`.
@@ -70,3 +70,5 @@ Version 0.8.3 supports Mercenaries 1.20.5 and retains 1.20.4 compatibility, fixi
 Version 0.9.0 adds [server-only region ambience](wiki/Sound-Regions.md): upload mono Ogg Vorbis sounds, select two corners, and fade tracks in/out with automatic repetition. Players download audio through a resource pack; no FFA client code is required. The [Easy NPC guide](wiki/Easy-NPC-Trading.md#worked-example-a-village-baker) now includes a full Denar baker example.
 
 Version 0.10.0 adds [Denar rewards and payment tasks in FTB Quests](wiki/FTB-Quests.md). Use the built-in Custom Reward/Task editor and Denar tags, with native team/individual claims and repeat rules. Wallet receipts prevent duplicate payments after interruptions; FFA remains server-only, and Easy NPC trading is unchanged.
+
+Version 0.10.1 keeps placed spawn lanterns lit with Fantasy Feudalism Items 0.1.7. The new `lantern_burnout = false` default pauses their fuel use and weather extinguishing in protected regions; children can override it. See [lantern protection](wiki/Flags-and-Interactions.md#keep-spawn-lanterns-lit).

@@ -28,6 +28,7 @@
 | `pearls` | `false` | Ender-pearl use and supported pearl travel at protected endpoints. |
 | `totems` | `false` | Totem of Undying activation. |
 | `fire` | `false` | Supported fire placement, ticking, burning and spreading. |
+| `lantern_burnout` | `false` | With Items 0.1.7, allow placed lanterns to consume fuel and go out from weather. False pauses these effects. Manual switches retain ordinary interaction permissions. |
 | `mob_spawning` | `false` | Ordinary new mob spawning, with supported NPC/admin-origin exceptions. |
 | `hostile_spawning` | `false` | Hostile spawning; mob_spawning must also allow the spawn. |
 | `mob_griefing` | `false` | Supported mob-griefing behavior; not a universal mod-machine hook. |
@@ -153,3 +154,31 @@ All ten new flags default to false in protected areas, including when loading ol
 `flight` already controls elytra launch and ongoing gliding, so no duplicate elytra flag is needed. Disabling it stops gliding when entering protection. `fire` controls world fire; `catch_fire` controls burning players; `flint_and_steel` controls ignition tools.
 
 `item_drop` targets voluntary player drops. Death drops and Minecraft-forced inventory cleanup are retained rather than deleting items. `item_pickup` governs ground item pickups, not shop transactions or direct administrator inventory edits. Mod features that bypass vanilla/NeoForge hooks need their own verified adapters.
+
+## Keep spawn lanterns lit
+
+With **FFA 0.10.1** and **Fantasy Feudalism Items 0.1.7**, placed vanilla lanterns in protected areas keep their current fuel and cannot be switched off by the Items weather handler. This applies automatically to existing spawn regions and the enabled spawn dimension, with `lantern_burnout = false`. Standalone protected regions also use that default. Children inherit their parent's rule.
+
+The fuel timer **pauses at the remaining amount**. It resumes normally when protection is removed or burnout is allowed. Nothing is refilled automatically. Administrators can still use the Items mod's normal lantern switches, and ordinary player interactions retain their existing region permissions. Already unlit or empty lanterns need refueling/relighting once through the Items controls.
+
+To allow the Items mod's ordinary lantern fuel/weather behavior in a child such as a survival area:
+
+```text
+/ffa region flag survival_area lantern_burnout true
+```
+
+To pause it there again, or restore parent inheritance:
+
+```text
+/ffa region flag survival_area lantern_burnout false
+/ffa region flag survival_area lantern_burnout inherit
+```
+
+The server-wide protected-area default is in the existing `[defaults]` section of `config/ffa/server.toml`:
+
+```toml
+[defaults]
+lantern_burnout = false
+```
+
+Existing files missing this new key use `false` automatically. This controls **placed lanterns**, including soul lanterns; torches and carried/dropped lights keep their normal Items behavior. FFA's `fire` flag remains separate. The adapter is enabled only for the inspected Items **0.1.7** layout; other Items versions need verification. The Items JAR and clients need no FFA-specific changes. The protection reuses existing checks on loaded lights and does not scan or force-load chunks.
