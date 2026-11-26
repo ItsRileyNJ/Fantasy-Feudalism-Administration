@@ -1,4 +1,4 @@
-# Development build 0.11.0
+# Development build 0.11.1
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
@@ -37,3 +37,5 @@ Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged play
 0.10.2: locks armor-stand and Supplementaries hat-stand equipment behind both `entity_interact` and `containers` at the player and target. `hanging_damage` also covers hat-stand attacks/projectiles. Default spawn flags protect both stands; administrators remain exempt. Verified with Supplementaries 1.21.1-4.1.4 and Moonlight 1.21.1-3.8.5, separately and alongside the supplied Items/FTB/Easy NPC/Mercenaries mods. Replace the old FFA JAR with this version and restart; no new region flag or data migration is needed. See the Flags and Interactions wiki guide for a child wardrobe example.
 
 0.11.0: persistent administrator player mannequins/holograms, with saved skins, copied visual equipment and independently styled names/titles. Use `/ffa mannequin create DISPLAY [PLAYER]`; `/ffa hologram` is an alias. No FFA client JAR or extra resource pack is required. The new `weather` flag defaults false in protected regions and stops natural snow/ice, precipitation block callbacks and natural lightning. Visible rain/snow remains unchanged, existing snow/ice is retained, and children can allow weather explicitly. See the Mannequins and Holograms and Flags and Interactions wiki guides. Replace the previous FFA server JAR and restart; no manual state conversion is needed.
+
+0.11.1: administrator travelers automatically load existing chunks or generate missing destination chunks for FFA/vanilla TP, including cross-dimension commands. Saved blocks are preserved; bounds, hazards and collisions are still checked. Ordinary players and automation retain their restrictions, and RTP remains loaded-only. No config migration or manual force-load is needed. See the Staff Tools wiki guide.

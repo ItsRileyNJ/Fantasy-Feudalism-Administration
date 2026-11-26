@@ -38,8 +38,9 @@ A hidden command can be a permission/module restriction, not a missing installat
 | Destination is obstructed | Clear room for the player's body; do not force arrivals inside walls |
 | No safe support / hazard | Use a dry full-block floor, clear fire/lava/cactus/magma/powder snow and other checked hazards; partial floors can fail conservative checks |
 | Dimension unavailable | Enable/register the intended dimension and repair outdated points |
+| Destination chunk is unloaded; have an administrator load it | Update the server to FFA 0.11.1+ for automatic loading/generation during admin travel; confirm the traveler has administrator authority |
 | Loading saved destination | Stand still; movement can cancel the queued load |
-| No fully generated saved chunk | Visit/load and save the destination legitimately; FFA will not generate missing chunks just to honor the point |
+| No fully generated saved chunk | Ordinary-player travel cannot generate terrain. An administrator using FFA 0.11.1+ can visit the point to load/generate it first |
 | Loading busy/timed out | Respect the bounded queue, investigate storage/server load and try later |
 | Permission denied | Check source/destination region travel flags and portal, warp and region access rules |
 | Teleport declined by another rule | Inspect the other protection/teleport mods and server logs |
@@ -91,7 +92,9 @@ Versions through **0.6.0**, including **0.5.0**, can reject `/execute in ffa:spa
 
 Update to **0.6.1 or newer**, replacing the old FFA JAR while the server is stopped. Keep the existing configuration, `<world>/ffa/`, and dimension folders. No map re-import or permission reduction is needed. The fixed command validates the actual destination after coordinate-changing events. FFA rejections report their real reason without also printing native success feedback. Relative command coordinates are resolved once.
 
-Destination safety still applies. Load the imported build's chunk and choose unobstructed coordinates with a safe floor, or use Creative mode as an administrator for initial construction. `8.5 80 8.5` is the guide's sample platform location, not a relocation of imported chunks. Use the build's original X/Y/Z.
+Destination safety still applies. On 0.11.1+, an administrator's teleport automatically loads the imported build's chunk; choose unobstructed coordinates with a safe floor, or use Creative mode as an administrator for initial construction. `8.5 80 8.5` is the guide's sample platform location, not a relocation of imported chunks. Use the build's original X/Y/Z.
+
+For automatic administrator loading of unloaded/new destination chunks, use **0.11.1 or later**. See [the administrator loading rules and example](Staff-Tools.md#teleporting-to-unloaded-chunks). The earlier 0.6.1 coordinate fix and this loading change address separate teleport failures.
 
 ## Some players still see night after setting day
 

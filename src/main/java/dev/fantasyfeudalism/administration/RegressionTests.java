@@ -229,6 +229,7 @@ public final class RegressionTests {
       SpawnRegression.verify(h, app);
       BorderRegression.verify(h, app);
       TeleportRegression.verify(h, app);
+      AdminChunkRegression.verify(h, app);
       PortalTravelRegression.verify(h, app);
       CombatRegression.verify(h, app);
       RulesRegression.verify(h, app);

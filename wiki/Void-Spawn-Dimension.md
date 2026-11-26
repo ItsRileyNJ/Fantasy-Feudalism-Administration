@@ -35,7 +35,7 @@ The optional dimension is **`ffa:spawn`**. It uses an empty generator: no terrai
    /execute in ffa:spawn run forceload remove 0 0
    ```
 
-FFA teleports can subsequently load previously saved full chunks through their bounded queue. They will not generate missing destination terrain to rescue an invalid point.
+From **FFA 0.11.1**, administrators can teleport into an unloaded or missing chunk directly; an initial `/forceload` is optional if you enter in Creative first. Existing saved/imported blocks are loaded normally. Missing chunks use the empty generator and have no automatic platform. Ordinary players retain the bounded saved-full-chunk queue and cannot generate missing destination terrain. See [administrator chunk loading](Staff-Tools.md#teleporting-to-unloaded-chunks).
 
 ## How protection works here
 
