@@ -98,7 +98,7 @@ Walk into the selected portal volume normally. FFA checks contact with your full
 
 Normal teleport cooldown defaults to three seconds; portal loop cooldown defaults to five seconds, including for administrators. A portal triggers once per entry. If you arrive inside another portal, standing there after the cooldown will not bounce you back: step fully outside its volume and enter again to use it. Put destinations outside portal trigger volumes for the clearest route. Entering during a cooldown or another pending teleport also requires stepping out and re-entering afterward.
 
-Travel uses saved safe terrain; unknown terrain is not generated. Portal/warp access, combat locks, warp bans, jail/rules restrictions and safe landing checks still apply. Pending portal travel rechecks portal links, warp access and the original source region before loading/arrival; if the destination changes, enter again.
+Ordinary-player travel uses saved safe terrain and cannot generate missing terrain. From FFA 0.11.1, administrator travelers automatically load/generate destination chunks before safe-landing validation; [administrator loading rules](Staff-Tools.md#teleporting-to-unloaded-chunks) also cover vanilla TP. Portal/warp access, combat locks, warp bans, jail/rules restrictions and safe landing checks still apply. Pending portal travel rechecks portal links, warp access and the original source region before loading/arrival; if the destination changes, enter again.
 
 ```text
 /ffa portal delete town_gate

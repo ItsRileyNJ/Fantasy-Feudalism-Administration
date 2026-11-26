@@ -77,7 +77,8 @@ cancelOnMovement = true
 requestExpirySeconds = 60
 requestCooldownSeconds = 10
 portalCooldownSeconds = 5
-# Load only previously saved full chunks; at most one completed load is applied per tick.
+# Ordinary-player queue: saved full chunks only; at most one completed load per tick.
+# Administrators may load/generate destination chunks directly during teleport validation.
 maximumQueuedLoads = 2
 loadTimeoutSeconds = 15
 [homes]

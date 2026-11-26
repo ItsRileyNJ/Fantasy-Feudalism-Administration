@@ -61,7 +61,7 @@ The [full default server.toml](examples/server.toml) is extracted from the curre
 | `teleport.requestExpirySeconds` | `60` | 1..3600 seconds | Reload | Time before an incoming TPA/first-contact whisper request expires. |
 | `teleport.requestCooldownSeconds` | `10` | 0..3600 seconds | Reload | Minimum interval between normal-player TPA or first-contact whisper requests. |
 | `teleport.portalCooldownSeconds` | `5` | 1..3600 seconds | Reload | Portal loop/repeat protection, including administrators. |
-| `teleport.maximumQueuedLoads` | `2` | 1..16 jobs | Reload | Maximum queued saved-destination loads; at most one completed load is applied per tick. |
+| `teleport.maximumQueuedLoads` | `2` | 1..16 jobs | Reload | Maximum ordinary-player queued saved-destination loads; at most one completion per tick. Administrator direct loading/generation is separate. |
 | `teleport.loadTimeoutSeconds` | `15` | 1..60 seconds | Reload | Timeout for a queued destination load. |
 | `homes.maximum` | `3` | 0..1000 | Reload | Default home count for normal players; existing homes are not deleted. |
 | `homes.allowedDimensions` | `["minecraft:overworld"]` | List of dimension IDs | Reload | Dimensions in which native homes can be created; administrators bypass this restriction. |

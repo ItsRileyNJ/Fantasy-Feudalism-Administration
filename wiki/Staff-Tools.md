@@ -89,3 +89,20 @@ Destination bounds, obstruction/hazard checks and pending transaction protection
 ## Player mannequins and holograms
 
 Use `/ffa mannequin create DISPLAY [PLAYER]` at the intended position to recognize a notable player. `/ffa hologram` is an alias. These persistent visual displays support saved skins, copied equipment and styled names/titles without becoming online players. See the [complete setup and examples](Mannequins-and-Holograms.md).
+
+## Teleporting to unloaded chunks
+
+From **FFA 0.11.1**, administrators can teleport into unloaded chunks without visiting or force-loading them first. This covers FFA homes, warps, spawn, `/back`, portals and direct/vanilla teleports, including cross-dimension commands:
+
+```text
+/gamemode creative
+/execute in ffa:spawn run tp @s 8.5 80 8.5
+```
+
+Enable the spawn dimension and restart before using its dimension ID. FFA loads existing saved chunks normally, preserving their blocks. If a chunk has never existed, Minecraft generates it with that dimension's generator. Missing `ffa:spawn` chunks are empty; FFA does not create a floor or replace an imported building. Creative/flying administrators can enter clear air; otherwise a safe supporting block is still required.
+
+The destination collision footprint, including neighboring chunks at an edge, is loaded before checking the landing. Obstructions, hazardous blocks, invalid coordinates and world borders still reject a teleport. This uses normal chunk loading and does not add persistent `/forceload` entries. Generating new terrain can take a moment, as with vanilla travel.
+
+Administrator status belongs to the **player being teleported**, checked through the configured operator level or `ffa.admin`. An administrator typing a vanilla command targeting an ordinary player does not grant that target administrator privileges. Load the destination by visiting it yourself first if needed. Ordinary FFA player teleports retain the existing bounded saved-full-chunk queue and cannot generate missing terrain. RTP continues searching only already loaded terrain for everyone. Automation fake players do not receive administrator chunk-generation privileges.
+
+If you are still told to have an administrator load the chunk first, confirm the **server** runs FFA 0.11.1 or later and that FFA recognizes you as an administrator. No new setting or separate chunk-loading command is needed.

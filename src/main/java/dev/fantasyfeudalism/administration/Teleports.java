@@ -114,9 +114,20 @@ public final class Teleports {
         || level.isOutsideBuildHeight(pos.above())
         || !level.getWorldBorder().isWithinBounds(pos))
       return "Destination is outside world bounds.";
+    AABB box = p.getBoundingBox().move(dest.x - p.getX(), dest.y - p.getY(), dest.z - p.getZ());
+    if (app.compat.admin(p)) {
+      // Use vanilla loading/generation for real administrators, after bounds checks.
+      // Include BlockCollisions' one-block margin so chunk-edge landing checks are complete.
+      int minChunkX = (net.minecraft.util.Mth.floor(box.minX - 1.0E-7) - 1) >> 4;
+      int maxChunkX = (net.minecraft.util.Mth.floor(box.maxX + 1.0E-7) + 1) >> 4;
+      int minChunkZ = (net.minecraft.util.Mth.floor(box.minZ - 1.0E-7) - 1) >> 4;
+      int maxChunkZ = (net.minecraft.util.Mth.floor(box.maxZ + 1.0E-7) + 1) >> 4;
+      for (int x = minChunkX; x <= maxChunkX; x++)
+        for (int z = minChunkZ; z <= maxChunkZ; z++)
+          if (!level.hasChunk(x, z)) level.getChunk(x, z);
+    }
     if (!level.hasChunkAt(pos))
       return "Destination chunk is unloaded; have an administrator load it before travel.";
-    AABB box = p.getBoundingBox().move(dest.x - p.getX(), dest.y - p.getY(), dest.z - p.getZ());
     if (level.getBlockCollisions(p, box).iterator().hasNext()) return "Destination is obstructed.";
     for (BlockPos b : BlockPos.betweenClosed(pos.below(), pos.above())) {
       var state = level.getBlockState(b);
