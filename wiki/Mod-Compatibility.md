@@ -81,11 +81,11 @@ Use the built-in Custom Reward and Custom Task editor with `ffa_denar_reward_AMO
 
 FFA does not register a new client task type or replace FTB Library's global currency provider. FFA stays server-only. Install FTB Quests, FTB Teams, FTB Library and Architectury on the server and players’ clients. Easy NPC's existing Denar trade setup is unchanged.
 
-## Fantasy Feudalism Items lanterns
+## Fantasy Feudalism Items / Additions lanterns
 
-FFA **0.10.1** supports the uploaded **Items 0.1.7** lantern fuel/weather handlers. Protected areas pause placed-lantern fuel and weather extinguishing by default. The `lantern_burnout` region flag supports child overrides; [configuration and examples](Flags-and-Interactions.md#keep-spawn-lanterns-lit) explain manual switches, previously burnt-out lanterns, and the placed-light scope.
+FFA **0.11.2** supports the uploaded **Items 0.1.7** handlers and **Additions 0.1.25** (the renamed project/package). Protected areas pause placed-lantern fuel and weather extinguishing by default. The `lantern_burnout` region flag supports child overrides; [configuration and examples](Flags-and-Interactions.md#keep-spawn-lanterns-lit) explain manual switches, previously burnt-out lanterns, and the placed-light scope.
 
-No Items update or FFA client installation is needed for this adapter. It is optional: servers without Items retain vanilla lantern behavior. The private Items fuel layout is patched only for verified 0.1.7; this does not claim support for other Items versions.
+No FFA client installation is needed. Servers without either light mod retain vanilla lantern behavior. Private adapters are gated to the inspected Items 0.1.7 or Additions 0.1.25 layout. A separate native scheduled-tick guard protects lit-to-unlit weather changes on vanilla/soul lanterns even if a private adapter is unavailable; it does not certify fuel accounting for an unknown light-mod version or guard arbitrary writes outside scheduled lantern ticks. Additions 0.1.25 was built from upstream commit `3f1fba5e37349171e39d610255a1d04a7a13a160` for verification; its JAR is not redistributed.
 
 ## Supplementaries display stands
 

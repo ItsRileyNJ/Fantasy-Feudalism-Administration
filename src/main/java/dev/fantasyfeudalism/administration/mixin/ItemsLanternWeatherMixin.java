@@ -8,7 +8,12 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Pseudo
-@Mixin(targets = "com.fantasyfeudalism.items.lighting.WeatherLighting", remap = false)
+@Mixin(
+    targets = {
+      "com.fantasyfeudalism.items.lighting.WeatherLighting",
+      "com.fantasyfeudalism.additions.lighting.WeatherLighting"
+    },
+    remap = false)
 public abstract class ItemsLanternWeatherMixin {
   @Inject(method = "check", at = @At("HEAD"), cancellable = true)
   private static void ffa$weather(

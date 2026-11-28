@@ -114,3 +114,15 @@ For an affected shader user, temporarily disable the shader pack, then run `/tim
 `Unverified Mercenaries version: 1.20.5`, followed by `FFA startup refused: ... settlement adapter is unavailable`, means FFA's old adapter version check rejected the installed Mercenaries version. Use **FFA 0.8.3 or later**, which verifies and supports the supplied 1.20.5 settlement API while retaining 1.20.4 support.
 
 Mercenaries' `settlement.requireHousingForRestocking` option controls villager restocking and does not repair an unavailable FFA adapter. Existing towns and region definitions do not need conversion. See [compatibility](Mod-Compatibility.md) for the setting and its distinction from claimed-town overlap protection.
+
+## Lanterns go out in protected spawn
+
+Update the **server** to FFA **0.11.2 or later**, remove the old FFA JAR and restart. The earlier private lantern adapter recognized Items 0.1.7 only; the renamed Additions mod uses another package. Version 0.11.2 adds verified Additions 0.1.25 support and a separate native scheduled-weather safeguard.
+
+```text
+/ffa region flag Spawn lantern_burnout false
+```
+
+Replace `Spawn` with the actual region name. Check the child region where the lantern stands: an explicit `lantern_burnout = true` allows ordinary burnout/weather there. Set it to `false` or `inherit` as appropriate. In the enabled spawn dimension outside named regions, `[defaults].lantern_burnout` must be false. Reload general settings with `/ffa reload`.
+
+Already extinguished lanterns need relighting once; protection does not automatically relight a lantern or refill fuel. Deliberate administrator switches remain available. Keep `lantern_burnout` separate from the snow/ice `weather` flag. See [the full lantern guide](Flags-and-Interactions.md#keep-spawn-lanterns-lit) for supported versions and scope.

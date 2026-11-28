@@ -10,14 +10,23 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Pseudo
-@Mixin(targets = "com.fantasyfeudalism.items.lighting.LightFuel", remap = false)
+@Mixin(
+    targets = {
+      "com.fantasyfeudalism.items.lighting.LightFuel",
+      "com.fantasyfeudalism.additions.lighting.LightFuel"
+    },
+    remap = false)
 public abstract class ItemsLanternFuelMixin {
   @ModifyExpressionValue(
       method = "tick",
-      at =
-          @At(
-              value = "FIELD",
-              target = "Lcom/fantasyfeudalism/items/lighting/LightFuel$Entry;soul:Z"))
+      at = {
+        @At(
+            value = "FIELD",
+            target = "Lcom/fantasyfeudalism/items/lighting/LightFuel$Entry;soul:Z"),
+        @At(
+            value = "FIELD",
+            target = "Lcom/fantasyfeudalism/additions/lighting/LightFuel$Entry;soul:Z")
+      })
   private static boolean ffa$pause(
       boolean soul, @Local ServerLevel level, @Local BlockPos pos, @Local BlockState state) {
     // Skip this iteration exactly like a non-burning light; never refill or rewrite its soul flag.

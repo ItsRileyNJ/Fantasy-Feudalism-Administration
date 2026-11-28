@@ -238,6 +238,7 @@ public final class RegressionTests {
       QuestRegression.verify(h, app);
       NativeQuestRegression.verify(h, app);
       LanternRegression.verify(h, app);
+      RainLanternRegression.verify(h, app);
       if (net.neoforged.fml.ModList.get().isLoaded("villagerscontract")) mercenaries(h, p, app);
       app.teleports.request(p, p, false);
       h.fail("Self teleport request must fail");

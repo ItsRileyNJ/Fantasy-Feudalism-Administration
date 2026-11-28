@@ -28,12 +28,15 @@ public final class FfaMixinPlugin implements IMixinConfigPlugin {
                           && mod.getVersion().toString().equals("1.21.1-4.1.4"));
     if (!mixinClassName.endsWith("ItemsLanternFuelMixin")
         && !mixinClassName.endsWith("ItemsLanternWeatherMixin")) return true;
+    String id =
+        targetClassName.startsWith("com.fantasyfeudalism.additions.")
+            ? "fantasy_feudalism_additions"
+            : "fantasy_feudalism_items";
+    String version = id.equals("fantasy_feudalism_additions") ? "0.1.25" : "0.1.7";
     return mods != null
         && mods.getMods().stream()
             .anyMatch(
-                mod ->
-                    mod.getModId().equals("fantasy_feudalism_items")
-                        && mod.getVersion().toString().equals("0.1.7"));
+                mod -> mod.getModId().equals(id) && mod.getVersion().toString().equals(version));
   }
 
   @Override

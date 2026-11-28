@@ -1,4 +1,4 @@
-# Development build 0.11.1
+# Development build 0.11.2
 
 For the server only: Minecraft 1.21.1, NeoForge 21.1.262, Java 21.
 
@@ -39,3 +39,5 @@ Includes administrator `/ffa tphere PLAYER`; this can bring a combat-tagged play
 0.11.0: persistent administrator player mannequins/holograms, with saved skins, copied visual equipment and independently styled names/titles. Use `/ffa mannequin create DISPLAY [PLAYER]`; `/ffa hologram` is an alias. No FFA client JAR or extra resource pack is required. The new `weather` flag defaults false in protected regions and stops natural snow/ice, precipitation block callbacks and natural lightning. Visible rain/snow remains unchanged, existing snow/ice is retained, and children can allow weather explicitly. See the Mannequins and Holograms and Flags and Interactions wiki guides. Replace the previous FFA server JAR and restart; no manual state conversion is needed.
 
 0.11.1: administrator travelers automatically load existing chunks or generate missing destination chunks for FFA/vanilla TP, including cross-dimension commands. Saved blocks are preserved; bounds, hazards and collisions are still checked. Ordinary players and automation retain their restrictions, and RTP remains loaded-only. No config migration or manual force-load is needed. See the Staff Tools wiki guide.
+
+0.11.2: protects lit vanilla/soul lanterns from automatic storm shutoff during scheduled lantern ticks, with normal rescheduling and manual administrator switches preserved. Adds verified Additions 0.1.25 fuel/weather support alongside Items 0.1.7. Keep `lantern_burnout = false` in the effective protected region; relight already extinguished lanterns once. Replace the old server FFA JAR and restart. No new setting, FFA client installation, or fuel refill is needed.

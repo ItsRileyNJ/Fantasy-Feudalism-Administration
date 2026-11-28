@@ -55,7 +55,8 @@
     "ItemsLanternWeatherMixin",
     "ArmorStandEquipmentMixin",
     "HatStandEquipmentMixin",
-    "WeatherMixin"
+    "WeatherMixin",
+    "LanternWeatherTickMixin"
   ],
   "injectors": {
     "defaultRequire": 1
