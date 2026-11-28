@@ -29,7 +29,7 @@
 | `totems` | `false` | Totem of Undying activation. |
 | `fire` | `false` | Supported fire placement, ticking, burning and spreading. |
 | `weather` | `false` | Natural snow accumulation, water freezing, precipitation block callbacks (such as filling cauldrons), and naturally generated lightning. Visible rain/snow remains unchanged. |
-| `lantern_burnout` | `false` | With Items 0.1.7, allow placed lanterns to consume fuel and go out from weather. False pauses these effects. Manual switches retain ordinary interaction permissions. |
+| `lantern_burnout` | `false` | Allow supported placed-lantern fuel use and storm extinguishing. False pauses verified fuel handlers and guards scheduled lantern weather ticks. Manual switches retain ordinary interaction permissions. |
 | `mob_spawning` | `false` | Ordinary new mob spawning, with supported NPC/admin-origin exceptions. |
 | `hostile_spawning` | `false` | Hostile spawning; mob_spawning must also allow the spawn. |
 | `mob_griefing` | `false` | Supported mob-griefing behavior; not a universal mod-machine hook. |
@@ -158,7 +158,7 @@ All ten new flags default to false in protected areas, including when loading ol
 
 ## Keep spawn lanterns lit
 
-With **FFA 0.10.1** and **Fantasy Feudalism Items 0.1.7**, placed vanilla lanterns in protected areas keep their current fuel and cannot be switched off by the Items weather handler. This applies automatically to existing spawn regions and the enabled spawn dimension, with `lantern_burnout = false`. Standalone protected regions also use that default. Children inherit their parent's rule.
+With **FFA 0.11.2**, placed vanilla lanterns in protected areas are guarded against scheduled rain/storm extinguishing. Fuel/weather adapters support **Fantasy Feudalism Items 0.1.7** and the renamed **Fantasy Feudalism Additions 0.1.25**, keeping their placed lantern fuel paused. Older FFA versions only patched the inspected Items 0.1.7 package. This applies automatically to existing spawn regions and the enabled spawn dimension, with `lantern_burnout = false`. Standalone protected regions also use that default. Children inherit their parent's rule.
 
 The fuel timer **pauses at the remaining amount**. It resumes normally when protection is removed or burnout is allowed. Nothing is refilled automatically. Administrators can still use the Items mod's normal lantern switches, and ordinary player interactions retain their existing region permissions. Already unlit or empty lanterns need refueling/relighting once through the Items controls.
 
@@ -182,7 +182,7 @@ The server-wide protected-area default is in the existing `[defaults]` section o
 lantern_burnout = false
 ```
 
-Existing files missing this new key use `false` automatically. This controls **placed lanterns**, including soul lanterns; torches and carried/dropped lights keep their normal Items behavior. FFA's `fire` flag remains separate. The adapter is enabled only for the inspected Items **0.1.7** layout; other Items versions need verification. The Items JAR and clients need no FFA-specific changes. The protection reuses existing checks on loaded lights and does not scan or force-load chunks.
+Existing files missing this new key use `false` automatically. This controls **placed lanterns**, including soul lanterns; torches and carried/dropped lights keep their normal Items behavior. FFA's `fire` flag remains separate. Private fuel/weather adapters are enabled only for the inspected Items **0.1.7** and Additions **0.1.25** layouts; other fuel implementations need verification. Separately, the native guard blocks a protected vanilla/soul lantern's lit-to-unlit write during its scheduled block tick, including when a version-specific adapter is absent. It leaves the callback and its next scheduled check running. Outside that automatic scope, deliberate administrator switches and other valid edits still work. The other mod and clients need no FFA-specific changes. The protection reuses existing checks on loaded lights and does not scan or force-load chunks.
 
 ## Protect armor stands and hat stands
 
@@ -237,4 +237,4 @@ weather = false
 
 Rain and snow remain visible and the dimension's weather cycle is unchanged. The flag does not remove snow or ice already present; clean those up separately if needed. It does not block deliberate player/admin placement of snow or ice, or administrator lightning commands such as smite. Those actions retain their separate permissions. Naturally generated effects have no administrator actor to exempt, so weather protection applies even when an administrator stands nearby.
 
-Wilderness continues normal weather behavior. Other dimensions are unaffected unless covered by a protected region or their applicable default protection. This guards vanilla precipitation/lightning paths; a mod's independent weather system may need its own adapter. Items 0.1.7 lantern fuel/weather behavior still uses the separate `lantern_burnout` flag.
+Wilderness continues normal weather behavior. Other dimensions are unaffected unless covered by a protected region or their applicable default protection. This guards vanilla precipitation/lightning paths; a mod's independent weather system may need its own adapter. Lantern fuel/weather behavior uses the separate `lantern_burnout` flag, including the 0.11.2 scheduled-tick safeguard.

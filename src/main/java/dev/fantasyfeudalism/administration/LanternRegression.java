@@ -90,15 +90,17 @@ final class LanternRegression {
   }
 
   static void verify(GameTestHelper h, Administration app) throws Exception {
-    boolean installed = ModList.get().isLoaded("fantasy_feudalism_items");
+    boolean additions = ModList.get().isLoaded("fantasy_feudalism_additions");
+    String modId = additions ? "fantasy_feudalism_additions" : "fantasy_feudalism_items";
+    boolean installed = ModList.get().isLoaded(modId);
     if (!installed
         || !ModList.get()
-            .getModContainerById("fantasy_feudalism_items")
+            .getModContainerById(modId)
             .orElseThrow()
             .getModInfo()
             .getVersion()
             .toString()
-            .equals("0.1.7")) {
+            .equals(additions ? "0.1.25" : "0.1.7")) {
       h.assertTrue(
           !app.settings.defaults.get(Flag.LANTERN_BURNOUT),
           "Lantern protection defaults safely without Items");
@@ -116,8 +118,9 @@ final class LanternRegression {
     boolean raining = world.isRaining(), thundering = world.isThundering();
     float rain = level.getRainLevel(1), thunder = level.getThunderLevel(1);
     var blocks = new LinkedHashMap<BlockPos, BlockState>();
-    Class<?> fuel = Class.forName(ITEMS + "LightFuel"),
-        weather = Class.forName(ITEMS + "WeatherLighting");
+    String packageName = additions ? "com.fantasyfeudalism.additions.lighting." : ITEMS;
+    Class<?> fuel = Class.forName(packageName + "LightFuel"),
+        weather = Class.forName(packageName + "WeatherLighting");
     Object manager = invoke(fuel, "get", new Class<?>[] {ServerLevel.class}, level);
     CompoundTag oldFuel =
         (CompoundTag)
